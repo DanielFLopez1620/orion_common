@@ -4,4 +4,4 @@ simple_right_arm_controller:
     joints:
       - servo_conn2_joint
     interface_name: position
-    update_rate: 30
+    update_rate: 10

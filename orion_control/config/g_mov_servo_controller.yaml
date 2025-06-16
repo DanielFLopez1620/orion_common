@@ -4,4 +4,4 @@ g_mov_servo_controller:
     joints:
       - g_mov_servo_conn_joint
     interface_name: position
-    update_rate: 30
+    update_rate: 10

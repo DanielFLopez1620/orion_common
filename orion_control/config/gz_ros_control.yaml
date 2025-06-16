@@ -1,4 +1,4 @@
 /controller_manager:
   ros__parameters:
-    update_rate: 30 # Hz
+    update_rate: 10 # Hz
     use_sim_time: true

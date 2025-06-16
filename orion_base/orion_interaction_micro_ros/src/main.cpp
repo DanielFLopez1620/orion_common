@@ -16,6 +16,9 @@
 #include <std_msgs/msg/bool.h>
 #include <std_msgs/msg/int32.h>
 
+// ----------------------- Cutom requierements -------------------------------
+#include "screen.hpp"
+
 // //////////////////////// GLOBAL DEFINITIONS ////////////////////////////////
 
 // --------------------------- Definitions ------------------------------------
@@ -25,27 +28,6 @@
 #define TS_UL_PIN 34        // Upper left
 #define TS_LR_PIN 2         // Lower right
 #define TS_LL_PIN 35        // Lower left
-
-// Define SPI Pins for screen
-#define TFT_RST        26   // Reset pin
-#define TFT_RS         25   // Data/Command pin
-#define TFT_CS         15   // Chip Select pin
-#define TFT_SDI        13   // MOSI pin
-#define TFT_CLK        14   // SCK pin
-#define TFT_LED        0    // Should be 0 if wired to +5V
-#define TFT_BRIGHTNESS 200  // Brightness level
-#define X_INI 45            // X begin for base eyes
-#define X_END 125           // X end for base eyes
-#define X_OFF 30            // X Offset planned
-#define Y1_INI 20           // Y first eye begin for base eye
-#define Y2_INI 130          // Y second eye begin for base eye
-#define Y_SIZE 70           // Y size of eyes
-#define TIME_OUT 2500       // Time out
-
-// ------------------------ Object definition for hardware -------------------
-
-TFT_22_ILI9225 tft = TFT_22_ILI9225(TFT_RST, TFT_RS, TFT_CS, TFT_SDI, TFT_CLK,
-    TFT_LED, TFT_BRIGHTNESS);
 
 // ------------------------- ROS 2 related definitions ------------------------
 // Define publishers
@@ -82,6 +64,12 @@ rcl_timer_t timer;
 // Time tools
 unsigned long last_ping_time = 0;
 const unsigned long ping_interval_ms = 1000; 
+
+// Helpers
+int previous_emotion = 0;
+
+// Screen
+Screen screen;
 
 // Define a ROS 2 Checker
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
@@ -182,9 +170,7 @@ void setup()
     pinMode(TS_UR_PIN,INPUT);
 
     // Initialize screen
-    tft.begin();
-    tft.setBackgroundColor(COLOR_BLACK);
-    tft.clear();
+    screen.initialize();
 
 } // void setup()
 
@@ -246,210 +232,18 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
  */
 void emotion_callback(const void *msgin)
 {
-    RCLC_UNUSED(msgin);
-    switch((int)emotion_msg.data)
+    const std_msgs__msg__Int32 * emotion = (const std_msgs__msg__Int32 *) msgin;
+    int value = emotion->data;
+    if(previous_emotion != value)
     {
-        // ------------------- Angry
-        case 0:
-            tft.clear();
-            tft.fillRectangle(
-                X_INI, Y1_INI,
-                X_END, Y1_INI + Y_SIZE,
-                COLOR_ORANGE
-            );
-            tft.fillRectangle(
-                X_INI, Y2_INI, 
-                X_END, Y2_INI + Y_SIZE,
-                COLOR_ORANGE
-            );
-            tft.fillTriangle(
-                X_END, Y1_INI, 
-                X_END + 12, 
-                Y1_INI, X_END,
-                Y1_INI + Y_SIZE, 
-                COLOR_ORANGE
-            );
-            tft.fillTriangle(
-                X_END,
-                Y2_INI, 
-                X_END,
-                Y2_INI + Y_SIZE, 
-                X_END + 12,
-                Y2_INI + Y_SIZE,
-                COLOR_ORANGE);
-            break;
-        // ------------------- Inexpressive
-        case 1:
-            tft.clear();
-            tft.fillRectangle(
-                X_INI + X_OFF,
-                Y1_INI, X_END - X_OFF,
-                Y1_INI + Y_SIZE, 
-                COLOR_YELLOW
-            );
-            tft.fillRectangle(
-                X_INI + X_OFF,
-                Y2_INI, X_END - X_OFF,
-                Y2_INI + Y_SIZE,
-                COLOR_YELLOW
-            );
-            break;
-        // ------------------- Fear
-        case 2:
-            tft.clear();
-            tft.fillCircle(
-                (X_END + X_INI)/2,
-                Y1_INI + Y_SIZE/2,
-                Y_SIZE/3,
-                COLOR_BLUE);
-            tft.fillCircle(
-                (X_END + X_INI)/2,
-                Y2_INI + Y_SIZE/2,
-                Y_SIZE/3,
-                COLOR_BLUE);
-            break;
-        // ------------------- Happy
-        case 3:
-            tft.clear();
-            tft.fillTriangle(
-                X_INI,
-                Y1_INI,
-                X_INI,
-                Y1_INI + Y_SIZE
-                , X_END,
-                (Y1_INI * 2 + Y_SIZE)/2,
-                COLOR_YELLOW
-            );
-            tft.fillTriangle(
-                X_INI,
-                Y2_INI,
-                X_INI,
-                Y2_INI + Y_SIZE
-                , X_END,
-                (Y2_INI * 2 + Y_SIZE)/2,
-                COLOR_YELLOW
-            );
-            tft.fillTriangle(
-                X_INI,
-                Y1_INI + 10,
-                X_INI,
-                Y1_INI + Y_SIZE - 10,
-                X_END - 10,
-                (Y1_INI * 2 + Y_SIZE)/2,
-                COLOR_BLACK
-            );
-            tft.fillTriangle(
-                X_INI,
-                Y2_INI + 10,
-                X_INI,
-                Y2_INI + Y_SIZE - 10,
-                X_END - 10,
-                (Y2_INI * 2 + Y_SIZE)/2,
-                COLOR_BLACK
-            );
-            break;
-        // ------------------- Neutral
-        case 4:
-            tft.clear();
-            tft.fillRectangle(X_INI,
-                Y1_INI,
-                X_END,
-                Y1_INI + Y_SIZE,
-                COLOR_YELLOW
-            );
-            tft.fillRectangle(X_INI,
-                Y2_INI,
-                X_END,
-                Y2_INI + Y_SIZE,
-                COLOR_YELLOW
-            );
-            break;
-        // ------------------- Surprise
-        case 5:
-            tft.clear();
-            tft.fillCircle(
-                (X_END + X_INI)/2,
-                Y1_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            tft.fillCircle(
-                (X_END + X_INI)/2,
-                Y2_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            break;
-        // ------------------- Sad
-        case 6:
-            tft.clear();
-            tft.fillRectangle(
-                X_INI,
-                Y1_INI,
-                X_END,
-                Y1_INI + Y_SIZE,
-                COLOR_LIGHTBLUE);
-            tft.fillRectangle(
-                X_INI,
-                Y2_INI,
-                X_END,
-                Y2_INI + Y_SIZE,
-                COLOR_LIGHTBLUE);
-            tft.fillTriangle(X_END,
-                Y1_INI,
-                X_END,
-                Y1_INI + Y_SIZE,
-                X_END + 10,
-                Y1_INI + Y_SIZE,
-                COLOR_LIGHTBLUE);
-            tft.fillTriangle(X_END,
-                Y2_INI,
-                X_END + 10,
-                Y2_INI, X_END,
-                Y2_INI + Y_SIZE,
-                COLOR_LIGHTBLUE);
-            break;
-        // ------------------- Default
-        default:
-            tft.clear();
-            tft.fillRectangle(
-                X_INI,
-                Y1_INI,
-                X_END,
-                Y1_INI + Y_SIZE,
-                COLOR_YELLOW
-            );
-            tft.fillRectangle(
-                X_INI,
-                Y2_INI,
-                X_END,
-                Y2_INI + Y_SIZE,
-                COLOR_YELLOW
-            );
-            tft.fillCircle(
-                X_INI,
-                Y1_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            tft.fillCircle(
-                X_END,
-                Y1_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            tft.fillCircle(
-                X_INI,
-                Y2_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            tft.fillCircle(
-                X_END,
-                Y2_INI + Y_SIZE/2,
-                Y_SIZE/2,
-                COLOR_YELLOW
-            );
-            break;
-        };
+        // Bitmap emotion
+        screen.drawEmotion(value);
+
+        // Geometry emotion
+        // screen.displayEmotion(value);
+
+        // Update emotion
+        previous_emotion = value;
+    }
+    
 } // emotion_callback()
