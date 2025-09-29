@@ -3,10 +3,10 @@
 #include <std_msgs/msg/int64_multi_array.hpp>
 #include <orion_control/orion_shared_state.hpp>
 
-class OrionBridgeUros : public rclcpp::Node
+class OrionBridgeDiff : public rclcpp::Node
 {
 public:
-    OrionBridgeUros() : Node("orion_bridge_uros")
+    OrionBridgeDiff() : Node("orion_bridge_diff")
     {
         sub_enc_left_ = this->create_subscription<std_msgs::msg::Int64>(
             "/diff_ctl_left_enc", 10,
@@ -29,7 +29,7 @@ public:
 
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(20),
-            std::bind(&OrionBridgeUros::publish_motors_cmd, this)
+            std::bind(&OrionBridgeDiff::publish_motors_cmd, this)
         );
     }
 
@@ -52,7 +52,7 @@ private:
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<OrionBridgeUros>());
+    rclcpp::spin(std::make_shared<OrionBridgeDiff>());
     rclcpp::shutdown();
     return 0;
 }
