@@ -26,7 +26,7 @@ namespace orion_control
     public:
         DiffDriveOrion() = default;
 
-        hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
+        hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareComponentInterfaceParams& params) override;
 
         hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State& prev_state) override;
 

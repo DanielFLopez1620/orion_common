@@ -2,14 +2,15 @@
 
 namespace orion_control
 {
-    hardware_interface::CallbackReturn DiffDriveOrion::on_init(const hardware_interface::HardwareInfo& info)
+    hardware_interface::CallbackReturn DiffDriveOrion::on_init(const hardware_interface::HardwareComponentInterfaceParams& params)
     {
-        if(hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS)
+        if(hardware_interface::SystemInterface::on_init(params) != hardware_interface::CallbackReturn::SUCCESS)
         {
             return hardware_interface::CallbackReturn::ERROR;
         }
 
-        RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_init...");
+        auto info_ = params.hardware_info;
+        // RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_init...");
 
         config_.wheel_left_name = info_.hardware_parameters.at("left_wheel");
         config_.wheel_right_name = info_.hardware_parameters.at("right_wheel");
@@ -23,7 +24,7 @@ namespace orion_control
 
     hardware_interface::CallbackReturn DiffDriveOrion::on_configure(const rclcpp_lifecycle::State &)
     {
-        RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_configure...");
+        // RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_configure...");
         return hardware_interface::CallbackReturn::SUCCESS;
     }
 
@@ -63,13 +64,13 @@ namespace orion_control
 
     hardware_interface::CallbackReturn DiffDriveOrion::on_activate(const rclcpp_lifecycle::State &)
     {
-        RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_activate...");
+        // RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_activate...");
         return hardware_interface::CallbackReturn::SUCCESS;
     }
 
     hardware_interface::CallbackReturn DiffDriveOrion::on_deactivate(const rclcpp_lifecycle::State &)
     {
-        RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_deactivate...");
+        // RCLCPP_INFO(this->logger_, "DiffDriveOrion: on_deactivate...");
         return hardware_interface::CallbackReturn::SUCCESS;
     }
 

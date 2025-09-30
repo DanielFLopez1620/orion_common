@@ -17,6 +17,28 @@ struct ServoState
 {
     std::atomic<double> pos{0.0};
     std::atomic<double> cmd{0.0};
+
+    ServoState() = default;
+    ServoState(double p, double c) : pos(p), cmd(c) {}
+    ServoState(const ServoState&) = delete;
+    ServoState& operator=(const ServoState&) = delete;
+
+    ServoState(ServoState&& other) noexcept
+    {
+        pos.store(other.pos.load(std::memory_order_relaxed));
+        cmd.store(other.cmd.load(std::memory_order_relaxed));
+    }
+
+    ServoState& operator=(ServoState&& other) noexcept
+    {
+        if (this != &other)
+        {
+            pos.store(other.pos.load(std::memory_order_relaxed));
+            cmd.store(other.cmd.load(std::memory_order_relaxed));
+        }
+        return *this;
+    }
+
 };
 
 struct OrionForwardSharedState
@@ -25,7 +47,11 @@ struct OrionForwardSharedState
 
     OrionForwardSharedState(size_t n_servos = 2)
     {
-        servos.resize(n_servos);
+        servos.reserve(n_servos);
+        for(size_t i=0; i < n_servos; ++i)
+        {
+            servos.emplace_back();
+        }
     }
 };
 
