@@ -4,7 +4,9 @@
 #include <atomic>
 #include <vector>
 #include <mutex>
+#include <memory>
 
+// ---------------- Diff state ----------------
 struct OrionDiffSharedState
 {
     std::atomic<int64_t> enc_left{0};
@@ -13,6 +15,7 @@ struct OrionDiffSharedState
     std::atomic<int64_t> cmd_right{0};
 };
 
+// ---------------- Servo state ----------------
 struct ServoState
 {
     std::atomic<double> pos{0.0};
@@ -38,9 +41,9 @@ struct ServoState
         }
         return *this;
     }
-
 };
 
+// ---------------- Forward state ----------------
 struct OrionForwardSharedState
 {
     std::vector<ServoState> servos;
@@ -48,15 +51,33 @@ struct OrionForwardSharedState
     OrionForwardSharedState(size_t n_servos = 2)
     {
         servos.reserve(n_servos);
-        for(size_t i=0; i < n_servos; ++i)
+        for (size_t i = 0; i < n_servos; ++i)
         {
             servos.emplace_back();
         }
     }
 };
 
-extern OrionDiffSharedState g_orion_diff_state;
-extern OrionForwardSharedState g_orion_forw_state;
-extern std::mutex g_orion_forward_allocation_mtx;
+// ---------------- Accessors ----------------
+// Use inline to avoid needing a .cpp definition
+inline std::shared_ptr<OrionDiffSharedState> get_orion_diff_state()
+{
+    static std::shared_ptr<OrionDiffSharedState> instance =
+        std::make_shared<OrionDiffSharedState>();
+    return instance;
+}
 
-#endif
+inline std::shared_ptr<OrionForwardSharedState> get_orion_forward_state(size_t n_servos = 2)
+{
+    static std::shared_ptr<OrionForwardSharedState> instance =
+        std::make_shared<OrionForwardSharedState>(n_servos);
+    return instance;
+}
+
+inline std::shared_ptr<std::mutex> get_orion_forward_allocation_mtx()
+{
+    static std::shared_ptr<std::mutex> mtx = std::make_shared<std::mutex>();
+    return mtx;
+}
+
+#endif // ORION_SHARED_STATE_HPP
