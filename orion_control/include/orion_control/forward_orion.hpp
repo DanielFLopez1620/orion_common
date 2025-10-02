@@ -83,7 +83,7 @@ namespace orion_control
                 pub_topic, rclcpp::QoS(1));
 
             this->pub_timer_ = this->create_wall_timer(
-                std::chrono::milliseconds(20),
+                std::chrono::milliseconds(100),
                 std::bind(&OrionForwardBridgeNode::publish_commands, this));
 
             this->servo_pose_sub_ = this->create_subscription<std_msgs::msg::Float32>(

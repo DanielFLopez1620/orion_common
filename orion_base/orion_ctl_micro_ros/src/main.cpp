@@ -154,7 +154,7 @@ void setup()
     ));
 
     const unsigned int timer_timeout = 1000 / diff::ROBOT_CONST::PID_RATE;
-    const unsigned int servo_timeout = 250;
+    const unsigned int servo_timeout = 100;
 
     RCCHECK(rclc_timer_init_default2(
         &timer_diff,
@@ -226,7 +226,7 @@ void setup()
 
     servo_left.begin();
     servo_right.begin();
-    
+
     attachInterrupt(diff::HARDWARE::ML_ENCA, &read_left_enc, CHANGE);
     attachInterrupt(diff::HARDWARE::MR_ENCA, &read_right_enc, CHANGE);
 
