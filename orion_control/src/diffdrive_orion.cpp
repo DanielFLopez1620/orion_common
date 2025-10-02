@@ -20,7 +20,7 @@ namespace orion_control
 
         this->config_.left_wheel_name = info_.hardware_parameters.at("left_wheel_name");
         this->config_.right_wheel_name = info_.hardware_parameters.at("right_wheel_name");
-        this->config_.enc_tics_per_rev = std::stoi(info_.hardware_parameters.at("enc_tics_per_rev"));
+        this->config_.enc_tics_per_rev = std::stoi(info_.hardware_parameters.at("enc_ticks_per_rev"));
 
         this->left_wheel_.Setup(this->config_.left_wheel_name, this->config_.enc_tics_per_rev);
         this->right_wheel_.Setup(this->config_.right_wheel_name, this->config_.enc_tics_per_rev);
