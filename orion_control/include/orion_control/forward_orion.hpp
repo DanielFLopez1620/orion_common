@@ -20,8 +20,14 @@
 
 namespace orion_control
 {
+    // Predefinition of the bridge class
+
     class OrionForwardBridgeNode;
 
+    /**
+     * Class oriented to implement the control for a forward controller, for cases like
+     * servomotors (MG996r, MG995, MG90, SG90).
+     */
     class ForwardOrion : public hardware_interface::SystemInterface
     {
     public:
@@ -30,28 +36,34 @@ namespace orion_control
         hardware_interface::CallbackReturn on_init(
             const hardware_interface::HardwareComponentInterfaceParams& params) override;
 
-        hardware_interface::CallbackReturn on_configure(const rclcpp_lifecycle::State& prev_state) override;
+        hardware_interface::CallbackReturn on_configure(
+            const rclcpp_lifecycle::State& prev_state) override;
 
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
         std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-        hardware_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State& prev_state) override;
+        hardware_interface::CallbackReturn on_activate(
+            const rclcpp_lifecycle::State& prev_state) override;
 
-        hardware_interface::CallbackReturn on_deactivate(const rclcpp_lifecycle::State& prev_state) override;
+        hardware_interface::CallbackReturn on_deactivate(
+            const rclcpp_lifecycle::State& prev_state) override;
 
-        hardware_interface::return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+        hardware_interface::return_type read(
+            const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
-        hardware_interface::return_type write(const rclcpp::Time&, const rclcpp::Duration& period) override;
+        hardware_interface::return_type write(
+            const rclcpp::Time&, const rclcpp::Duration& period) override;
 
     private:
         std::shared_ptr<OrionForwardBridgeNode> bridge_node_;
 
+        std_msgs::msg::Float32::SharedPtr servo_pose_;
+        std_msgs::msg::Float32::SharedPtr servo_cmd_;
+
         std::string servo_sub_topic_;
         std::string servo_pub_topic_;
 
-        std_msgs::msg::Float32::SharedPtr servo_pose_;
-        std_msgs::msg::Float32::SharedPtr servo_cmd_;
 
         struct ServoComp
         {
@@ -64,8 +76,12 @@ namespace orion_control
 
         rclcpp::Logger logger_{rclcpp::get_logger("ForwardOrion")};
 
-    };
+    }; // class ForwardOrion
 
+    /**
+     * Node class oriented to implement the bridge communication between the
+     * hardware interface and the µ-ROS communication.
+     */
     class OrionForwardBridgeNode : public rclcpp::Node
     {
     public:
@@ -97,6 +113,9 @@ namespace orion_control
                 });
             }
     private:
+        /**
+         * Will publish the feedback of the servo order.
+         */
         void publish_commands()
         {
             if(rclcpp::ok() && servo_cmd_ptr_)
@@ -111,8 +130,9 @@ namespace orion_control
         rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr servo_pose_sub_;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr servo_cmd_pub_;
         rclcpp::TimerBase::SharedPtr pub_timer_;
-    };
 
-}
+    }; // class OrionForwardBridgeNode
+
+} // orion_control
 
 #endif

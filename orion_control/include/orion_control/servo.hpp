@@ -12,11 +12,11 @@ namespace orion_control
 
         void Setup(const std::string& joint_name);
 
+        std::string joint_name_;   // Joint name
+        double pos_{0};            // Current position
+        double cmd_{0};            // Current commanded position
 
-        std::string joint_name_;
-        double pos_{0};
-        double cmd_{0};
-    };
-}
+    }; // class Servo
+} // orion_control
 
 #endif

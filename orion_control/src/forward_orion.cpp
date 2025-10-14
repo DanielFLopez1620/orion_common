@@ -5,8 +5,8 @@ namespace orion_control
 {
     /**
      * Forward control actions to implement on initialization of the controller
-     * that includes the set up of the servo to command, the locing of the
-     * executor to add the node that interacts with ros2_control reading and
+     * that includes the set up of the servo to command, the locking of the
+     * executor to add the node that interacts with µ-ROS reading and
      * writing methods and the callback return definitions.
      *
      * @param params Parameters required for the initialization of a hardware
@@ -42,7 +42,7 @@ namespace orion_control
         this->servo_.joint_name_ =
             info_.hardware_parameters.at("servo_name");
 
-        // Lock executor to add the bridge nod
+        // Lock executor to add the bridge node
         if (auto locked_executor = params.executor.lock())
         {
             this->bridge_node_ = std::make_shared<OrionForwardBridgeNode>(
@@ -65,10 +65,12 @@ namespace orion_control
         RCLCPP_INFO(this->logger_, "Fwd:: End [on_init]...");
         return hardware_interface::CallbackReturn::SUCCESS;
 
-    } // on_init
+    } // on_init()
 
     /**
      * For now, just used to log that that configure was passed.
+     *
+     * @return Success if the on_configure was passed without any issues.
      */
     hardware_interface::CallbackReturn ForwardOrion::on_configure(
         const rclcpp_lifecycle::State&)
@@ -78,7 +80,7 @@ namespace orion_control
 
         return hardware_interface::CallbackReturn::SUCCESS;
 
-    } // on_configure
+    } // on_configure()
 
     /**
      * Expose the read-only variables for feedback on the control process.
@@ -104,10 +106,13 @@ namespace orion_control
 
         return state_interfaces;
 
-    } // export_state_interfaces
+    } // export_state_interfaces()
 
     /**
-     * 
+     * Expose the writable variables for commands, in this case, servo position.
+     *
+     * @return Vector of the command interfaces used, in this case, servo
+     *      command position.
      */
     std::vector<hardware_interface::CommandInterface> ForwardOrion::export_command_interfaces()
     {
@@ -116,57 +121,95 @@ namespace orion_control
         std::vector <hardware_interface::CommandInterface> command_interfaces;
 
         command_interfaces.emplace_back(
-            hardware_interface::CommandInterface(this->servo_.joint_name_, 
+            hardware_interface::CommandInterface(this->servo_.joint_name_,
                 hardware_interface::HW_IF_POSITION, &this->servo_.cmd_));
 
         RCLCPP_INFO(this->logger_, "Fwd:: End [export_command_interfaces]...");
 
         return command_interfaces;
-    }
 
-    hardware_interface::CallbackReturn ForwardOrion::on_activate(const rclcpp_lifecycle::State&)
+    } // export_command_interfaces()
+
+    /**
+     * For now just used to log that activate was passed.
+     *
+     * @return Success if on_activate was completed safely.
+     */
+    hardware_interface::CallbackReturn ForwardOrion::on_activate(
+        const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Fwd:: Begin [on_activate]...");
         RCLCPP_INFO(this->logger_, "Fwd:: End [on_activate]...");
         return hardware_interface::CallbackReturn::SUCCESS;
-    }
 
-    hardware_interface::CallbackReturn ForwardOrion::on_deactivate(const rclcpp_lifecycle::State&)
+    } // on_activate()
+
+    /**
+     * For now just used to log that deactivate was passed.
+     *
+     * @return Success if deactivate was completed safely.
+     */
+    hardware_interface::CallbackReturn ForwardOrion::on_deactivate(
+        const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Fwd:: Begin [on_deactivate]...");
         RCLCPP_INFO(this->logger_, "Fwd:: End [on_deactivate]...");
         return hardware_interface::CallbackReturn::SUCCESS;
-    }
 
-    hardware_interface::return_type ForwardOrion::read(const rclcpp::Time&, const rclcpp::Duration&)
+    } // on_deactivate()
+
+    /**
+     * Read the sensor (servo position) updates and stores its value, where
+     * the position is read in radians.
+     *
+     * @param time [Unused] stores the time when called
+     * @param duration [Unused] Stores the duration (period) of the read
+     *
+     * @return OK if the reading process was completely safely. Otherwise,
+     *      it will raise an error.
+     */
+    hardware_interface::return_type ForwardOrion::read(
+        const rclcpp::Time&, const rclcpp::Duration&)
     {
         RCLCPP_DEBUG(this->logger_, "Fwd:: Begin [read]...");
 
         if(this->servo_pose_)
         {
-            // objective =  objective * (M_PI / 180) - M_PI/2
             this->servo_.feedback_ = this->servo_pose_->data;
         }
 
         RCLCPP_DEBUG(this->logger_, "Fwd:: End [read]...");
         return hardware_interface::return_type::OK;
-    }
 
-    hardware_interface::return_type ForwardOrion::write(const rclcpp::Time&, const rclcpp::Duration&)
+    } // read()
+
+    /**
+     * Write to the actuator (servo position) to command the objective
+     * received, where the position is in radians.
+     *
+     * @param time [Unused] stores the time when called
+     * @param duration  [Unused] Stores the duration (period) of the read
+     *
+     * @return OK if the writing process was completely safely. Otherwise,
+     *      it will raise an error.
+     */
+    hardware_interface::return_type ForwardOrion::write(
+        const rclcpp::Time&, const rclcpp::Duration&)
     {
         RCLCPP_DEBUG(this->logger_, "Fwd:: Begin [write]...");
 
         if(this->servo_cmd_)
         {
-            // objective.data = (objective + M_PI/2) * (180.0 / M_PI)
             this->servo_cmd_->data = (float) this->servo_.cmd_;
         }
 
         RCLCPP_DEBUG(this->logger_, "Fwd:: Begin [write]...");
         return hardware_interface::return_type::OK;
-    }
+
+    } // write()
 
 } // orion_control
 
+// ADDING PLUGIN FOR FORWARD CONTROLLER
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(orion_control::ForwardOrion, hardware_interface::SystemInterface)
