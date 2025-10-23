@@ -171,11 +171,11 @@ void setup()
 
     // Initialize screen
     screen.initialize();
-
+    screen.drawEmotion(3);
 } // void setup()
 
 // /////////////////////////// LOOP IMPLEMENTATION ///////////////////////////
-void loop() 
+void loop()
 {
     // Delay required to avoid over-heating ESP32
 	delay(100);
@@ -190,9 +190,9 @@ void loop()
 /**
  * Loop to handle errors
  */
-void error_loop() 
+void error_loop()
 {
-	while(1) 
+	while(1)
 	{
 		delay(100);
 	}
@@ -201,14 +201,14 @@ void error_loop()
 /**
  * Function that will be linked to the timer in order to publish
  * the message data.
- * 
+ *
  * @param timer Pointer to timer object
  * @param last_call_time Last time the timer was called
  */
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time) 
+void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
 	RCLC_UNUSED(last_call_time);
-	if (timer != NULL) 
+	if (timer != NULL)
 	{
 		// Check state button when timer is called
         ts_ur_msg.data = digitalRead(TS_UR_PIN);

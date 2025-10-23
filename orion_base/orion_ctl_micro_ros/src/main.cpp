@@ -100,7 +100,7 @@ void setup()
         {
             delay(500);
         }
-    } while (ret != RCL_RET_OK && (millis() - start < 120000));
+    } while (ret != RCL_RET_OK && (millis() - start < 180000));
 
     RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_orion_ctl_node", "", &support));
 

@@ -280,8 +280,8 @@ def generate_launch_description():
 
     ld.add_action(OpaqueFunction(function=setup_lidar))
 
-    ld.add_action(IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(orion_chat_launch_path)
-    ))
+    #ld.add_action(IncludeLaunchDescription(
+    #    PythonLaunchDescriptionSource(orion_chat_launch_path)
+    #))
 
     return ld
