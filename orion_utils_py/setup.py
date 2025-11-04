@@ -22,6 +22,9 @@ setup(
         'console_scripts': [
             'laser_filter = orion_utils_py.laser_filter:main',
             'introducing_orion = orion_utils_py.introducing_orion:main',
+            'checking_mov = orion_utils_py.check_mov:main',
+            'happy_birthday = orion_utils_py.happy_birthday:main',
+            'demo_theater = orion_utils_py.demo_theater:main',
         ],
     },
 )
