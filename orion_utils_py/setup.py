@@ -15,8 +15,8 @@ setup(
     zip_safe=True,
     maintainer='dan1620',
     maintainer_email='dfelipe.lopez@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='Common python utilities and emos',
+    license='BSD-Clause-3',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
@@ -25,6 +25,7 @@ setup(
             'checking_mov = orion_utils_py.check_mov:main',
             'happy_birthday = orion_utils_py.happy_birthday:main',
             'demo_theater = orion_utils_py.demo_theater:main',
+            'emotion_try = orion_utils_py.emotion_try:main',
         ],
     },
 )
