@@ -3,7 +3,7 @@
 #include "Arduino.h"   // Library oriented to use Arduino-like definitions
 
 // -------------------- Custom dependencies --------------------------------
-#include "encoder.hpp" // Encoder header 
+#include "encoder.hpp" // Encoder header
 
 // ////////////////////// CLASS DEFINITIONS ////////////////////////////////
 namespace diff
@@ -22,7 +22,7 @@ namespace diff
     /**
      * Update encoder count by saving the value of the encoder count sum
      * with a blocking of the interruptions.
-     * 
+     *
      * @return Integer with the encoder count sum
      */
     int EncoderDriver::read()
@@ -36,7 +36,7 @@ namespace diff
     } // int EncoderDriver::read()
 
     /**
-     * Function that determinates the direction of the movement (positive is
+     * Function that determinate the direction of the movement (positive is
      * going forward, negative otherwise) and update the encoder count.
      */
     void IRAM_ATTR EncoderDriver::readEnc()
@@ -51,5 +51,14 @@ namespace diff
         }
 
     } // void EncoderDriver::readEnc()
+
+    /**
+     * Resets to zero the encoder count
+     */
+    void EncoderDriver::reset()
+    {
+        this->pos_i_ = 0;
+
+    } // void EncodeDriver::reset()
 
 } // namespace diff

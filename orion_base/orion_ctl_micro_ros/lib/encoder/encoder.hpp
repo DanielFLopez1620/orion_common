@@ -18,7 +18,7 @@ namespace diff
     public:
         /**
          * User defined constructor to set up the encoder channels.
-         * 
+         *
          * @param enc_a Pin of the encoder's channel A
          * @param enc_b Pin of the encoder's channel B
          */
@@ -29,6 +29,7 @@ namespace diff
         void begin();
         int read();
         void IRAM_ATTR readEnc();
+        void reset();
 
     }; // class EncoderDriver
 
