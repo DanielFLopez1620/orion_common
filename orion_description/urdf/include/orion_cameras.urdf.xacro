@@ -113,7 +113,7 @@
         <!-- ................... Maixsense Support ......................... -->
         <link name="maixsense_sup">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
             <geometry>
             <mesh filename="package://orion_description/meshes/maixsense_sup.stl"
                 scale="0.001 0.001 0.001"/>
@@ -121,14 +121,14 @@
             <material name="SoftBlack"/>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
             <geometry>
             <mesh filename="package://orion_description/meshes/maixsense_sup.stl" 
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
         <inertial>
-            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
             <mass value="0.002"/>
             <inertia ixx="6.15e-08" ixy="0.0" ixz="0.0"
                     iyy="1.4166666666666665e-07" iyz="0.0"
@@ -136,15 +136,15 @@
         </inertial>
         </link>
         <joint name="maixsense_sup_joint" type="fixed">
-            <parent link="${level_cam}"/>
+            <parent link="base_l3_s1"/>
             <child link="maixsense_sup"/>
-            <origin xyz="0.038945 -0.030451 0.0125" rpy="0 0 0"/>
+            <origin xyz="0.038945 -0.030451 -0.010" rpy="0 0 0"/>
         </joint>
 
         <!-- ................................ Maixsense ............................ -->
         <link name="maixsense">
         <visual>
-            <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
             <geometry>
             <mesh filename="package://orion_description/meshes/maixsense.stl"
                 scale="0.001 0.001 0.001"/>
@@ -152,14 +152,14 @@
             <material name="SoftBlack"/>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
             <geometry>
             <mesh filename="package://orion_description/meshes/maixsense.stl" 
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
         <inertial>
-            <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
             <mass value="0.01"/>
             <inertia ixx="1.4708639141126087e-06" ixy="0.0" ixz="0.0"
                     iyy="7.106770833333332e-07" iyz="0.0"
@@ -169,7 +169,7 @@
         <joint name="maixsense_joint" type="fixed">
             <parent link="maixsense_sup"/>
             <child link="maixsense"/>
-            <origin xyz="0 0 0.0205" rpy="0 0 0"/>
+            <origin xyz="0 0 -0.0205" rpy="0 0 0"/>
         </joint>
         <!-- ......................... Usage of GMov ...................................  -->
         <xacro:if value="${g_mov}">

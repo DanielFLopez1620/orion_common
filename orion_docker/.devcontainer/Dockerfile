@@ -13,7 +13,22 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y python3-pip python3-setuptools python3-vcstool \ 
     apt-utils bash-completion \
     curl wget software-properties-common
-ENV SHELL /bin/bash
+
+    RUN apt-get update && apt-get install -y \
+    python3-opencv \
+    python3-venv \
+    ffmpeg \
+    protobuf-compiler \
+    libprotobuf-dev \
+    cmake \
+    libopencv-dev \
+    git \
+    && apt-get clean
+
+# Install MediaPipe
+RUN pip3 install mediapipe --break-system-packages
+
+ENV SHELL=/bin/bash
 
 RUN colcon mixin remove default
 RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
@@ -24,6 +39,7 @@ RUN apt-get update && apt-get install -y python3-colcon-common-extensions python
 RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp
 
 RUN apt-get update && apt-get install -y ros-$ROS_DISTRO-ros-gz
+
 
 COPY repos.yaml /home/$USERNAME/ws/repos.yaml
 

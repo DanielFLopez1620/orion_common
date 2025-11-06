@@ -895,6 +895,12 @@
                         iyy="8.960721799390997e-09" iyz="0"
                         izz="4.443388969597693e-09"/>
             </xacro:if>
+            <xacro:if value="${id == 'm3x20'}">
+                <mass value="0.0024"/>
+                <inertia ixx="8.5251996963501e-08" ixy="0" ixz="0"
+                        iyy="8.648216387229408e-08" iyz="0"
+                        izz="1.333016690879308e-08"/>
+            </xacro:if>
         </inertial>
         </link>
         <!-- Joint Spacer -->
