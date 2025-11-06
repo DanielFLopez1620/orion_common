@@ -26,6 +26,7 @@ namespace diff
             : enc_a_{enc_a}, enc_b_ {enc_b}
         {}
 
+        // Methods prototypes
         void begin();
         int read();
         void IRAM_ATTR readEnc();

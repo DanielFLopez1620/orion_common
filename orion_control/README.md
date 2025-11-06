@@ -8,7 +8,7 @@ Package oriented to the control configuration and parameters for the ORION robot
 
 ## 📝 License
 
-The source code is released under a [BSD 3-Clause license](/LICENSE).
+The source code is released under a [BSD 3-Clause license](/orion_control/LICENSE.md).
 
 **Author**: Daniel Felipe López Escobar.
 

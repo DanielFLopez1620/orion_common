@@ -100,7 +100,7 @@ def load_controllers(context):
             controller_params_file=right_arm_path
         ))
 
-    return controllers 
+    return controllers
 
 def generate_robot_bringup(context):
     """
@@ -158,10 +158,15 @@ def generate_robot_bringup(context):
     return [rsp_node, controller_node]
 
 def setup_lidar(context):
+    """
+    The LD19 node uses lifecycle, so here it is the implementation of the
+    container for a proper usage of the LIDAR
+    """
     lidar_elements = []
     lidar_params = os.path.join(get_package_share_directory('orion_bringup'),
 	'config', 'ldlidar.yaml')
 
+    # Add composable container for isolated components
     ldlidar_container = ComposableNodeContainer(
 	name='ldlidar_container',
         package='rclcpp_components',
@@ -170,9 +175,9 @@ def setup_lidar(context):
         composable_node_descriptions=[],
         output='screen',
     )
-
     lidar_elements.append(ldlidar_container)
 
+    # Add composable node for the LIDAR component
     ldlidar_component = ComposableNode(
         package='ldlidar_component',
         plugin='ldlidar::LdLidarComponent',
@@ -181,17 +186,20 @@ def setup_lidar(context):
         extra_arguments=[{'use_intra_process_comms': True}]
     )
 
+    # Lode LiDAR Nodes
     load_composable_node = LoadComposableNodes(
         target_container='ldlidar_container',
         composable_node_descriptions=[ldlidar_component]
     )
-
     lidar_elements.append(load_composable_node)
 
     return lidar_elements
 
 
 def generate_launch_description():
+    """
+    Launch description for common bringup of the ORION robot
+    """
     # Paths
     lidar_config = os.path.join(
         get_package_share_directory('orion_bringup'),
@@ -237,6 +245,7 @@ def generate_launch_description():
         ]
     ))
 
+    # Laser filter related to prevent considering self as obstacle
     ld.add_action(Node(
         package='orion_utils_py',
         executable='laser_filter',
@@ -244,7 +253,7 @@ def generate_launch_description():
         output='screen'
     ))
 
-    # A010
+    # A010 driver run
     ld.add_action(Node(
         package='depth_maixsense_a010',
         executable='publisher',
@@ -253,6 +262,7 @@ def generate_launch_description():
         condition=IfCondition(PythonExpression(["'", LaunchConfiguration('camera'), "' == 'a010'"]))
     ))
 
+    # OS30A driver run
     os30a_launch_path = os.path.join(
         get_package_share_directory('depth_ydlidar_os30a'),
         'launch',
@@ -263,6 +273,8 @@ def generate_launch_description():
         condition=IfCondition(PythonExpression(["'", LaunchConfiguration('camera'), "' == 'os30a'"]))
     ))
 
+    # Astra S driver run
+    # Make sure you can compile the Astra S packages on RPi before trying to use it
     #astra_launch_path = os.path.join(
     #    get_package_share_directory('orbbec_camera'),
     #    'launch',
@@ -274,12 +286,12 @@ def generate_launch_description():
     #    condition=IfCondition(PythonExpression(["'", LaunchConfiguration('camera'), "' == 'astra_s'"]))
     #))
 
+    # Add execution of the description, controllers and LIDAR
     ld.add_action(OpaqueFunction(function=generate_robot_bringup))
-
     ld.add_action(OpaqueFunction(function=load_controllers))
-
     ld.add_action(OpaqueFunction(function=setup_lidar))
 
+    # To enable IA/TTS/STT/LLM functionalities
     #ld.add_action(IncludeLaunchDescription(
     #    PythonLaunchDescriptionSource(orion_chat_launch_path)
     #))

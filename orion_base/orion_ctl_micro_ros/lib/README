@@ -13,7 +13,17 @@ Here you can find the next elements:
 - **[pid](/orion_base/orion_ctl_micro_ros/lib/pid/):** Controller implementation to compute the motor movement.
 - **[servo](/orion_base/orion_ctl_micro_ros/lib/servo/):** For using a ServoMotor, in this case, a MG996r to set/get the motor position on rad and degrees.
 
-## PlatfomIO Library Structure
+## Troubleshooting
+
+### Robot moving in opposite direction
+
+Review the port connection or exchange the ports in the [Hardware Constants File](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp)
+
+### µ-ROS not compiling
+
+Ensure you have properly followed the instructions to compile µ-ROS code with PlatformIO. Check [micro_ros_platformio](https://github.com/micro-ROS/micro_ros_platformio)
+
+## PlatformIO Library Structure
 
 This directory is intended for project specific (private) libraries.
 PlatformIO will compile them to static libraries and link into the executable file.

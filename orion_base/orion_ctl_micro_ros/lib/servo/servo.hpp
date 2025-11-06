@@ -22,7 +22,7 @@ namespace fwd
         /**
          * User defined constructor to set up the max and min position of the
          * servo, and the PWM pin.
-         * 
+         *
          * @param max_pos Upper limit of servo movement
          * @param min_pos Lower limit of servo movement
          * @param pwm_pin Pin to attach the PWM contorl
@@ -31,15 +31,26 @@ namespace fwd
             const unsigned int pwm_pin)
             : max_pos_{max_pos}, min_pos_{min_pos}, pwm_pin_{pwm_pin} {}
 
+        // Method prototypes
+
         void begin();
+
         void setPositionDeg(const float& degrees);
+
         float getPositionDeg();
+
         void setPositionRad(const float& radians);
+
         float getPositionRad();
+
         void approximatePositionDeg();
+
         void setObjectiveDeg(float degrees);
+
         void setObjectiveRad(float radians);
-    };
-}
+
+    }; // class ServoMotor
+
+} // namespace fwd
 
 #endif

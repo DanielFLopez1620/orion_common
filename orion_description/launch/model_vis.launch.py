@@ -38,7 +38,7 @@ ARGS = [
 def generate_launch_description():
     # Generate launch description
     ld = LaunchDescription(ARGS)
-    
+
     # Define paths
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')

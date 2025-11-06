@@ -8,9 +8,13 @@
 // ---------------------- Custom dependencies ------------------------------
 #include "motor.hpp" // Custom header for a motor class
 
-// /////////////////////// CLASS DEFINTIONS ///////////////////////////////
+// /////////////////////// CLASS DEFINITIONS ///////////////////////////////
 namespace diff
 {
+    /**
+     * Method to start safely the motors and prevent unexpected movement
+     * when initializing board.
+     */
     void MotorDriver::safe_init()
     {
         pinMode(this->enable_pin_, OUTPUT);
@@ -21,7 +25,8 @@ namespace diff
 
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
-    }
+
+    } // void MotorDriver::safe_init()
 
     /**
      * Initialize motor object in a secure way.
@@ -34,10 +39,10 @@ namespace diff
     } // void MotorDriver::begin()
 
     /**
-     * Set the PWM for the motor velocity, it will clamp it ccording the max
+     * Set the PWM for the motor velocity, it will clamp it according the max
      * and min PWM allowed. Also, based on the sign, it will determinate
      * the motor direction.
-     * 
+     *
      * @param speed PWM integer value for controlling the motor
      */
     void MotorDriver::set_speed(int speed)
@@ -76,11 +81,15 @@ namespace diff
 
     } // void MotorDriver::set_speed()
 
+    /**
+     * Method oriented to hard-force the stop of the motors.
+     */
     void MotorDriver::stop()
     {
         analogWrite(this->enable_pin_, 0);
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
-    }
+
+    } // void MotorDriver::stop()
 
 } // namespace diff

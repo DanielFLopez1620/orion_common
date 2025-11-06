@@ -8,9 +8,9 @@ This package is oriented to common utilities made with **Python** and **rclpy** 
 
 ## 📝 License
 
-The source code is released under a [BSD 3-Clause license](/LICENSE).
+The source code is released under a [BSD 3-Clause license](/orion_utils_py/LICENSE.md).
 
-**Authors**: Daniel Felipe López Escobar, Miguel Ángel Gonzlez Rodriguez, and Alejandro Bermúdez.  
+**Authors**: Daniel Felipe López Escobar.
 The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **Jazzy** distribution.
 
 ---
@@ -21,6 +21,46 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 - [⚠️ Troubleshooting](#️-troubleshooting)
 
 ## 💻 Nodes
+
+### check_mov
+
+Node that moves the robot and validate the movement with logs over the */odom topic*:
+
+~~~bash
+ros2 run orion_utils_py check_mov
+~~~
+
+### demo_theater
+
+A demo node focused on say the final words of a theater presentation:
+
+~~~bash
+ros2 run orion_utils_py demo_theater
+~~~
+
+### emotion_try
+
+A node that publishes the emotion with a incremental counter to check all the ORION's expressions:
+
+~~~bash
+ros2 run orion_utils_py emotion_try
+~~~
+
+### happy_birthday
+
+A simple node intended to say hi to that special person:
+
+~~~bash
+ros2 run orion_utils_py happy_birthday
+~~~
+
+### introducing_orion.py
+
+A demo node that covers simple arm and motor moves with emotions to display the capabilities of ORION.
+
+~~~bash
+ros2 run orion_utils_py introducing_orion
+~~~
 
 ### laser_filter
 
@@ -33,7 +73,7 @@ ros2 run orion_utils_py laser_filter
 
 ## ⚠️ Troubleshooting
 
-### Ranges not filter the columns
+### Ranges not filter the columns of the robot
 
 In case the position of your LIDAR differs from the one mentioned in the Wiki or in the robot_description, you can manually changes the ranges as it is managed as a parameter.
 

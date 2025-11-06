@@ -8,9 +8,9 @@ This repository contains teh bringup and start up of the ORION robot. Before usi
 
 ## 📝 License
 
-The source code is released under a [BSD 3-Clause license](/LICENSE).
+The source code is released under a [BSD 3-Clause license](/orion_bringup/LICENSE.md).
 
-**Authors**: Daniel Felipe López Escobar, Miguel Ángel Gonzalez Rodriguez, and Alejandro Bermúdez.
+**Author**: Daniel Felipe López Escobar.
 
 The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **Jazzy** distribution.
 
@@ -27,7 +27,7 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 
 ## 📝 Udev rules set up
 
-As we are using multiple USB devices which may change of port or even the USB devices may be different, for example, depending on your camaras selection. This is the reason we require to implement **udev** rules.
+As we are using multiple USB devices which may change of port or even the USB devices may be different, for example, depending on your cameras selection. This is the reason we require to implement **udev** rules.
 
 ### General considerations
 
@@ -66,7 +66,7 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{seria
 A demo file you can use to replicate your rules is [example_udev.rules](/orion_bringup/example_udev.rules):
 
 ~~~rules
-UBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", SYMLINK+="ttyLD19"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", SYMLINK+="ttyLD19"
 SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.1:1.0", SYMLINK+="ttyESP32_1"
 SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.3:1.0", SYMLINK+="ttyESP32_2"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", ATTRS{serial}=="202206 DB225C", SYMLINK+="ttyA010"
@@ -75,7 +75,7 @@ SUBSYSTEM=="usb", ATTR{idProduct}=="0402", ATTR{idVendor}=="2bc5", MODE:="0666",
 
 ### Comments based on components
 
-- **LD19:** Its rules were based on the [ldrobot-lidar-ros2](https://github.com/Myzhar/ldrobot-lidar-ros2/blob/devel/rules/ldlidar.rules) package of Myzhar. This apply for the youyeetuu LD19 LIDAR and worked on 3 different LIDARs. However, do not forget to validate the attribues.
+- **LD19:** Its rules were based on the [ldrobot-lidar-ros2](https://github.com/Myzhar/ldrobot-lidar-ros2/blob/devel/rules/ldlidar.rules) package of Myzhar. This apply for the youyeetoo LD19 LIDAR and worked on 3 different LIDARs. However, do not forget to validate the attributes.
 
 - **ORBBEC Astra S:** Its rules were taken from [depth_orbbec_astra](https://github.com/Tesis-ORION/depth_orbbec_astra/blob/main/orbbec_camera/scripts/99-obsensor-libusb.rules) repository.
 
@@ -83,11 +83,11 @@ SUBSYSTEM=="usb", ATTR{idProduct}=="0402", ATTR{idVendor}=="2bc5", MODE:="0666",
 
 - **OS30A:** As a note, you  do not need a rules for the OS30A, as it is configured to use its serial in the launch files for the camera.
 
-- **ESP32:** As there are two ESP32 and there is a high probability you bought the two ESP32 from the same batch, they may end with the same attributes. That is the reason, you should prefer a environmental attribute like the **ID_PATH** to distinguis both devices.
+- **ESP32:** As there are two ESP32 and there is a high probability you bought the two ESP32 from the same batch, they may end with the same attributes. That is the reason, you should prefer a environmental attribute like the **ID_PATH** to distinguish both devices.
 
     Also make sure that the ESP32 of the first floor is the one with the name **/dev/ttyESP32_1** and the one in the fourth floor is the **/dev/ttyESP32_2**, as the PlatformIO and µ-ROS programs will use this ports by default.
 
-    For more inofrmation on the ESP32 and the udev rules, check [orion_base](/orion_base/README.md).
+    For more information on the ESP32 and the udev rules, check [orion_base](/orion_base/README.md).
 
 ## 🚀 Launch files
 
@@ -142,57 +142,36 @@ Ensure you have the following elements:
 
     ~~~sh
     #!/bin/bash
-    CAMERA_TYPE="a010"  # Options: a010, astra_s, os30a
+    set -e
 
+    G_MOV="true"        # Options: true, false
+    CAMERA_TYPE="a010"  # Options: a010, astra_s, os30a
     echo "Selected camera: $CAMERA_TYPE"
 
     echo "Waiting for internet connection..."
-    while ! ping -c 1 8.8.8.8 &>/dev/null; do
-        sleep 1
-    done
+    while ! ping -c 1 8.8.8.8 &>/dev/null; do sleep 1; done
     echo "Internet connection established."
 
-    declare -a SYMLINK_DEVICES=("/dev/ttyESP32_1" "/dev/ttyESP32_2" "/dev/ttyLD19")
-
-    for DEV in "${SYMLINK_DEVICES[@]}"; do
+    for DEV in /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19; do
         echo "Waiting for $DEV..."
-        while [ ! -e "$DEV" ]; do
-            sleep 1
-        done
+        while [ ! -e "$DEV" ]; do sleep 1; done
         echo "$DEV found."
-        
-        REAL_DEV=$(readlink -f "$DEV")
-        echo "Setting permissions for $REAL_DEV..."
-        chmod 666 "$REAL_DEV"
     done
 
     if [ "$CAMERA_TYPE" == "a010" ]; then
-        echo "Waiting for /dev/ttyA010..."
-        while [ ! -e /dev/ttyA010 ]; do
-            sleep 1
-        done
+        while [ ! -e /dev/ttyA010 ]; do sleep 1; done
         echo "/dev/ttyA010 is available."
-
     elif [ "$CAMERA_TYPE" == "astra_s" ]; then
-        echo "Waiting for Astra S USB device..."
-        while ! lsusb | grep -i "astra_s" &>/dev/null; do
-            sleep 1
-        done
+        while ! lsusb | grep -i "astra_s" &>/dev/null; do sleep 1; done
         echo "Astra S USB device found."
     fi
 
     echo "Sourcing ROS2 and workspace..."
     source /opt/ros/jazzy/setup.bash
-    source ~/ros2_ws/install/setup.bash # Update with your workspace name
-    # export ROS_DOMAIN_ID=16 # Only valid if not using µ-ROS
+    source ~/ros2_ws/install/setup.bash
 
     echo "Launching ORION bringup..."
-
-    if [ "$CAMERA_TYPE" == "a010" ] || [ "$CAMERA_TYPE" == "astra_s" ]; then
-        ros2 launch orion_bringup bringup.launch.py camera:="$CAMERA_TYPE"
-    else
-        ros2 launch orion_bringup bringup.launch.py
-    fi
+    ros2 launch orion_bringup bringup.launch.py camera:=$CAMERA_TYPE g_mov:=$G_MOV
     ~~~
 
 3. Add the service [startup_robot.service](/orion_bringup/startup_robot.service) to the systemd directory:
@@ -295,6 +274,10 @@ Ensure you have the following elements:
 
 ## ⚠️ Troubleshooting
 
+### Astra S compilation
+
+The [Astra S Camera Package](https://github.com/Tesis-ORION/depth_orbbec_astra) may have problems compiling on RPi 4 with 4 GB of RAM or less, so by default the Astra S options have been disabled on the [bringup.launch.py](/orion_bringup/launch/bringup.launch.py), [CMakeLists.txt](/orion_bringup/CMakeLists.txt) and [package.xml](/orion_bringup/package.xml). So, check the comments and enable the options if you want to use the Astra S camera.
+
 ### Startup service not loading
 
 This may occur for the next reasons:
@@ -320,6 +303,6 @@ This may occur for the next reasons:
 
 ### Robot is not moving
 
-This may be caused if the µ-ROS nodes didn't activate on time or the connection with the agend wasn't possible. For this, just reboot the ESP32 by taking out the respective walls.
+This may be caused if the µ-ROS nodes didn't activate on time or the connection with the agent wasn't possible. For this, just reboot the ESP32 by taking out the respective walls.
 
 For more information check [orion_base](/orion_base/README.md)

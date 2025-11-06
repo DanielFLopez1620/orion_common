@@ -19,7 +19,7 @@ namespace diff
      */
     struct ROBOT_CONST
     {
-        static const int PID_RATE {10};
+        static const int PID_RATE {20};
         static const int PID_T {1000 / PID_RATE};
         static const int PID_KP {20};
         static const int PID_KD {12};

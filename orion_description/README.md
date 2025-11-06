@@ -42,8 +42,8 @@ You can visualize the */robot_description* of the robot with the [model_vis.laun
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   ros2_control : Boolean (true/false) to indicate usage of ros2_controllers
 #   simplified : Boolean (true/false) to indicate if use the simplified URDF model
-#   
-ros2 launch orion_description model_vis.launch.py camera:=os30a 
+#
+ros2 launch orion_description model_vis.launch.py camera:=os30a
 ~~~
 
 ![model_vis](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/model_viz.gif)
@@ -64,7 +64,7 @@ To launch the */robot_description* of the robot with the [rsp.launch.py](/orion_
 #   simplified : Boolean (true/false) to indicate the usage of the simplified URDF model.
 #   ctl_type: Control type can be 'micro-ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
-#   
+#
 ros2 launch orion_description rsp.launch.py
 ~~~
 

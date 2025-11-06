@@ -7,8 +7,8 @@ namespace diff
 {
     /**
      * Calculate the PID output based on the error (input - reference), the
-     * constante defined and considering the clamping to avoid saturation.
-     * 
+     * constant defined and considering the clamping to avoid saturation.
+     *
      * @param enc_count Current value of the encoder count of the motor
      * @param computed_output Pointer to the PWM output
      */
@@ -35,7 +35,7 @@ namespace diff
         // Considering PID with a Ko value to avoid too much increment
         long output = (this->kp_ * err - this->kd_ * (input - this->last_input_)
             + this->integral_term_) / this->ko_;
-        
+
         // Sum previous output
         output += this->last_output_;
 
@@ -61,9 +61,9 @@ namespace diff
         this->last_enc_count_ = enc_count;
         this->last_input_ = input;
         this->last_output_ = output;
-    
+
     } // void ControlPID::compute()
-        
+
     /**
      * Disable the PID.
      */
@@ -72,19 +72,19 @@ namespace diff
         this->enabled_ = false;
 
     } // void ControlPID::disabled()
-    
+
     /**
-     * Enamble the PID
+     * Enable the PID
      */
     void ControlPID::enable()
     {
         this->enabled_ = true;
 
     } // void ControlPID::enable()
-    
+
     /**
      * Check that the PID is enabled or not
-     * 
+     *
      * @return True if it is enabled, false otherwise.
      */
     bool ControlPID::enabled()
@@ -92,10 +92,10 @@ namespace diff
         return this->enabled_;
 
     } // bool ControlPID::enabled()
-    
+
     /**
      * Reset the PID values for the computation.
-     * 
+     *
      * @param enc_count Latest encoder count
      */
     void ControlPID::reset(int enc_count)
@@ -110,7 +110,7 @@ namespace diff
 
     /**
      * Update set point (objective) of the controller
-     * 
+     *
      * @param setpoint Encoder count to achieve
      */
     void ControlPID::setSetpoint(int setpoint)
@@ -121,7 +121,7 @@ namespace diff
 
     /**
      * Update the constants of the PID
-     * 
+     *
      * @param kp Proportional constant
      * @param kd Derivative constant
      * @param ki Integral constant

@@ -2,7 +2,7 @@
 // ---------------------- STD Libraries ------------------------------------
 #include <cmath> // Standard library for math (Symbols, constants and oper.)
 
-// ---------------------- Custom dependenices -----------------------------
+// ---------------------- Custom dependencies -----------------------------
 #include "servo.hpp"
 
 // //////////////////////// CLASS DEFINITIONS /////////////////////////////
@@ -18,7 +18,7 @@ namespace fwd
 
     /**
      * Write the given position (in degrees) to the servo
-     * 
+     *
      * @param degrees Pointer to the desired objective
      */
     void ServoMotor::setPositionDeg(const float& degrees)
@@ -33,13 +33,13 @@ namespace fwd
         }
         else
         {
-            this->servo_.write(degrees);  
+            this->servo_.write(degrees);
         }
     }
 
     /**
      * Read the current position of the servo.
-     * 
+     *
      * @return Current position in degrees.
      */
     float ServoMotor::getPositionDeg()
@@ -50,7 +50,7 @@ namespace fwd
     /**
      * Set the position of the servo by considering radians and then
      * converting them into degrees.
-     * 
+     *
      * @param radians Objective in radians
      */
     void ServoMotor::setPositionRad(const float& radians)
@@ -60,7 +60,7 @@ namespace fwd
 
     /**
      * Read the current position of the servo
-     * 
+     *
      * @return Current position in radians.
      */
     float ServoMotor::getPositionRad()
@@ -91,7 +91,7 @@ namespace fwd
 
     /**
      * Set the servo objective in degrees
-     * 
+     *
      * @param degrees Objective to move slowly.
      */
     void ServoMotor::setObjectiveDeg(float degrees)
@@ -101,11 +101,11 @@ namespace fwd
 
     /**
      * Set the servo objective in radians
-     * 
+     *
      * @param degrees Objective to move slowly.
      */
     void ServoMotor::setObjectiveRad(float radians)
     {
         this->setObjectiveDeg(radians * 180 / M_PI);
     }
-}
+} // namespace fwd

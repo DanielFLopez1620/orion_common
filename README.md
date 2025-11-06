@@ -14,7 +14,7 @@ This repository contains essential packages for the **O**pen-source **R**obot fo
 
 The source code is released under a [BSD 3-Clause license](/LICENSE).
 
-**Authors**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
+**Team**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
 
 The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **Jazzy** distribution.
 
@@ -33,7 +33,7 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 
 The repository is organized into modular ROS 2 packages:
 
-- 🌌 **[`orion`](/orion/README.md)** 🛰️ Metapackage grouping all main components dependencies.
+- 🌌 **[`orion`](/orion/README.md)** 🛰️ Meta-package grouping all main components dependencies.
 - 📦 **[`orion_assets`](/orion_assets/README.md)** 🗂️ CAD files for design, assembly, and construction of the robot.
 - 🎮 **[`orion_control`](/orion_control/README.md)** 🧠 Configuration for controllers and hardware interfaces plugins for ROS 2 controllers.
 - 🧩 **[`orion_description`](/orion_description/README.md)** 📐 URDF/Xacro description of the robot’s structure.
@@ -42,7 +42,7 @@ The repository is organized into modular ROS 2 packages:
 - 🐳 **[`orion_docker`](/orion_docker/README.md)** 📦 Docker support for containerized development and deployment of the robot.
 - 🧰 **[`orion_utils_py`](/orion_utils_py/README.md)** 🐍 Utility scripts in Python 3 to common applications like laser filter or simple actions.
 
-To build you robot, review the hardware changes and learn aout the versions of the robot, do not forget to check the 📖 [`ORION Wiki`](https://github.com/Tesis-ORION/orion_common/wiki) 📔
+To build you robot, review the hardware changes and learn about the versions of the robot, do not forget to check the 📖 [`ORION Wiki`](https://github.com/Tesis-ORION/orion_common/wiki) 📔
 
 ---
 
@@ -50,7 +50,7 @@ To build you robot, review the hardware changes and learn aout the versions of t
 
 These components provide extended capabilities for sensors, simulation, perception, and interaction:
 
-- 💬 **[`orion_chat`](https://github.com/Tesis-ORION/orion_chat)** 🤖 Natural Language Processing interface for interacting with the robot and send commands (for example, specificy arm movement or command a velocity to the robot).
+- 💬 **[`orion_chat`](https://github.com/Tesis-ORION/orion_chat)** 🤖 Natural Language Processing interface for interacting with the robot and send commands (for example, specify arm movement or command a velocity to the robot).
 
 - 🧿 **[`orion_gz`](https://github.com/Tesis-ORION/orion_gz)** 🏙️ Simulation of the robot in GZ Harmonic that integrates native plugins, bridges between ROS 2 and GZ with [`ros_gz_bridge`](https://github.com/gazebosim/ros_gz/tree/ros2/ros_gz_bridge), and the integration of [`ros2_control`](https://control.ros.org/) with [`gz_ros2_control`](https://github.com/ros-controls/gz_ros2_control).
 
@@ -86,8 +86,6 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
 
     ~~~bash
     cd ~/ros2_ws/src
-
-    # For now it is on branch dev
     git clone https://github.com/Tesis-ORION/orion_common.git
     ~~~
 
@@ -103,7 +101,7 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
 4. Install the [`orion_chat`](https://github.com/Tesis-ORION/orion_chat) package:
 
     ~~~bash
-    git clone https://github.com/Tesis-ORION/orion_chat.git  
+    git clone -b teatro https://github.com/Tesis-ORION/orion_chat.git
     cd orion_chat
     ./install_apt.sh
     pip install -r requirements.txt --break-system-packages
@@ -112,12 +110,12 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
 5. Implement the additional installs recommended on the cameras READMEs, for more info check [Maixsense A010](https://github.com/Tesis-ORION/depth_maixsense_a010), [YDLidar OS30A](https://github.com/Tesis-ORION/Depth_ydlidar_os30a) and [ORBBEC ASTRA S](https://github.com/Tesis-ORION/depth_orbbec_astra) packages.
 
     ~~~bash
-    # --------- General 
+    # --------- General
     sudo usermod -a -G dialout $USER
 
     # -------- OS30A
     sudo ln -sf /lib/x86_64-linux-gnu/libdc1394.so /usr/lib/libdc1394.so.22
-    
+
     # Edit file
     sudo nano /opt/ros/humble/include/tf2_geometry_msgs/tf2_geometry_msgs/tf2_geometry_msgs.hpp
     # Change the following lines
@@ -135,7 +133,7 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
     ros-$ROS_DISTRO-backward-ros libdw-dev
     ~~~
 
-6. Install external packages dependencies in the source
+6. Install external packages dependencies for the G-Mov package (pi cam and servo) in the source
 
     ~~~bash
     cd ~/ros2_ws/src
