@@ -1,0 +1,16 @@
+[Unit]
+Description=Startup ROS2 Bringup Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/startup_robot.sh
+User=orion
+Environment=HOME=/home/orion
+WorkingDirectory=/home/orion
+Restart=on-failure
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

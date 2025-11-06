@@ -1,0 +1,1092 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!--//////////////////// MATH AND NUMS MACROS ///////////////////////-->
+
+    <xacro:property name="pi_2" value="${pi / 2}"/>
+    <xacro:property name="pi_4" value="${pi / 4}"/>
+    <xacro:property name="pi_6" value="${pi / 6}"/>
+    <xacro:property name="pi_8" value="${pi / 8}"/>
+
+    <!--///////////////////// 10 x 80 SPACERS MACROS ///////////////////////-->
+
+    <!-- ......................... Single custom spacer ................... -->
+    <xacro:macro name="spacer_10x80" params="front side level x y z">
+        <!-- Orientation properties -->
+        <xacro:property name="muls" value="1"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="muls" value="-1"/>
+        </xacro:if>
+        <xacro:property name="mulf" value="1"/>
+        <xacro:if value="${front == 2}">
+            <xacro:property name="mulf" value="-1"/>
+        </xacro:if>
+        <xacro:property name="gyro" value="${pi}"/>
+        <xacro:if value="${side == 2 and front == 1}">
+            <xacro:property name="gyro" value="${pi_2}"/>
+        </xacro:if>
+        <xacro:if value="${side == 1 and front == 2}">
+            <xacro:property name="gyro" value="${3*pi_2}"/>
+        </xacro:if>
+        <xacro:if value="${side == 2 and front == 2}">
+            <xacro:property name="gyro" value="0"/>
+        </xacro:if>
+
+        <!-- Link definition-->
+        <link name="spacer_l${level}_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${gyro}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/spacer_10x80.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="PLAWhite"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${gyro}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/spacer_10x80.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${gyro}"/>
+            <mass value="0.012"/>
+            <inertia ixx="6.799999999999999e-06" ixy="0.0" ixz="0.0"
+                    iyy="6.799999999999999e-06" iyz="0.0"
+                    izz="8e-07"/>
+        </inertial>
+        </link>
+        <joint name="spacer_l${level}_${front}${side}_joint" type="fixed">
+            <parent link="base_l${level}_s${front}"/>
+            <child link="spacer_l${level}_${front}${side}"/>
+            <origin xyz="${x*mulf} ${y*muls} ${z+0.0025}" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+        <gazebo reference="spacer_l${level}_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:if>
+    </xacro:macro>
+
+    <!-- ....................... Double 10x80 Spacer .................... -->
+    <xacro:macro name="double_spacer_10x80" params="front level x y z">
+        <xacro:spacer_10x80 front="${front}" side="1" level="${level}" x="${x}"
+            y="${y}" z="${z}"/>
+        <xacro:spacer_10x80 front="${front}" side="2" level="${level}" x="${x}"
+            y="${y}" z="${z}"/>
+    </xacro:macro>
+    
+    <!--//////////////////// BASES AND LEVELS MACROS ///////////////////////-->
+    
+    <!-- ................... Half base macro .............................. -->
+    <xacro:macro name="half_base" params="level side parent x y z">
+        <xacro:property name="mul" value="1"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="mul" value="-1"/>
+        </xacro:if>
+        <link name="base_l${level}_s${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${mul*pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/half_platform.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <xacro:if value="${color == 'mdf'}">
+                <material name="MDF"/>
+            </xacro:if>
+            <xacro:if value="${color == 'transparent'}">
+                <material name="TransparentBlack"/>
+            </xacro:if>
+            <xacro:if value="${color == 'pla'}">
+                <material name="PLAWhite"/>
+            </xacro:if>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${mul*pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/half_platform.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${mul*pi_2}"/>
+            <mass value="0.053"/>
+            <inertia ixx="5.843802083333332e-05" ixy="0.0" ixz="0.0"
+                    iyy="0.00019480260416666664" iyz="0.0"
+                    izz="0.0002531854166666666"/>
+        </inertial>
+        </link>
+        <joint name="base_l${level}_s${side}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="base_l${level}_s${side}"/>
+            <origin xyz="${x + (mul*0.115/2)} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="base_l${level}_s${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ...................... Complete base ............................ -->
+    <xacro:macro name="com_base" params="level parent x y z">
+        <xacro:half_base level="${level}" side="1" parent="middle_base" x="${x}"
+            y="${y}" z="${z}"/>
+        <xacro:half_base level="${level}" side="2" parent="middle_base" x="${x}"
+            y="${y}" z="${z}"/>
+    </xacro:macro>
+
+    <!--  /////////////////// MOTOR DC MACROS ///////////////////////////////-->
+    <!-- ....................... Motor DC Kit .............................. -->
+    <xacro:macro name="motor_dc" params="front side x y z">
+        <!-- Properties -->
+        <xacro:property name="mulf" value="1"/>
+        <xacro:if value="${front == 2}">
+            <xacro:property name="mulf" value="-1"/>
+        </xacro:if>
+        <xacro:property name="muls" value="1"/>
+        <xacro:property name="orin" value="0"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="muls" value="-1"/>
+            <xacro:property name="orin" value="${pi}"/>
+        </xacro:if>
+        <!-- Motor mount definition-->
+        <link name="motor_support_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${orin}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/motor_mount.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${orin}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/motor_mount.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${orin}"/>
+            <mass value="0.011753"/>
+            <inertia ixx="2.1329054208642935e-06" ixy="0.0" ixz="0.0"
+                    iyy="1.7437733457263675e-06" iyz="0.0"
+                    izz="1.7440374248620737e-06"/>
+        </inertial>
+        </link>
+        <joint name="motor_support_${front}${side}_joint" type="fixed">
+            <parent link="base_l0_s${front}"/>
+            <child link="motor_support_${front}${side}"/>
+            <origin xyz="${x*mulf} ${y*muls} ${z+0.0025}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="motor_support_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+
+        <!-- Link motor dc definition-->
+        <link name="motor_dc_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${-pi_2*muls} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/motor_dc.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${-pi_2*muls} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/motor_dc.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${-pi_2*muls} 0 0"/>
+            <mass value="0.099"/>
+            <inertia ixx="5.612122306673401e-05" ixy="0.0" ixz="0.0"
+                    iyy="5.6124427915649726e-05" iyz="0.0"
+                    izz="1.0309295151084287e-05"/>
+        </inertial>
+        </link>
+        <joint name="motor_dc_${front}${side}_joint" type="fixed">
+            <parent link="motor_support_${front}${side}"/>
+            <child link="motor_dc_${front}${side}"/>
+            <origin xyz="0 ${-0.05625*muls} 0" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="motor_dc_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+
+        <!-- Coupling definition-->
+        <link name="coupling_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${orin} 0 ${pi_6*muls}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/coupling.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="Brass"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${orin} 0 ${pi_6*muls}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/coupling.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${orin} 0 ${pi_6*muls}"/>
+            <mass value="0.0152"/>
+            <inertia ixx="6.244666666666666e-07" ixy="0.0" ixz="0.0"
+                    iyy="6.958222391764178e-07" iyz="0.0"
+                    izz="4.994889058430845e-07"/>
+        </inertial>
+        </link>
+        <joint name="coupling_${front}${side}_joint" type="continuous">
+            <axis xyz="0.0 0.0 1.0"/>
+            <parent link="motor_support_${front}${side}"/>
+            <child link="coupling_${front}${side}"/>
+            <xacro:if value="${motor == 1000}">
+                <limit effort="0.01079" velocity="104.97"/>
+            </xacro:if>
+            <xacro:if value="${motor == 100}">
+                <limit effort="0.08336" velocity="10.47"/>
+            </xacro:if>
+            <origin xyz="0 ${(0.01120 + 0.000325)*muls} 0" rpy="${-pi_2*muls+orin} 0 0"/>
+        </joint>
+        <gazebo reference="coupling_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+
+        <!-- Ring definition -->
+        <link name="ring_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${-pi_2*muls} 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/ring.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="ArduinoBlue"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 ${-pi_2*muls} 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/ring.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 ${-pi_2*muls} 0"/>
+            <mass value="0.0109"/>
+            <inertia ixx="4.816756860757923e-06" ixy="0.0" ixz="0.0"
+                    iyy="2.9882463541666663e-06" iyz="0.0"
+                    izz="2.9867490482579234e-06"/>
+        </inertial>
+        </link>
+        <joint name="ring_${front}${side}_joint" type="fixed">
+            <parent link="coupling_${front}${side}"/>
+            <child link="ring_${front}${side}"/>
+            <origin xyz="0 0 ${0.0068*muls}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="ring_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+
+        <!-- Neumatic definition-->
+        <link name="neumatic_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${pi_2*muls} 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/neumatic.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 ${pi_2*muls} 0"/>
+            <geometry>
+            <sphere radius="0.033675"/>
+            <!--mesh filename="package://orion_description/meshes/neumatic.stl" 
+                scale="0.001 0.001 0.001"/-->
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 ${pi_2*muls} 0"/>
+            <mass value="0.0399"/>
+            <inertia ixx="3.15394093727487e-05" ixy="0.0" ixz="0.0"
+                    iyy="1.7872841935074492e-05" iyz="0.0"
+                    izz="1.7872841935074492e-05"/>
+        </inertial>
+        </link>
+        <joint name="neumatic_${front}${side}_joint" type="fixed">
+            <parent link="ring_${front}${side}"/>
+            <child link="neumatic_${front}${side}"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="neumatic_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>0.8</mu2>
+        </gazebo>
+
+    </xacro:macro>
+
+    <!--////////////////////////// CASTER WHEEL ////////////////////////////-->
+    <xacro:property name="caster_type" value="fixed"/>
+    
+    <xacro:if value="${gazebo}">
+        <xacro:property name="caster_type" value="continuous"/>
+    </xacro:if>
+
+    <!-- ......................... Macro for caster ....................... -->
+    <xacro:macro name="caster_wheel" params="parent front x y z">
+        <!-- Caster base definition-->
+        <link name="caster_base_${front}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_base.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_base.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${pi_2}"/>
+            <mass value="0.01085"/>
+            <inertia ixx="9.360136765056053e-07" ixy="0.0" ixz="0.0"
+                    iyy="1.315763414372338e-06" iyz="0.0"
+                    izz="2.2314830712000656e-06"/>
+        </inertial>
+        </link>
+        <joint name="caster_base_${front}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="caster_base_${front}"/>
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="caster_base_${front}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+        
+        <!-- Caster middle definition-->
+        <link name="caster_middle_${front}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_middle.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_middle.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+            <mass value="0.001"/>
+            <inertia ixx="1.6321007868011535e-06" ixy="0.0" ixz="0.0"
+                    iyy="1.3901075509910613e-06" iyz="0.0"
+                    izz="1.644364587792215e-06"/>
+        </inertial>
+        </link>
+        <joint name="caster_middle_${front}_joint" type="${caster_type}">
+            <axis xyz="0.0 0.0 1.0"/>
+            <parent link="caster_base_${front}"/>
+            <child link="caster_middle_${front}"/>
+            <origin xyz="0 0 -0.002" rpy="${pi} 0 0"/>
+            <dynamics damping="0.05" friction="0.0"/>
+        </joint>
+        <gazebo reference="caster_middle_${front}">
+            <mu1>0.01</mu1>
+            <mu2>0.01</mu2>
+            <kp>100000.0</kp>
+            <kd>10.0</kd>
+        </gazebo>
+
+        <!-- Caster wheel definition-->
+        <link name="caster_wheel_${front}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi_2} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_wheel.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${pi_2} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/caster_wheel.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${pi_2} 0 0"/>
+            <mass value="0.001"/>
+            <inertia ixx="5.723473258925721e-07" ixy="0.0" ixz="0.0"
+                    iyy="8.268436933141506e-07" iyz="0.0"
+                    izz="5.724272007549117e-07"/>
+        </inertial>
+        </link>
+        <joint name="caster_wheel_${front}_joint" type="${caster_type}">
+            <axis xyz="0.0 0.0 1.0"/>
+            <parent link="caster_middle_${front}"/>
+            <child link="caster_wheel_${front}"/>
+            <origin xyz="-0.0108 0 0.0185" rpy="${pi_2} 0 0"/>
+            <dynamics damping="0.05" friction="0.0"/>
+        </joint>
+        <gazebo reference="caster_wheel_${front}">
+            <mu1>0.01</mu1>
+            <mu2>0.01</mu2>
+            <kp>100000.0</kp>
+            <kd>10.0</kd>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ///////////////////// BATTERIES MACROS ////////////////////////////-->
+    <!-- ...................... B18650 Macro .............................. -->
+    <xacro:macro name="b18650" params="parent element num x y z">
+        <xacro:property name="inv" value="1"/>
+        <xacro:property name="rot" value="${pi_2}"/>
+        <xacro:if value="${num == 2}">
+            <xacro:property name="rot" value="${pi_2*3}"/>
+            <xacro:property name="inv" value="-1"/>
+        </xacro:if>
+        <xacro:if value="${num == 3}">
+            <xacro:property name="rot" value="${pi_2*5}"/>
+        </xacro:if>
+        <!-- Link -->
+        <link name="${element}_${num}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 ${rot} 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/b18650.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="DriverRed"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 ${rot} 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/b18650.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0"/>
+            <mass value="0.048"/>
+            <inertia ixx="1.9520194552672923e-06" ixy="0.0" ixz="0.0"
+                    iyy="1.9520999999999995e-06" iyz="0.0"
+                    izz="2.5911945526729246e-07"/>
+        </inertial>
+        </link>
+        <joint name="${element}_${num}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${element}_${num}"/>
+            <origin xyz="${x*inv} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="${element}_${num}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ........................ Battery holder macro ........................ -->
+    <xacro:macro name="bat_hold" params=" parent element num x y z">
+        <!-- Link -->
+        <link name="${element}_${num}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/batteryholderx3.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/batteryholderx3.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.02012"/>
+            <inertia ixx="1.4044179166666666e-06" ixy="0.0" ixz="0.0"
+                    iyy="2.9665263333333333e-06" iyz="0.0"
+                    izz="4.369602916666666e-06"/>
+        </inertial>
+        </link>
+        <joint name="${element}_${num}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${element}_${num}"/>
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="${element}_${num}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="stack_bat" params="parent num x y z">
+        <xacro:property name="serie" value="0.009"/>
+        <xacro:bat_hold parent="${parent}" element="bathold" num="${num}" 
+            x="${x}" y="${y}" z="${z}"/>
+        <xacro:b18650 parent="bathold_${num}" element="b18650_${num}" num="1" 
+            x="${-0.065/2}" y="${serie}" z="0.01"/>
+        <xacro:b18650 parent="bathold_${num}" element="b18650_${num}" num="2" 
+            x="${-0.065/2}" y="${-serie}" z="0.01"/>
+        <xacro:b18650 parent="bathold_${num}" element="b18650_${num}" num="3" 
+            x="${-0.065/2}" y="${-serie*3}" z="0.01"/>
+    </xacro:macro>
+
+    <!-- //////////////////// SERVOS MACROS ///////////////////////////////-->
+
+    <xacro:macro name="servo_mounted" params="parent side x y z">
+        <!-- Servo Mount Link -->
+        <xacro:property name="inv" value="1"/>
+        <xacro:property name="flex" value="0"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="inv" value="-1"/>
+            <xacro:property name="flex" value="${pi}"/>
+        </xacro:if>
+        <link name="servo_support_${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${flex}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/servo_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="PLAWhite"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${flex}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/servo_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${flex}"/>
+            <mass value="0.012"/>
+            <inertia ixx="3.1172499999999997e-06" ixy="0.0" ixz="0.0"
+                    iyy="4.2049999999999996e-06" iyz="0.0"
+                    izz="6.60025e-06"/>
+        </inertial>
+        </link>
+        <joint name="servo_support_${side}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="servo_support_${side}"/>
+            <origin xyz="${x} ${y*inv} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="servo_support_${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+        <!-- Servo Link -->
+        <link name="servo_${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="${-pi_2*inv} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/mg996r.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${-pi_2*inv} 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/mg996r.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${-pi_2*inv} 0 0"/>
+            <mass value="0.055"/>
+            <inertia ixx="1.1155878535842904e-05" ixy="0.0" ixz="0.0"
+                    iyy="2.1057527828089415e-05" iyz="0.0"
+                    izz="1.3568315958913178e-05"/>
+        </inertial>
+        </link>
+        <joint name="servo_${side}_joint" type="fixed">
+            <parent link="servo_support_${side}"/>
+            <child link="servo_${side}"/>
+            <origin xyz="0 ${-0.0216*inv} -0.01375" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="servo_${side}">
+            <mu1>0.05</mu1>
+            <mu2>0.05</mu2>
+        </gazebo>
+        <!-- Servo Conn -->
+        <link name="servo_conn_${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/servo_conn.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/servo_conn.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.005"/>
+            <inertia ixx="1.750719658194081e-07" ixy="0.0" ixz="0.0"
+                    iyy="1.750397680831338e-07" iyz="0.0"
+                    izz="3.332367339025419e-07"/>
+        </inertial>
+        </link>
+        <joint name="servo_conn${side}_joint" type="revolute">
+            <axis xyz="0.0 0.0 1.0"/>
+            <parent link="servo_${side}"/>
+            <child link="servo_conn_${side}"/>
+            <origin xyz="0.01 ${0.0406*inv} 0" rpy="${-pi_2*inv} 0 0"/>
+            <limit lower="${-pi/3}" upper="${pi/3}" effort="1.08" velocity="5.24"/>
+            <dynamics damping="0.05" friction="0.002"/>
+        </joint>
+        <gazebo reference="servo_conn_${side}">
+            <mu1>0.05</mu1>
+            <mu2>0.05</mu2>
+        </gazebo>
+    </xacro:macro>
+    <!--///////////////////// SPEAKERS MACROS ///////////////////////-->
+
+    <!-- Speakers Macro -->
+    <xacro:macro name="speakers_mount" params="parent front side x y z">
+        <!--  Properties -->
+        <xacro:property name="mulf" value="1"/>
+        <xacro:property name="muls" value="1"/>
+        <xacro:property name="inv" value="${pi}"/>
+        <xacro:if value="${front == 2}">
+            <xacro:property name="mulf" value="-1"/>
+        </xacro:if>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="muls" value="-1"/>
+            <xacro:property name="inv" value="0"/>
+        </xacro:if>
+        <!-- Speaker support -->
+        <link name="speaker_sup_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/speaker_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="PLAWhite"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/speaker_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <mass value="0.007"/>
+            <inertia ixx="1.402333333333333e-06" ixy="0.0" ixz="0.0"
+                    iyy="2.578333333333333e-06" iyz="0.0"
+                    izz="1.2926666666666665e-06"/>
+        </inertial>
+        </link>
+        <joint name="speaker_sup_${front}${side}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="speaker_sup_${front}${side}"/>
+            <origin xyz="${x*mulf} ${y*muls} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="speaker_sup_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+
+        <!-- Speaker -->
+        <link name="speaker_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/speaker.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/speaker.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
+            <mass value="0.0456"/>
+            <inertia ixx="1.102e-05" ixy="0.0" ixz="0.0"
+                    iyy="1.6081600000000002e-05" iyz="0.0"
+                    izz="1.102e-05"/>
+        </inertial>
+        </link>
+        <joint name="speaker_${front}${side}_joint" type="fixed">
+            <parent link="speaker_sup_${front}${side}"/>
+            <child link="speaker_${front}${side}"/>
+            <origin xyz="0 ${0.0375*muls/2} 0" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="speaker_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- ///////////////////////////// WALL MACROS //////////////////////// -->
+    <xacro:macro name="complete_lateral_wall" 
+            params="id parent side level x y z">
+        <xacro:property name="muls" value="1"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="muls" value="-1"/>
+        </xacro:if>
+        <link name="wall_${id}_${level}_${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <xacro:if value="${color == 'mdf'}">
+                <material name="MDF"/>
+            </xacro:if>
+            <xacro:if value="${color == 'transparent'}">
+                <material name="TransparentBlack"/>
+            </xacro:if>
+            <xacro:if value="${color == 'pla'}">
+                <material name="PLAWhite"/>
+            </xacro:if>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+            <mass value="0.042"/>
+            <inertia ixx="2.3541875e-05" ixy="0.0" ixz="0.0"
+                    iyy="0.000177884" iyz="0.0"
+                    izz="0.000154357875"/>
+        </inertial>
+        </link>
+        <joint name="wall_${id}_${level}_${side}_joint" type="fixed">
+        <parent link="${parent}"/>
+        <child link="wall_${id}_${level}_${side}"/>
+        <origin xyz="${x} ${(y+0.00075)*muls} ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="wall_${id}_${level}_${side}">
+            <mu1>0.05</mu1>
+            <mu2>0.05</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="complete_front_wall" 
+            params="id parent front level x z">
+        <xacro:property name="mulf" value="1"/>
+        <xacro:property name="orz" value="0"/>
+        <xacro:if value="${front == 2}">
+            <xacro:property name="mulf" value="-1"/>
+            <xacro:property name="orz" value="${pi}"/>
+        </xacro:if>
+        <!-- Link -->
+        <link name="wall_${id}_${level}_${front}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2 + orz}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <xacro:if value="${color == 'mdf'}">
+                <material name="MDF"/>
+            </xacro:if>
+            <xacro:if value="${color == 'transparent'}">
+                <material name="TransparentBlack"/>
+            </xacro:if>
+            <xacro:if value="${color == 'pla'}">
+                <material name="PLAWhite"/>
+            </xacro:if>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2 + orz}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2 + orz}"/>
+            <mass value="0.039"/>
+            <inertia ixx="2.18603125e-05" ixy="0.0" ixz="0.0"
+                    iyy="0.000139178" iyz="0.0"
+                    izz="0.00011733231249999999"/>
+        </inertial>
+        </link>
+        <joint name="wall_${id}_${level}_${front}_joint" type="fixed">
+        <parent link="${parent}"/>
+        <child link="wall_${id}_${level}_${front}"/>
+        <origin xyz="${(x+0.00075)*mulf} 0 ${z}" rpy="0 0 0"/>
+        </joint>
+        <gazebo reference="wall_${id}_${level}_${front}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- /////////////////////////// Generic Metric Spacer /////////////////-->
+    <xacro:macro name="metric_spacer"
+            params="id parent element front side x y z">
+        
+        <!-- Link Spacer -->
+        <link name="${id}_${element}_${front}${side}">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/spacer_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="Brass"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/spacer_${id}.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0 " rpy="0 0 0"/>
+            <xacro:if value="${id == 'm4x17'}">
+                <mass value="0.00109"/>
+                <inertia ixx="3.0393740495491044e-08" ixy="0" ixz="0"
+                        iyy="3.129874333045412e-08" iyz="0"
+                        izz="3.129874333045412e-08"/>
+            </xacro:if>
+            <xacro:if value="${id == 'm3x10'}">
+                <mass value="0.0008"/>
+                <inertia ixx="8.550666163126637e-09" ixy="0" ixz="0"
+                        iyy="8.960721799390997e-09" iyz="0"
+                        izz="4.443388969597693e-09"/>
+            </xacro:if>
+            <xacro:if value="${id == 'm3x20'}">
+                <mass value="0.0024"/>
+                <inertia ixx="8.5251996963501e-08" ixy="0" ixz="0"
+                        iyy="8.648216387229408e-08" iyz="0"
+                        izz="1.333016690879308e-08"/>
+            </xacro:if>
+        </inertial>
+        </link>
+        <!-- Joint Spacer -->
+        <joint name="${id}_${element}_${front}${side}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${id}_${element}_${front}${side}"/>
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+        </joint>
+        <!-- Gazebo Spacer -->
+        <gazebo reference="${id}_${element}_${front}${side}">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <!-- 2 symetric hex spacers by considering offset -->
+    <xacro:macro name="x2xmetric_spacer" 
+                params="id element parent offset_y x y z">
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="" side="r" x="${x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="" side="l" x="${x}" y="${y + offset_y}" z="${z}"/>
+    </xacro:macro>
+
+    <!-- 3  hex spacers by considering triangle -->
+    <xacro:macro name="x3xmetric_spacer" 
+                params="id element parent offset_x offset_y x y z">
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="l" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="" side="r" x="${x}" y="${y + offset_y}" z="${z}"/>
+    </xacro:macro>
+
+    <!-- 4  hex spacers by considering mirror offset -->
+    <xacro:macro name="x4xmetric_spacer" 
+                params="id element parent offset_x offset_y x y z">
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="r" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="l" x="${x + offset_x}" y="${y + offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="r" x="${x - offset_x}" y="${y + offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
+    </xacro:macro>
+
+    <!-- 6  hex spacers by considering mirror offset and middles-->
+    <xacro:macro name="x6xmetric_spacer" 
+                params="id element parent offset_x offset_y x y z">
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="r" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="l" x="${x + offset_x}" y="${y + offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="r" x="${x - offset_x}" y="${y + offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="f" side="" x="${x + offset_x}" y="0" z="${z}"/>
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+            front="r" side="" x="${x - offset_x}" y="0" z="${z}"/>
+    </xacro:macro>
+
+    <!-- ////////////////////// Touch sensors macros //////////////////////-->
+    <xacro:macro name="touch_sensor" params="x y z upper side parent prefix">
+        <xacro:property name="rotR" value="${-pi_2}"/>
+        <xacro:property name="rotP" value="${pi}"/>
+        <xacro:property name="rotY" value="0"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="rotR" value="${pi_2}"/>
+        </xacro:if>
+        <xacro:if value="${upper}">
+            <xacro:property name="rotR" value="0"/>
+            <xacro:property name="rotP" value="0"/>
+            <xacro:property name="rotY" value="${-pi_2}"/>
+        </xacro:if>
+        <link name="touch_sensor_${prefix}${side}">
+            <visual name="">
+                <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/touch_sensor.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="ArduinoBlue"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/touch_sensor.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <mass value="0.001984467"/>
+                <inertia ixx="1.3218052332160457e-07" ixy="0.0" ixz="0.0" 
+                         iyy="1.0060793220379826e-07" iyz="0.0" 
+                         izz="2.2367231024415283e-07"/>
+            </inertial>
+        </link>
+        <joint name="touch_sensor_${prefix}${side}_joint" type="fixed">
+            <origin xyz="${x} ${y} ${z}" rpy="0.0 0.0 0.0"/>
+            <parent link="${parent}"/>
+            <child link="touch_sensor_${prefix}${side}"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="touch_sensor_${prefix}${side}">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+
+        <xacro:property name="rotR" value="0"/>
+        <xacro:property name="rotP" value="0"/>
+        <xacro:property name="rotY" value="${pi}"/>
+        <xacro:property name="offsetZ" value="-0.0065"/>
+        <xacro:property name="offsetY" value="0.002"/>
+        <xacro:property name="offsetX" value="0"/>
+        <xacro:if value="${side == 2}">
+            <xacro:property name="rotY" value="0"/>
+            <xacro:property name="offsetY" value="-0.002"/>
+        </xacro:if>
+        <xacro:if value="${upper}">
+            <xacro:property name="rotR" value="${-pi_2}"/>
+            <xacro:property name="rotP" value="0"/>
+            <xacro:property name="rotY" value="${-pi_2}"/>
+            <xacro:property name="offsetZ" value="0.00175"/>
+            <xacro:property name="offsetY" value="0"/>
+            <xacro:property name="offsetX" value="-0.0065"/>
+        </xacro:if>
+        <link name="touch_sup_${prefix}${side}">
+            <visual name="">
+                <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="PLAWhite"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
+                <mass value="0.004"/>
+                <inertia ixx="4.400208333333333e-07" ixy="0.0" ixz="0.0" 
+                         iyy="6.019366727956135e-07" iyz="0.0" 
+                         izz="2.252908394622803e-07"/>
+            </inertial>
+        </link>
+        <joint name="touch_sup_${prefix}${side}_joint" type="fixed">
+            <origin xyz="${offsetX} ${offsetY} ${offsetZ}" rpy="0 0 0"/>
+            <parent link="touch_sensor_${prefix}${side}"/>
+            <child link="touch_sup_${prefix}${side}"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="touch_sup_${prefix}${side}">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:macro>
+
+    <!-- /////////////////////// Cameras macros //////////////////////// -->
+    <xacro:macro name="camera_sensor" params="x y z R P Y parent">
+        <!-- ................... Camera sensors links .................. -->
+        <link name="camera_link"/>
+
+        <joint name="camera_joint" type="fixed">
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+            <parent link="${parent}"/>
+            <child link="camera_link"/>
+        </joint>
+
+        <link name="camera_link_optical"/>
+
+        <joint name="optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${R} ${P} ${Y}"/>
+            <parent link="camera_link"/>
+            <child link="camera_link_optical"/>
+        </joint>
+    </xacro:macro>
+</robot>

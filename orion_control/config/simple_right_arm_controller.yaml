@@ -1,0 +1,7 @@
+simple_right_arm_controller:
+  ros__parameters:
+    type: forward_command_controller/ForwardCommandController
+    joints:
+      - servo_conn2_joint
+    interface_name: position
+    update_rate: 20 # Hz

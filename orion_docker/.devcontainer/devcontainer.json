@@ -1,0 +1,50 @@
+{
+  "name": "ROS 2 Development Container",
+  // COMMENT privileged for Podman
+  "privileged": true,
+  "remoteUser": "orion",
+  "build": {
+      "dockerfile": "Dockerfile",
+      "args": {
+          "USERNAME": "orion"
+      }
+  },
+  "workspaceFolder": "/home/orion/ws",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/orion/ws,type=bind",
+  "customizations": {
+      "vscode": {
+          "extensions": [
+              "ms-vscode.cpptools",
+              "ms-vscode.cpptools-themes",
+              "twxs.cmake",
+              "donjayamanne.python-extension-pack",
+              "ms-iot.vscode-ros",
+              "ms-azuretools.vscode-docker",
+              "ms-vscode.cmake-tools"
+          ]
+      }
+  },
+  "containerEnv": {
+      "DISPLAY": "unix:0",
+      "ROS_DOMAIN_ID": "16"
+  },
+  "runArgs": [
+
+      "--network", "host",
+
+      "-e", "DISPLAY=${env:DISPLAY}",
+
+      "--group-add", "video",
+      "--group-add", "audio",
+
+      "--device", "/dev/snd",
+  "--gpus", "all"
+  ],
+  "mounts": [
+      "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+      "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+      "source=/dev/snd,target=/dev/snd,type=bind,consistency=cached",
+      "source=${env:HOME}/.Xauthority,target=/home/orion/.Xauthority,type=bind"
+  ],
+  "postCreateCommand": "./.devcontainer/post_create.sh"
+}

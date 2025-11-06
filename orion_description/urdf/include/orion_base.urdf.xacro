@@ -1,0 +1,876 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- This xacro file aims for adding the mobile platform to the robot-->
+
+    <!-- ////////////////////////// BASE LINK //////////////////////////////-->
+    <link name="base_link"/>
+    
+    <!-- .................... Middle frame ......................... -->
+    <link name="middle_base"/>
+    <joint name="to_middle_base" type="fixed">
+        <origin xyz="-0.05 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="middle_base"/>
+    </joint>
+
+    <!-- ///////////////////////// PROPERTIES //////////////////////////////-->
+    <xacro:property name="level_height" value="0.08"/>
+    <xacro:property name="thickness" value="0.0025"/>
+
+    <!-- /////////////////////////// LEVELS ///////////////////////////////-->
+    <xacro:com_base level="0" parent="middle_base" x="0" y="0"
+        z="${level_height*0+ thickness*0}"/>
+    <xacro:com_base level="1" parent="middle_base" x="0" y="0" 
+        z="${level_height*1 + thickness*1}"/>
+    <xacro:com_base level="2" parent="middle_base" x="0" y="0" 
+        z="${level_height*2 + thickness*2}"/>
+    <xacro:com_base level="3" parent="middle_base" x="0" y="0" 
+        z="${level_height*3 + thickness*3}"/>
+    <xacro:half_base level="4" side="2" parent="middle_base" x="0" y="0"
+        z="${level_height*4 + thickness*4}"/>
+
+    <!-- /////////////////////// LEVEL's SPACERS//////////////////////////-->
+    <xacro:double_spacer_10x80 front="1" level="0" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="2" level="0" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="1" level="1" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="2" level="1" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="1" level="2" x="${-0.15/2 + 0.0275 + 0.006}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="2" level="2" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="2" level="3" x="${0.15/2 - 0.0275}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    <xacro:double_spacer_10x80 front="1" level="3" x="${-0.15/2 + 0.0075}" 
+            y="${0.21/2 - 0.010}" z="0"/>
+    
+    <!-- //////////////////////// MOTORS DC ////////////////////////////-->
+    <xacro:motor_dc front="1" side="1" x="-0.0025" y="${0.05418+0.036/2}" 
+        z="-0.0225"/>
+    <xacro:motor_dc front="1" side="2" x="-0.0025" y="${0.05418+0.036/2}"
+        z="-0.0225"/>
+
+    
+
+    <!-- /////////////////////// CASTER WHEEL //////////////////////////-->
+    <xacro:x4xmetric_spacer id="m4x17" element="caster" parent="base_l0_s2"
+    offset_x="0.012" offset_y="0.015" x="-0.023" y="0" 
+    z="${-0.001 - 0.017}"/>
+    <xacro:caster_wheel parent="base_l0_s2" front="2" x="-0.023" y="0" 
+    z="${-0.002 - 0.017}"/>
+    
+    <!-- //////////////// FIRST FLOOR COMPONENTS ///////////////////// -->
+    <xacro:unless value="${simplified}">
+        <!-- .................. Hex spacers for stack .................... -->
+        <xacro:x6xmetric_spacer id="m3x10" element="bathol" parent="base_l0_s1"
+            offset_x="${0.0855/2}" offset_y="${0.127/2}" x="0.005" y="0" 
+            z="0.0025"/>
+        
+        <!-- ..................... Battery Platform ....................... -->
+        <link name="bat_platform">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/bathold_support.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <xacro:if value="${color == 'mdf'}">
+                    <material name="MDF"/>
+                </xacro:if>
+                <xacro:if value="${color == 'transparent'}">
+                    <material name="TransparentBlack"/>
+                </xacro:if>
+                <xacro:if value="${color == 'pla'}">
+                    <material name="PLAWhite"/>
+                </xacro:if>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/bathold_support.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.018"/>
+            <inertia ixx="1.2564374999999998e-05" ixy="0.0" ixz="0.0"
+                    iyy="2.6539499999999996e-05" iyz="0.0"
+                    izz="3.9091874999999996e-05"/>
+        </inertial>
+        </link>
+        <joint name="bat_platform_joint" type="fixed">
+            <parent link="base_l0_s1"/>
+            <child link="bat_platform"/>
+            <origin xyz="0.005 0 0.0125" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="bat_platform">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+
+        <!-- ....................... Battery Stacks ........................ -->
+        <xacro:stack_bat parent="bat_platform" num="1" x="0" y="-0.023" z="0.0025"/>
+        <xacro:stack_bat parent="bat_platform" num="2" x="0" y="${0.023+0.02}" 
+            z="0.0025"/>
+
+        <!-- ........................ Additional spacers ........................-->
+        <xacro:x6xmetric_spacer id="m3x20" element="bathol_2" parent="base_l0_s1"
+            offset_x="${0.0855/2}" offset_y="${0.127/2}" x="0.005" y="0" 
+            z="0.0175"/>
+        
+        <!-- ..................... Battery Platform ....................... -->
+        <link name="bat_platform_2">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/bathold_support.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <xacro:if value="${color == 'mdf'}">
+                    <material name="MDF"/>
+                </xacro:if>
+                <xacro:if value="${color == 'transparent'}">
+                    <material name="TransparentBlack"/>
+                </xacro:if>
+                <xacro:if value="${color == 'pla'}">
+                    <material name="PLAWhite"/>
+                </xacro:if>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/bathold_support.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.018"/>
+            <inertia ixx="1.2564374999999998e-05" ixy="0.0" ixz="0.0"
+                    iyy="2.6539499999999996e-05" iyz="0.0"
+                    izz="3.9091874999999996e-05"/>
+        </inertial>
+        </link>
+        <joint name="bat_platform_2_joint" type="fixed">
+            <parent link="base_l0_s1"/>
+            <child link="bat_platform_2"/>
+            <origin xyz="0.005 0 0.0375" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="bat_platform_2">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+
+        <!-- ....................... Battery Stacks ........................ -->
+        <xacro:stack_bat parent="bat_platform_2" num="3" x="0" y="-0.023" z="0.0025"/>
+        <xacro:stack_bat parent="bat_platform_2" num="4" x="0" y="${0.023+0.02}" 
+            z="0.0025"/>
+
+        <!-- ............... Hex spacers for Motor Driver................... -->
+        <xacro:x4xmetric_spacer id="m3x10" element="driver" parent="base_l0_s2"
+        offset_x="${0.03702/2}" offset_y="${-0.0368/2}" x="-0.023453" 
+        y="0.031351" z="0.0025"/>
+        
+        <!-- ......................... Motor Driver ........................ -->
+        <link name="driver">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/driver.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="DriverRed"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/driver.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.026"/>
+                <inertia ixx="5.575206798350021e-06" ixy="0.0" ixz="0.0"
+                iyy="5.588291024131272e-06" iyz="0.0"
+                izz="8.062726989147962e-06"/>
+        </inertial>
+    </link>
+    <joint name="driver_joint" type="fixed">
+        <parent link="base_l0_s2"/>
+        <child link="driver"/>
+        <origin xyz="-0.023453 0.031351 0.0125" rpy="0 0 0"/>
+    </joint>
+    <xacro:if value="${gazebo}">
+            <gazebo reference="driver">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+        
+        <!-- ........................ Regulator Support ......................... -->
+        <link name="reg_support">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/regulator_sup.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="PLAWhite"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/regulator_sup.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <mass value="0.010"/>
+                <inertia ixx="2.0760416666666664e-06" ixy="0.0" ixz="0.0"
+                iyy="5.797708333333332e-06" iyz="0.0"
+                izz="3.872083333333333e-06"/>
+            </inertial>
+        </link>
+        <joint name="reg_support_joint" type="fixed">
+            <parent link="base_l0_s2"/>
+            <child link="reg_support"/>
+            <origin xyz="-0.026 -0.0275 0.0025" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="reg_support">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+        
+        <!-- ....................... Regulator ............................... -->
+        <link name="regulator">
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi_2} 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/regulator_2.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="ArduinoBlue"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi_2} 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/regulator_2.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${pi_2} 0 ${-pi_2}"/>
+                <mass value="0.025"/>
+                <inertia ixx="3.4813802083333333e-06" ixy="0.0" ixz="0.0"
+                iyy="9.114713541666667e-06" iyz="0.0"
+                izz="1.1970833333333332e-05"/>
+            </inertial>
+        </link>
+        <joint name="reg_joint" type="fixed">
+            <parent link="reg_support"/>
+            <child link="regulator"/>
+            <origin xyz="-0.0025 0 ${0.06/2 -0.0025}" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="regulator">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:unless>
+        
+        <!-- ......................... Switch ........................... -->
+    <link name="switch">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+            <geometry>
+                <mesh filename="package://orion_description/meshes/switch_3s_15a.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="ArduinoBlue"/>
+        </visual>
+    <collision>
+    <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+    <geometry>
+    <mesh filename="package://orion_description/meshes/switch_3s_15a.stl" 
+        scale="0.001 0.001 0.001"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 0" rpy="${pi_2} 0 ${pi_2}"/>
+        <mass value="0.0586"/>
+        <inertia ixx="2.0657530893410246e-05" ixy="0.0" ixz="0.0"
+                iyy="1.8508864831011573e-05" iyz="0.0"
+                izz="6.875354057755155e-06"/>
+    </inertial>
+    </link>
+    <joint name="switch_joint" type="fixed">
+        <parent link="base_l1_s1"/>
+        <child link="switch"/>
+        <origin xyz="0.035 0.074 -0.015" rpy="0 0 0"/>
+    </joint>
+    <xacro:if value="${gazebo}">
+        <gazebo reference="switch">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:if>
+
+    <!-- ......................... Walls definitions ...................... -->
+    <xacro:complete_lateral_wall id="servo" parent="base_l0_s1" side="1" 
+        x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+        level="0"/>
+
+    <xacro:complete_lateral_wall id="servo" parent="base_l0_s1" side="2" 
+        x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+        level="0"/>
+
+    <xacro:complete_front_wall id="batteries" parent="base_l0_s1" front="1" 
+        x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="0"/>
+
+    <xacro:complete_front_wall id="regulator" parent="base_l0_s2" front="2" 
+        x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="0"/>
+
+    <!-- ///////////////// SECOND FLOOR COMPONENTS /////////////////////// -->
+
+    <xacro:unless value="${simplified}">
+        <!-- ..................... Spacers for esp32 adp ..................... -->
+        <xacro:x4xmetric_spacer id="m3x10" element="esp_adapter" parent="base_l1_s2"
+        offset_x="${0.0577/2}" offset_y="${0.0607/2}" x="0.004" y="0" z="-0.01"/>
+        
+        <!-- .......................... Esp32 Adapter ....................... -->
+        <link name="esp32_adapter">
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32_adp.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="RaspberryGreen"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32_adp.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+                <mass value="0.030"/>
+                <inertia ixx="1.1184306270694732e-05" ixy="0.0" ixz="0.0"
+                iyy="1.021680627069473e-05" iyz="0.0"
+                izz="2.0812499999999994e-05"/>
+            </inertial>
+        </link>
+        <joint name="esp32_adapter_joint" type="fixed">
+            <parent link="base_l1_s2"/>
+            <child link="esp32_adapter"/>
+            <origin xyz="0.004 0 -0.01" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="esp32_adapter">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+        
+        <!-- ....................... ESP32 ....................................... -->
+        <link name="esp32">
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="SoftBlack"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+                <mass value="0.0201"/>
+                <inertia ixx="4.904162034278915e-06" ixy="0.0" ixz="0.0"
+                iyy="1.5830928543782435e-06" iyz="0.0"
+                izz="6.0040505352397235e-06"/>
+            </inertial>
+        </link>
+        <joint name="esp32_joint" type="fixed">
+            <parent link="esp32_adapter"/>
+            <child link="esp32"/>
+            <origin xyz="0.002 0 -0.01" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="esp32">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:unless>
+        
+    <!-- .......................... LIDAR spacers .......................... -->
+    <xacro:x3xmetric_spacer id="m3x10" element="lidar" parent="base_l1_s1" 
+        offset_x="0.0234" offset_y="${0.03132/2}" x="-0.0575" y="0" z="0.0025"/>
+    
+    <!-- ............................ LD19 ................................. -->
+    <link name="ld19">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/ld19.stl"
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="SoftBlack"/>
+    </visual>
+    <collision>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/ld19.stl" 
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+        <mass value="0.047"/>
+        <inertia ixx="1.3696192839509037e-05" ixy="0.0" ixz="0.0"
+                iyy="1.6724159273229613e-05" iyz="0.0"
+                izz="1.981213921926534e-05"/>
+    </inertial>
+    </link>
+    <joint name="ld19_joint" type="fixed">
+        <parent link="base_l1_s1"/>
+        <child link="ld19"/>
+        <origin xyz="${-0.0575} -0.0035 0.0125" rpy="0 0 0"/>
+    </joint>
+    <xacro:if value="${gazebo}">
+        <gazebo reference="ld19">
+            <selfCollide>false</selfCollide>
+            <mu1 value="0.05" />
+            <mu2 value="0.05" />
+        </gazebo>
+    </xacro:if>
+
+    <link name="laser_scan"/>
+    <joint name="laser_joint" type="fixed">
+        <parent link="ld19"/>
+        <child link="laser_scan"/>
+        <origin xyz="0 -0.0025 0.0285" rpy="0 0 0"/>
+    </joint>
+
+    <!-- ......................... LIDAR serial .......................... -->
+    <xacro:unless value="${simplified}">
+        <link name="lidar_serial">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/serial_ld.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="ArduinoBlue"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/serial_ld.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <mass value="0.01"/>
+                <inertia ixx="1.4388020833333332e-06" ixy="0.0" ixz="0.0"
+                iyy="3.713020833333333e-07" iyz="0.0"
+                izz="1.7341666666666667e-06"/>
+            </inertial>
+        </link>
+        <joint name="lidar_serial_joint" type="fixed">
+            <parent link="base_l1_s2"/>
+            <child link="lidar_serial"/>
+            <origin xyz="-0.03 0.025 0.0025" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="lidar_serial">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:unless>
+        
+        <!-- ....................... Servo Definitions ........................ -->
+    <xacro:if value="${servo}">
+        <xacro:servo_mounted parent="base_l1_s2" side="1" x="0.00275" y="0.0765"
+            z="-0.026"/>
+        <xacro:servo_mounted parent="base_l1_s2" side="2" x="0.00275" y="0.0765"
+            z="-0.026"/>
+    </xacro:if>
+
+    <!-- ......................... Wall definitions ........................ -->
+    <xacro:complete_lateral_wall id="llidar" parent="base_l1_s1" side="1" 
+        x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+        level="1"/>
+
+    <xacro:complete_lateral_wall id="llidar" parent="base_l1_s1" side="2" 
+        x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+        level="1"/>
+
+    <xacro:complete_front_wall id="flidar" parent="base_l1_s1" front="1" 
+        x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="1"/>
+
+    <xacro:complete_front_wall id="flidar" parent="base_l1_s2" front="2" 
+        x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="1"/>
+
+    <!-- ////////////////// THIRD FLOOR COMPONENTES ////////////////////// -->
+    <xacro:if value="${rasp == 'rpi4'}">
+        <xacro:speakers_mount parent="base_l2_s2" front="2" side="1" x="-0.0025" 
+            y="0.0685" z= "0.0025"/>
+        <xacro:speakers_mount parent="base_l2_s2" front="2" side="2" x="-0.0025"
+            y="0.0685" z= "0.0025"/>
+
+        <xacro:complete_lateral_wall id="curve_speaker" parent="base_l2_s1" side="1" 
+            x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+        <xacro:complete_lateral_wall id="curve_speaker" parent="base_l2_s1" side="2" 
+            x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+        <xacro:complete_front_wall id="fdefault" parent="base_l2_s2" front="2" 
+            x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="2"/>
+    </xacro:if>
+
+    <xacro:if value="${rasp == 'rpi5'}">
+        <!-- ....................... Stereo Speaker ............................. -->
+        <link name="stereo">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                <mesh filename="package://orion_description/meshes/speaker_stereo.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="SoftBlack"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                <mesh filename="package://orion_description/meshes/speaker_stereo.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <mass value="0.0891"/>
+                <inertia ixx="2.2075679430880743e-05" ixy="0.0" ixz="0.0"
+                        iyy="6.239156111823016e-05" iyz="0.0"
+                        izz="5.4111982712956106e-05"/>
+            </inertial>
+        </link>
+        <joint name="stereo_joint" type="fixed">
+            <parent link="base_l2_s2"/>
+            <child link="stereo"/>
+            <origin xyz="-0.02 0 0.025" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="stereo">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+
+        <!-- ........................ Wall definitions ...................... -->
+        <xacro:complete_lateral_wall id="curve" parent="base_l2_s1" side="1" 
+            x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+        <xacro:complete_lateral_wall id="curve" parent="base_l2_s1" side="2" 
+            x="${-0.115/2}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+        <xacro:complete_front_wall id="stereo" parent="base_l2_s2" front="2" 
+            x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="2"/>
+    </xacro:if>
+    <!-- ////////////////// FOURTH FLOOR COMPONENTES ////////////////////// -->
+
+    <xacro:unless value="${simplified}">
+        <xacro:x4xmetric_spacer id="m3x10" element="${rasp}" parent="base_l3_s2"
+        offset_x="${0.049/2}" offset_y="${0.058/2}" x="0" y="0.0435" z="0.0025"/>
+        
+        <!-- Link Rasberry Pi -->
+        <link name="${rasp}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/${rasp}.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="RaspberryGreen"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/${rasp}.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <mass value="0.046"/>
+                <inertia ixx="1.3894925828259282e-05" ixy="0.0" ixz="0.0"
+                iyy="3.130518601304774e-05" iyz="0.0"
+                izz="4.278463267464035e-05"/>
+            </inertial>
+        </link>
+        <joint name="${rasp}_joint" type="fixed">
+            <parent link="base_l3_s2"/>
+            <child link="${rasp}"/>
+            <origin xyz="0 0.0335 0.0125" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="${rasp}">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+
+        <!-- .......................... Microphone .................................. -->
+        <link name="microphone">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/microphone.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="SoftBlack"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/microphone.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+                <mass value="0.020"/>
+                <inertia ixx="1.0875937499999998e-05" ixy="0.0" ixz="0.0"
+                iyy="1.6950937499999996e-05" iyz="0.0"
+                izz="7.154999999999999e-06"/>
+            </inertial>
+        </link>
+        <joint name="microphone_joint" type="fixed">
+            <parent link="base_l3_s1"/>
+            <child link="microphone"/>
+            <origin xyz="-0.0275 0.0 0.06" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="microphone">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:unless>
+        
+    <!-- ........................ Touch sensors ........................ -->
+    <xacro:touch_sensor x="0.005" y="0.1075" z="0.0825" upper="0" side="1" 
+        parent="base_l2_s2" prefix="2"/>
+    <xacro:touch_sensor x="0.005" y="-0.1075" z="0.0825" upper="0" side="2" 
+        parent="base_l2_s2" prefix="2"/>
+    <xacro:touch_sensor x="0.0425" y="0.0335" z="0.0025" upper="1" side="1" 
+        parent="base_l4_s2" prefix="4"/>
+    <xacro:touch_sensor x="0.0425" y="-0.0335" z="0.0025" upper="1" side="2" 
+        parent="base_l4_s2" prefix="4"/>
+
+    <!-- ......................... Walls definitions ............................ -->
+    <xacro:complete_lateral_wall id="screen" parent="base_l3_s1" side="1" 
+            x="${-0.115/2 + 0.005}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+    <xacro:complete_lateral_wall id="screen" parent="base_l3_s1" side="2" 
+            x="${-0.115/2 + 0.005}" y="${0.21/2 + 0.0005}" z="${0.082/2 + 0.0025/2}"
+            level="2"/>
+
+    <xacro:complete_front_wall id="rpi" parent="base_l3_s2" front="2" 
+        x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="3"/>
+
+    <xacro:unless value="${simplified}">
+        <!-- ............................ 2° ESP32 ................................ -->
+        
+        <!-- ..................... Spacers for esp32 adp ..................... -->
+        <xacro:x4xmetric_spacer id="m3x10" element="esp_2_adapter" parent="base_l3_s1"
+        offset_x="${0.0577/2}" offset_y="${0.0607/2}" x="0.004" y="0" z="0.0025"/>
+        
+        <!-- .......................... Esp32 Adapter ....................... -->
+        <link name="esp32_2_adapter">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32_adp.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="RaspberryGreen"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32_adp.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.030"/>
+                <inertia ixx="1.1184306270694732e-05" ixy="0.0" ixz="0.0"
+                iyy="1.021680627069473e-05" iyz="0.0"
+                izz="2.0812499999999994e-05"/>
+            </inertial>
+        </link>
+        <joint name="esp32_2_adapter_joint" type="fixed">
+            <parent link="base_l3_s1"/>
+            <child link="esp32_2_adapter"/>
+            <origin xyz="0.004 0 0.0125" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="esp32_adapter">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+        
+        <!-- ....................... ESP32 ....................................... -->
+        <link name="esp32_2">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32.stl"
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="SoftBlack"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/esp32.stl" 
+                    scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
+                <mass value="0.0201"/>
+                <inertia ixx="4.904162034278915e-06" ixy="0.0" ixz="0.0"
+                iyy="1.5830928543782435e-06" iyz="0.0"
+                izz="6.0040505352397235e-06"/>
+            </inertial>
+        </link>
+        <joint name="esp32_2_joint" type="fixed">
+            <parent link="esp32_2_adapter"/>
+            <child link="esp32_2"/>
+            <origin xyz="0.002 0 0.01" rpy="0 0 0"/>
+        </joint>
+        <xacro:if value="${gazebo}">
+            <gazebo reference="esp32">
+                <mu1>1.0</mu1>
+                <mu2>1.0</mu2>
+            </gazebo>
+        </xacro:if>
+    </xacro:unless>
+
+    <!-- .......................... Screen Sup ................................ -->
+    <link name="screen_sup">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/screen_sup.stl"
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+        <xacro:if value="${color == 'mdf'}">
+                <material name="MDF"/>
+            </xacro:if>
+            <xacro:if value="${color == 'transparent'}">
+                <material name="TransparentBlack"/>
+            </xacro:if>
+            <xacro:if value="${color == 'pla'}">
+                <material name="PLAWhite"/>
+            </xacro:if>
+    </visual>
+    <collision>
+        <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/screen_sup.stl" 
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+        <mass value="0.064"/>
+        <inertia ixx="0.00010683527996134758" ixy="0.0" ixz="0.0"
+                iyy="0.0002715" iyz="0.0"
+                izz="0.0003057352799613475"/>
+    </inertial>
+    </link>
+    <joint name="screen_sup_joint" type="fixed">
+        <parent link="base_l3_s1"/>
+        <child link="screen_sup"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <xacro:if value="${gazebo}">
+        <gazebo reference="screen_sup">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:if>
+
+    <!-- ...................... Screen ................................. -->
+    <link name="screen">
+    <visual>
+        <origin xyz="0 0 0" rpy="${pi_4} 0 ${pi_2}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/screen_il9225.stl"
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="DriverRed"/>
+    </visual>
+    <collision>
+        <origin xyz="0 0 0" rpy="${pi_4} 0 ${pi_2}"/>
+        <geometry>
+        <mesh filename="package://orion_description/meshes/screen_il9225.stl" 
+            scale="0.001 0.001 0.001"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 0" rpy="${pi_4} 0 ${pi_2}"/>
+        <mass value="0.0549"/>
+        <inertia ixx="7.3348232666702275e-06" ixy="0.0" ixz="0.0"
+                iyy="1.847275287121583e-05" iyz="0.0"
+                izz="2.4489976137886056e-05"/>
+    </inertial>
+    </link>
+    <joint name="screen_joint" type="fixed">
+        <parent link="screen_sup"/>
+        <child link="screen"/>
+        <origin xyz="0.0275 0 0.0525" rpy="0 0 0"/>
+    </joint>
+    <xacro:if value="${gazebo}">
+        <gazebo reference="screen">
+            <mu1>1.0</mu1>
+            <mu2>1.0</mu2>
+        </gazebo>
+    </xacro:if>
+
+</robot>

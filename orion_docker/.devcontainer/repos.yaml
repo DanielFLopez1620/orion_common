@@ -1,0 +1,10 @@
+repositories:
+  g_mov:
+    type: git
+    url: https://github.com/DanielFLopez1620/G-Mov_Project.git
+    version: dev
+
+  orion_common:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_common.git
+    version: dev

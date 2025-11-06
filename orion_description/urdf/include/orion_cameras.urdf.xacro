@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="level_cam" value="base_l2_s1"/>
+
+    <!--  //////////////////////// ASTRA_S CAM ///////////////////////////// -->
+    <xacro:if value="${camera == 'astra_s'}">
+        <!-- ....................... Astra S ............................... -->
+        <link name="astra">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/astra_s.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/astra_s.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.310"/>
+            <inertia ixx="0.0001453125" ixy="0.0" ixz="0.0"
+                    iyy="0.0007542674781328592" iyz="0.0"
+                    izz="0.0007949549781328593"/>
+        </inertial>
+        </link>
+        <joint name="astra_joint" type="fixed">
+            <parent link="${level_cam}"/>
+            <child link="astra"/>
+            <origin xyz="0.023 0 0.0325" rpy="0 0 0"/>
+        </joint>
+        <!-- ....................... Camera sensor defs ..................... -->
+        <xacro:camera_sensor x="0.02" y="0" z="0" R="${-pi_2}" P="0" Y="${-pi_2}"
+          parent="astra"/>
+    </xacro:if>
+    <!--  //////////////////////// OS30A CAM ///////////////////////////// -->
+    <xacro:if value="${camera == 'os30a'}">
+        <!-- ..................... OS30A Support .......................... -->
+        <link name="os30a_sup">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/os30a_sup.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/os30a_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.006"/>
+            <inertia ixx="5.791913396592736e-07" ixy="0.0" ixz="0.0"
+                    iyy="1.992091044590605e-06" iyz="0.0"
+                    izz="1.6121002950686689e-06"/>
+        </inertial>
+        </link>
+        <joint name="os30a_sup_joint" type="fixed">
+            <parent link="${level_cam}"/>
+            <child link="os30a_sup"/>
+            <origin xyz="${0.0555 - 0.0285} 0 0.0025" rpy="0 0 0"/>
+        </joint>
+
+        <!-- .................... OS30A ............................. -->
+        <link name="os30a">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/os30a.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="MetalGray"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/os30a.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 ${pi_2}"/>
+            <mass value="0.096"/>
+            <inertia ixx="9.999999999999999e-06" ixy="0.0" ixz="0.0"
+                    iyy="6.979999999999999e-05" iyz="0.0"
+                    izz="6.979999999999999e-05"/>
+        </inertial>
+        </link>
+        <joint name="os30a_joint" type="fixed">
+            <parent link="os30a_sup"/>
+            <child link="os30a"/>
+            <origin xyz="0.025 0 0.0145" rpy="0 0 0"/>
+        </joint>
+
+        <!-- ....................... Camera sensor defs ..................... -->
+        <xacro:camera_sensor x="0" y="0" z="0" R="${-pi_2}" P="0" Y="${-pi_2}"
+          parent="os30a"/>
+    </xacro:if>
+
+    <!--  //////////////////////// A010 CAM ///////////////////////////// -->
+    <xacro:if value="${camera == 'a010'}">
+        <!-- ................... Maixsense Support ......................... -->
+        <link name="maixsense_sup">
+        <visual>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/maixsense_sup.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/maixsense_sup.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${pi} 0 ${-pi_2}"/>
+            <mass value="0.002"/>
+            <inertia ixx="6.15e-08" ixy="0.0" ixz="0.0"
+                    iyy="1.4166666666666665e-07" iyz="0.0"
+                    izz="1.2816666666666664e-07"/>
+        </inertial>
+        </link>
+        <joint name="maixsense_sup_joint" type="fixed">
+            <parent link="base_l3_s1"/>
+            <child link="maixsense_sup"/>
+            <origin xyz="0.038945 -0.030451 -0.010" rpy="0 0 0"/>
+        </joint>
+
+        <!-- ................................ Maixsense ............................ -->
+        <link name="maixsense">
+        <visual>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/maixsense.stl"
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+            <material name="SoftBlack"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
+            <geometry>
+            <mesh filename="package://orion_description/meshes/maixsense.stl" 
+                scale="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="${-pi_2} 0 ${-pi_2}"/>
+            <mass value="0.01"/>
+            <inertia ixx="1.4708639141126087e-06" ixy="0.0" ixz="0.0"
+                    iyy="7.106770833333332e-07" iyz="0.0"
+                    izz="1.997790997445942e-06"/>
+        </inertial>
+        </link>
+        <joint name="maixsense_joint" type="fixed">
+            <parent link="maixsense_sup"/>
+            <child link="maixsense"/>
+            <origin xyz="0 0 -0.0205" rpy="0 0 0"/>
+        </joint>
+        <!-- ......................... Usage of GMov ...................................  -->
+        <xacro:if value="${g_mov}">
+            <xacro:include filename="$(find g_mov_description)/urdf/g_mov_macros.urdf.xacro"/>
+            <xacro:g_mov_assem parent="${level_cam}" spacer="m3x10" offset="${0.033/2}" 
+                x="0.013825" y="0.035" z="0.0025" joint_prefix="g_mov"/>
+        </xacro:if>
+        <!-- ......................... Camera sensors links ............................ -->
+        <xacro:camera_sensor x="0.011" y="0" z="0.0025" R="${-pi_2}" P="0" Y="${-pi_2}"
+          parent="maixsense"/>
+    </xacro:if>
+</robot>

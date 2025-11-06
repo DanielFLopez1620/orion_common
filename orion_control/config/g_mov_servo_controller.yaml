@@ -1,0 +1,7 @@
+g_mov_servo_controller:
+  ros__parameters:
+    type: forward_command_controller/ForwardCommandController
+    joints:
+      - g_mov_servo_conn_joint
+    interface_name: position
+    update_rate: 20 #Hz
