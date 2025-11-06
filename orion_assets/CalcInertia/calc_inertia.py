@@ -27,48 +27,44 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org>
 
 From: https://github.com/gstavrinos/calc-inertia
+Modified by: DanielFLopez1620
 """
 import sys
-import stl
-#(sudo pip install numpy-stl)
+from stl import mesh
 
-# Command line params:
+# Command line args:
 # 1: STL file
 # 2: Mass
 # 3: Scale
+# Make sure to have updated numpy stl
+# pip install --upgrade numpy-stl
 
-def getDimensions(model):
-    minx = maxx = miny = maxy = minz = maxz = None
-    for p in model.points:
-        if minx is None:
-            minx = p[stl.Dimension.X]
-            maxx = p[stl.Dimension.X]
-            miny = p[stl.Dimension.Y]
-            maxy = p[stl.Dimension.Y]
-            minz = p[stl.Dimension.Z]
-            maxz = p[stl.Dimension.Z]
-        else:
-            maxx = max(p[stl.Dimension.X], maxx)
-            minx = min(p[stl.Dimension.X], minx)
-            maxy = max(p[stl.Dimension.Y], maxy)
-            miny = min(p[stl.Dimension.Y], miny)
-            maxz = max(p[stl.Dimension.Z], maxz)
-            minz = min(p[stl.Dimension.Z], minz)
-    return maxx - minx, maxy - miny, maxz - minz
+def get_dimensions(model):
+    min_ = model.vectors.min(axis=(0, 1))
+    max_ = model.vectors.max(axis=(0, 1))
+    return tuple(max_ - min_)
 
-
-# Based on https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
-def getInertia(x, y, z, m, s):
-    xx = 1./12 * m * (y**2 + z**2) * s
-    yy = 1./12 * m * (x**2 + z**2) * s
-    zz = 1./12 * m * (x**2 + y**2) * s
+def get_inertia(x, y, z, m, scale):
+    xx = (1.0 / 12.0) * m * (y**2 + z**2) * scale
+    yy = (1.0 / 12.0) * m * (x**2 + z**2) * scale
+    zz = (1.0 / 12.0) * m * (x**2 + y**2) * scale
     return xx, yy, zz
 
 if __name__ == '__main__':
-    model = stl.mesh.Mesh.from_file(sys.argv[1])
-    m = float(sys.argv[2])
-    scale = float(sys.argv[3])
+    if len(sys.argv) != 4:
+        print("Usage: python script.py model.stl mass scale")
+        sys.exit(1)
 
-    x, y, z = getDimensions(model)
+    try:
+        model = mesh.Mesh.from_file(sys.argv[1])
+        m = float(sys.argv[2])
+        scale = float(sys.argv[3])
 
-    print("<inertia  ixx=\"%s\" ixy=\"0\" ixz=\"0\" iyy=\"%s\" iyz=\"0\" izz=\"%s\" />" % (getInertia(x, y, z, m, scale)))
+        x, y, z = get_dimensions(model)
+        ixx, iyy, izz = get_inertia(x, y, z, m, scale)
+
+        print(f'<inertia ixx="{ixx}" ixy="0" ixz="0" iyy="{iyy}" iyz="0" izz="{izz}" />')
+
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)

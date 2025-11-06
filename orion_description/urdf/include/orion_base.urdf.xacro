@@ -6,20 +6,28 @@
     <!-- ////////////////////////// BASE LINK //////////////////////////////-->
     <link name="base_link"/>
     
+    <!-- .................... Middle frame ......................... -->
+    <link name="middle_base"/>
+    <joint name="to_middle_base" type="fixed">
+        <origin xyz="-0.05 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="middle_base"/>
+    </joint>
+
     <!-- ///////////////////////// PROPERTIES //////////////////////////////-->
     <xacro:property name="level_height" value="0.08"/>
     <xacro:property name="thickness" value="0.0025"/>
 
     <!-- /////////////////////////// LEVELS ///////////////////////////////-->
-    <xacro:com_base level="0" parent="base_link" x="0" y="0"
+    <xacro:com_base level="0" parent="middle_base" x="0" y="0"
         z="${level_height*0+ thickness*0}"/>
-    <xacro:com_base level="1" parent="base_link" x="0" y="0" 
+    <xacro:com_base level="1" parent="middle_base" x="0" y="0" 
         z="${level_height*1 + thickness*1}"/>
-    <xacro:com_base level="2" parent="base_link" x="0" y="0" 
+    <xacro:com_base level="2" parent="middle_base" x="0" y="0" 
         z="${level_height*2 + thickness*2}"/>
-    <xacro:com_base level="3" parent="base_link" x="0" y="0" 
+    <xacro:com_base level="3" parent="middle_base" x="0" y="0" 
         z="${level_height*3 + thickness*3}"/>
-    <xacro:half_base level="4" side="2" parent="base_link" x="0" y="0"
+    <xacro:half_base level="4" side="2" parent="middle_base" x="0" y="0"
         z="${level_height*4 + thickness*4}"/>
 
     <!-- /////////////////////// LEVEL's SPACERS//////////////////////////-->
@@ -45,6 +53,8 @@
         z="-0.0225"/>
     <xacro:motor_dc front="1" side="2" x="-0.0025" y="${0.05418+0.036/2}"
         z="-0.0225"/>
+
+    
 
     <!-- /////////////////////// CASTER WHEEL //////////////////////////-->
     <xacro:x4xmetric_spacer id="m4x17" element="caster" parent="base_l0_s2"

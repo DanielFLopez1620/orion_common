@@ -131,9 +131,9 @@
 
     <!-- ...................... Complete base ............................ -->
     <xacro:macro name="com_base" params="level parent x y z">
-        <xacro:half_base level="${level}" side="1" parent="base_link" x="${x}"
+        <xacro:half_base level="${level}" side="1" parent="middle_base" x="${x}"
             y="${y}" z="${z}"/>
-        <xacro:half_base level="${level}" side="2" parent="base_link" x="${x}"
+        <xacro:half_base level="${level}" side="2" parent="middle_base" x="${x}"
             y="${y}" z="${z}"/>
     </xacro:macro>
 
@@ -250,6 +250,12 @@
             <axis xyz="0.0 0.0 1.0"/>
             <parent link="motor_support_${front}${side}"/>
             <child link="coupling_${front}${side}"/>
+            <xacro:if value="${motor == 1000}">
+                <limit effort="0.01079" velocity="104.97"/>
+            </xacro:if>
+            <xacro:if value="${motor == 100}">
+                <limit effort="0.08336" velocity="10.47"/>
+            </xacro:if>
             <origin xyz="0 ${(0.01120 + 0.000325)*muls} 0" rpy="${-pi_2*muls+orin} 0 0"/>
         </joint>
         <gazebo reference="coupling_${front}${side}">
@@ -305,8 +311,9 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 ${pi_2*muls} 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/neumatic.stl" 
-                scale="0.001 0.001 0.001"/>
+            <sphere radius="0.033675"/>
+            <!--mesh filename="package://orion_description/meshes/neumatic.stl" 
+                scale="0.001 0.001 0.001"/-->
             </geometry>
         </collision>
         <inertial>
@@ -324,14 +331,17 @@
         </joint>
         <gazebo reference="neumatic_${front}${side}">
             <mu1>1.0</mu1>
-            <mu2>1.0</mu2>
+            <mu2>0.8</mu2>
         </gazebo>
 
     </xacro:macro>
 
     <!--////////////////////////// CASTER WHEEL ////////////////////////////-->
-    <!--xacro:property name="caster_type" value="continuous"/-->
-    <xacro:property name="caster_type" value="continuous"/>
+    <xacro:property name="caster_type" value="fixed"/>
+    
+    <xacro:if value="${gazebo}">
+        <xacro:property name="caster_type" value="continuous"/>
+    </xacro:if>
 
     <!-- ......................... Macro for caster ....................... -->
     <xacro:macro name="caster_wheel" params="parent front x y z">
@@ -389,7 +399,7 @@
         </collision>
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
-            <mass value="0.01633"/>
+            <mass value="0.001"/>
             <inertia ixx="1.6321007868011535e-06" ixy="0.0" ixz="0.0"
                     iyy="1.3901075509910613e-06" iyz="0.0"
                     izz="1.644364587792215e-06"/>
@@ -400,10 +410,13 @@
             <parent link="caster_base_${front}"/>
             <child link="caster_middle_${front}"/>
             <origin xyz="0 0 -0.002" rpy="${pi} 0 0"/>
+            <dynamics damping="0.05" friction="0.0"/>
         </joint>
         <gazebo reference="caster_middle_${front}">
-            <mu1>1.0</mu1>
-            <mu2>1.0</mu2>
+            <mu1>0.01</mu1>
+            <mu2>0.01</mu2>
+            <kp>100000.0</kp>
+            <kd>10.0</kd>
         </gazebo>
 
         <!-- Caster wheel definition-->
@@ -425,7 +438,7 @@
         </collision>
         <inertial>
             <origin xyz="0 0 0" rpy="${pi_2} 0 0"/>
-            <mass value="0.00794"/>
+            <mass value="0.001"/>
             <inertia ixx="5.723473258925721e-07" ixy="0.0" ixz="0.0"
                     iyy="8.268436933141506e-07" iyz="0.0"
                     izz="5.724272007549117e-07"/>
@@ -436,10 +449,13 @@
             <parent link="caster_middle_${front}"/>
             <child link="caster_wheel_${front}"/>
             <origin xyz="-0.0108 0 0.0185" rpy="${pi_2} 0 0"/>
+            <dynamics damping="0.05" friction="0.0"/>
         </joint>
         <gazebo reference="caster_wheel_${front}">
-            <mu1>0.001</mu1>
-            <mu2>0.001</mu2>
+            <mu1>0.01</mu1>
+            <mu2>0.01</mu2>
+            <kp>100000.0</kp>
+            <kd>10.0</kd>
         </gazebo>
     </xacro:macro>
 
@@ -648,7 +664,7 @@
             <parent link="servo_${side}"/>
             <child link="servo_conn_${side}"/>
             <origin xyz="0.01 ${0.0406*inv} 0" rpy="${-pi_2*inv} 0 0"/>
-            <limit lower="${-pi_2}" upper="${pi_2}" effort="0.92" velocity="6.0"/>
+            <limit lower="${-pi/3}" upper="${pi/3}" effort="1.08" velocity="5.24"/>
             <dynamics damping="0.05" friction="0.002"/>
         </joint>
         <gazebo reference="servo_conn_${side}">

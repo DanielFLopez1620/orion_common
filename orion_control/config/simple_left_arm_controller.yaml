@@ -4,4 +4,4 @@ simple_left_arm_controller:
     joints:
       - servo_conn1_joint
     interface_name: position
-    update_rate: 30
+    update_rate: 20 # Hz

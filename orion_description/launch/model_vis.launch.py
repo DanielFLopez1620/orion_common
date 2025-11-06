@@ -28,14 +28,17 @@ ARGS = [
         choices=['true', 'false']),
     DeclareLaunchArgument('simplified', default_value='false',
         description="To ignore no-functional components in the URDF description",
-        choices=['true', 'false'])
+        choices=['true', 'false']),
+    DeclareLaunchArgument('motor', default_value='100',
+        description="Select your  motor nominal speed (rpm) at 12V",
+        choices=['1000', '100']),
 ]
 
 # //////////////////////////// LAUNCH DEFINITION //////////////////////////////
 def generate_launch_description():
     # Generate launch description
     ld = LaunchDescription(ARGS)
-    
+
     # Define paths
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')
@@ -57,7 +60,9 @@ def generate_launch_description():
                     ' rasp:=', LaunchConfiguration('rasp'),
                     ' gazebo:=false',
                     ' ros2_control:=', LaunchConfiguration('ros2_control'),
-                    ' simplified:=', LaunchConfiguration('simplified')
+                    ' simplified:=', LaunchConfiguration('simplified'),
+                    ' motor:=', LaunchConfiguration('motor'),
+                    ' ctl_type:=micro_ros'
                 ])
             }]
         )

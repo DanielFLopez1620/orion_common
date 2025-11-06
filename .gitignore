@@ -2,7 +2,7 @@ devel/
 logs/
 build/
 bin/
-lib/
+# lib/ # Omitted for now due to PlatformIO Workflow
 msg_gen/
 srv_gen/
 msg/*Action.msg

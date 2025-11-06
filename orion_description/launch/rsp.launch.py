@@ -24,14 +24,20 @@ ARGS = [
     DeclareLaunchArgument('rasp', default_value='rpi5',
         description="Select 4 for Raspberry Pi 4B, or 5 for Raspberry Pi 5",
         choices=['rpi4', 'rpi5']),
-    DeclareLaunchArgument('gazebo',default_value='true',
-        description="True for using gazebo tags, false otherwise",
-        choices=['true', 'false']),
     DeclareLaunchArgument('ros2_control', default_value='false',
         description="Whether to use ros2_control tags for motor controllers",
         choices=['true', 'false']),
     DeclareLaunchArgument('simplified', default_value='false',
         description="To ignore no-functional components in the URDF description",
+        choices=['true', 'false']),
+    DeclareLaunchArgument('motor', default_value='100',
+        description="Select your  motor nominal speed (rpm) at 12V",
+        choices=['1000', '100']),
+    DeclareLaunchArgument('ctl_type', default_value='micro_ros',
+        description="Select controller communication option",
+        choices=['serial', 'micro_ros']),
+    DeclareLaunchArgument('gazebo', default_value='false',
+        description="To use GZ configurations",
         choices=['true', 'false'])
 ]
 
@@ -61,18 +67,14 @@ def generate_robot_description(context):
         'rasp': get_argument(context, "rasp"),
         'gazebo': get_argument(context, "gazebo"),
         'ros2_control': get_argument(context, "ros2_control"),
-        'simplified': get_argument(context, 'simplified')
+        'simplified': get_argument(context, 'simplified'),
+        'motor': get_argument(context, 'motor'),
+        'ctl_type':get_argument(context, 'ctl_type')
     }
 
     # Obtaining robot description and making the substitution
     robot_description_config = xacro.process_file(xacro_file, mappings=mappings)
     robot_desc = robot_description_config.toprettyxml(indent='  ')
-    robot_desc = robot_desc.replace(
-        'package://orion_description/', f'file://{pkg_description}/'
-    )
-    robot_desc = robot_desc.replace(
-        'package://g_mov_description/', f'file://{pkg_gmov}/'
-    )
 
     # Launch node for robot state publisher
     rsp_node = Node(
@@ -96,5 +98,5 @@ def generate_launch_description():
 
     # Add robot description with context
     ld.add_action(OpaqueFunction(function=generate_robot_description))
-    
+
     return ld

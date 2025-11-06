@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>orion_utils_py</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="dfelipe.lopez@gmail.com">dan1620</maintainer>
-  <license>TODO: License declaration</license>
+  <version>0.3.0</version>
+  <description>Simple Python Utilities for the ORION robot</description>
+  <maintainer email="dfelipe.lopez@gmail.com">DanielFLopez1620</maintainer>
+  <license>BSD-3-Clause</license>
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
