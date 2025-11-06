@@ -11,16 +11,25 @@
 // /////////////////////// CLASS DEFINTIONS ///////////////////////////////
 namespace diff
 {
+    void MotorDriver::safe_init()
+    {
+        pinMode(this->enable_pin_, OUTPUT);
+        analogWrite(this->enable_pin_, 0);
+
+        pinMode(this->forw_pin_, OUTPUT);
+        pinMode(this->back_pin_, OUTPUT);
+
+        digitalWrite(this->forw_pin_, LOW);
+        digitalWrite(this->back_pin_, LOW);
+    }
+
     /**
-     * Initialize motor object.
-     * Set up the forward, backward and PWM pin of a driver, which aims to
-     * the control of a single DC motor.
+     * Initialize motor object in a secure way.
      */
     void MotorDriver::begin()
     {
-        pinMode(this->enable_pin_, OUTPUT);
-        pinMode(this->forw_pin_, OUTPUT);
-        pinMode(this->back_pin_, OUTPUT);
+        this->safe_init();
+        this->stop();
 
     } // void MotorDriver::begin()
 
@@ -66,5 +75,12 @@ namespace diff
         }
 
     } // void MotorDriver::set_speed()
+
+    void MotorDriver::stop()
+    {
+        analogWrite(this->enable_pin_, 0);
+        digitalWrite(this->forw_pin_, LOW);
+        digitalWrite(this->back_pin_, LOW);
+    }
 
 } // namespace diff

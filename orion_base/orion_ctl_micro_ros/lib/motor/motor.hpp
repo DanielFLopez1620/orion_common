@@ -18,7 +18,7 @@ namespace diff
         /**
          * User defined constructor that set up the pins of the driver where
          * the motor is connected.
-         * 
+         *
          * @param enable PWM Pin
          * @param forward Forward Pin
          * @param backward Backward Pin
@@ -29,6 +29,8 @@ namespace diff
 
         void begin();
         void set_speed(int speed);
+        void stop();
+        void safe_init();
     };
 }
 

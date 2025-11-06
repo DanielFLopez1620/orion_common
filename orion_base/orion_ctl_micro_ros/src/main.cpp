@@ -25,6 +25,7 @@ void IRAM_ATTR read_right_enc();
 void adjust_motors_speed();
 void set_motor_speed(int left_speed, int right_speed);
 void error_loop();
+void safe_startup_pins();
 void safe_startup();
 void timer_diff_callback(rcl_timer_t * timer, int64_t last_call_tm);
 void timer_fwd_callback(rcl_timer_t * timer, int64_t last_call_tm);
@@ -60,7 +61,7 @@ std_msgs__msg__Int64MultiArray cmd_msg_speed;
 
 bool received_motor_cmd = false;
 unsigned long last_cmd_time = 0;
-const unsigned long cmd_timeout_ms = 1000; // 1 segundo
+const unsigned long cmd_timeout_ms = 1000;
 
 diff::MotorDriver motor_left(
     diff::HARDWARE::ML_EN, diff::HARDWARE::ML_FORW, diff::HARDWARE::ML_BACW);
@@ -83,8 +84,13 @@ fwd::ServoMotor servo_right(max_servo_pos, min_servo_pos, fwd::HARDWARE::SERVO_R
 // ---- SETUP ----
 void setup()
 {
+    safe_startup_pins();
+    motor_left.safe_init();
+    motor_right.safe_init();
+
     Serial.begin(115200);
     set_microros_serial_transports(Serial);
+
     delay(2000);
 
     allocator = rcl_get_default_allocator();
@@ -93,6 +99,8 @@ void setup()
     rcl_ret_t ret;
     do {
         ret = rclc_support_init(&support, 0, NULL, &allocator);
+        motor_left.stop();
+        motor_right.stop();
         if (ret != RCL_RET_OK) {
             delay(500);
         }
@@ -128,10 +136,16 @@ void setup()
 
     motor_left.begin();
     motor_right.begin();
+    pid_left.disable();
+    pid_right.disable();
+    pid_left.setSetpoint(0);
+    pid_right.setSetpoint(0);
+
     enc_left.begin();
     enc_right.begin();
     servo_left.begin();
     servo_right.begin();
+
 
     attachInterrupt(diff::HARDWARE::ML_ENCA, &read_left_enc, CHANGE);
     attachInterrupt(diff::HARDWARE::MR_ENCA, &read_right_enc, CHANGE);
@@ -171,6 +185,28 @@ void safe_startup() {
 
     delay(500);
 }
+
+void safe_startup_pins()
+{
+    pinMode(diff::HARDWARE::ML_FORW, OUTPUT);
+    pinMode(diff::HARDWARE::ML_BACW, OUTPUT);
+    pinMode(diff::HARDWARE::MR_FORW, OUTPUT);
+    pinMode(diff::HARDWARE::MR_BACW, OUTPUT);
+    pinMode(diff::HARDWARE::ML_EN, OUTPUT);
+    pinMode(diff::HARDWARE::MR_EN, OUTPUT);
+    pinMode(fwd::HARDWARE::SERVO_LEFT, OUTPUT);
+    pinMode(fwd::HARDWARE::SERVO_RIGHT, OUTPUT);
+
+    digitalWrite(diff::HARDWARE::ML_EN, LOW);
+    digitalWrite(diff::HARDWARE::MR_EN, LOW);
+    digitalWrite(diff::HARDWARE::ML_FORW, LOW);
+    digitalWrite(diff::HARDWARE::ML_BACW, LOW);
+    digitalWrite(diff::HARDWARE::MR_FORW, LOW);
+    digitalWrite(diff::HARDWARE::MR_BACW, LOW);
+    digitalWrite(fwd::HARDWARE::SERVO_LEFT, LOW);
+    digitalWrite(fwd::HARDWARE::SERVO_RIGHT, LOW);
+}
+
 
 void IRAM_ATTR read_left_enc() { enc_left.readEnc(); }
 void IRAM_ATTR read_right_enc() { enc_right.readEnc(); }
@@ -230,6 +266,11 @@ void timer_diff_callback(rcl_timer_t * timer, int64_t last_call_tm)
 void cmd_motor_callback(const void *msgin)
 {
     const std_msgs__msg__Int64MultiArray * msg = (const std_msgs__msg__Int64MultiArray *) msgin;
+
+    if (msg->data.size != 2) {
+        return;
+    }
+
     received_motor_cmd = true;
     last_cmd_time = millis();
     set_motor_speed(msg->data.data[0], msg->data.data[1]);
