@@ -209,7 +209,7 @@ def generate_launch_description():
     orion_chat_launch_path = os.path.join(
         get_package_share_directory('orion_chat'),
         'launch',
-        'orion_launch.py'
+        'orion_robot_launch.py'
     )
 
     ld = LaunchDescription(ARGS)
@@ -292,8 +292,14 @@ def generate_launch_description():
     ld.add_action(OpaqueFunction(function=setup_lidar))
 
     # To enable IA/TTS/STT/LLM functionalities
-    #ld.add_action(IncludeLaunchDescription(
-    #    PythonLaunchDescriptionSource(orion_chat_launch_path)
-    #))
+    ld.add_action(IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(orion_chat_launch_path)
+    ))
+
+    ld.add_action(Node(
+        package='orion_chat',
+        executable='audio_recorder',
+        output="screen",
+    ))
 
     return ld

@@ -102,6 +102,7 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
 
     ~~~bash
     git clone -b teatro https://github.com/Tesis-ORION/orion_chat.git
+    git clone https://github.com/Tesis-ORION/audio_messages.git
     cd orion_chat
     ./install_apt.sh
     pip install -r requirements.txt --break-system-packages
