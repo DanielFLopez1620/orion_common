@@ -8,13 +8,17 @@ This repository contains essential packages for the **O**pen-source **R**obot fo
 
 **Keywords:** ROS 2, Differential Robot, HRI, ROS 2 Jazzy, Low-Cost Robotics.
 
+> Note: This is a fork of the original version, which aims to check for updates as some time has passed by and also work on some pending bugs or functionalities. This may depend on my free time, so not sure how frequent the changes would be.
+
 ---
 
 ## 📝 License
 
 The source code is released under a [BSD 3-Clause license](/LICENSE).
 
-**Team**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
+**Originally developed by**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
+
+**Forked by:** [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620)
 
 The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **Jazzy** distribution.
 
