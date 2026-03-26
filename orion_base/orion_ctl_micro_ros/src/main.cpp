@@ -243,8 +243,8 @@ void set_motor_speed(int left_speed, int right_speed)
         pid_right.enable();
     }
 
-    pid_left.setSetpoint(left_speed / diff::ROBOT_CONST::PID_RATE);
-    pid_right.setSetpoint(right_speed / diff::ROBOT_CONST::PID_RATE);
+    pid_left.setSetpoint((float)left_speed / (float)diff::ROBOT_CONST::PID_RATE);
+    pid_right.setSetpoint((float)right_speed / (float)diff::ROBOT_CONST::PID_RATE);
 }
 
 void error_loop() { while(1) { delay(100); } }

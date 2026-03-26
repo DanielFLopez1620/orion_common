@@ -21,10 +21,10 @@ namespace diff
     {
         static const int PID_RATE {20};
         static const int PID_T {1000 / PID_RATE};
-        static const int PID_KP {20};
-        static const int PID_KD {12};
-        static const int PID_KI {1};
-        static const int PID_KO {50};
+        static constexpr float PID_KP {20.0f};
+        static constexpr float PID_KD {12.0f};
+        static constexpr float PID_KI {1.0f};
+        static constexpr float PID_KO {50.0f};
         static const int PWM_MAX {255};
         static const int PWM_MIN {-255};
     };
