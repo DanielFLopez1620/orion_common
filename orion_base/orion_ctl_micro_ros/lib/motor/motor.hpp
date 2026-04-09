@@ -10,10 +10,9 @@ namespace diff
     class MotorDriver
     {
     private:
-        static constexpr int MAX_SPEED{225};  // Max PWM
-        unsigned int enable_pin_{0};          // Port related with speed
-        unsigned int forw_pin_{0};            // Forward pin
-        unsigned int back_pin_{0};            // Backward pin
+        unsigned int enable_pin_{0};  // Port related with speed
+        unsigned int forw_pin_{0};    // Forward pin
+        unsigned int back_pin_{0};    // Backward pin
 
     public:
         /**
