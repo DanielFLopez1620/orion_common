@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     apt-utils \
     bash-completion \
+    python3-argcomplete \
     # ---- Python build tools
     python3-pip \
     python3-setuptools \

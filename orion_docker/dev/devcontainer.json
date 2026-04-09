@@ -1,0 +1,45 @@
+{
+    "name": "ORION Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "orion_user",
+            "USER_UID": "1001"
+        }
+    },
+    "remoteUser": "orion_user",
+    // privileged: required for hardware device access (serial, USB, cameras)
+    "privileged": true,
+    // orion_common is mounted live — changes on host reflect immediately in container
+    "workspaceFolder": "/home/orion_user/ws/src/orion_common",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/orion_user/ws/src/orion_common,type=bind",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-themes",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "ms-python.python",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "containerEnv": {
+        // Domain 0 required for micro-ROS agent communication
+        "ROS_DOMAIN_ID": "0"
+    },
+    "runArgs": [
+        "--network", "host",
+        "-e", "DISPLAY=${env:DISPLAY}",
+        "--group-add", "video",
+        "--group-add", "audio"
+        // "--gpus", "all"  ← enable once NVIDIA Container Toolkit is configured for CDI
+    ],
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+        "source=${env:HOME}/.Xauthority,target=/home/orion_user/.Xauthority,type=bind"
+    ],
+    "postCreateCommand": "orion_docker/dev/post_create.sh"
+}
