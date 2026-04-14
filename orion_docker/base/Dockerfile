@@ -54,6 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-compressed-image-transport \
     ros-${ROS_DISTRO}-image-publisher \
     ros-${ROS_DISTRO}-camera-info-manager \
+    ros-jazzy-v4l2-camera \
     # ---- Diagnostics (used by camera and sensor drivers)
     ros-${ROS_DISTRO}-diagnostic-updater \
     ros-${ROS_DISTRO}-diagnostic-msgs \
@@ -91,11 +92,26 @@ RUN /bin/bash -c " \
     colcon build && \
     source install/local_setup.bash && \
     ros2 run micro_ros_setup create_agent_ws.sh && \
-    ros2 run micro_ros_setup build_agent.sh && \
-    rm -rf src build log agent_ws/src agent_ws/build agent_ws/log \
+    ros2 run micro_ros_setup build_agent.sh \
     "
 
-# ── 6. Environment ───────────────────────────────────────────────────────────
+# ── 6. OrbbecSDK (Astra S) ───────────────────────────────────────────────────
+# Detects build architecture and installs the matching .deb from ORBBEC releases.
+# amd64 → x86-64 host/dev container; arm64 → Raspberry Pi robot container.
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then \
+        DEB_URL="https://github.com/orbbec/OrbbecSDK/releases/download/v1.10.18/OrbbecSDK_v1.10.18_arm64.deb"; \
+    elif [ "$ARCH" = "amd64" ]; then \
+        DEB_URL="https://github.com/orbbec/OrbbecSDK/releases/download/v1.10.18/OrbbecSDK_v1.10.18_amd64.deb"; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    wget -q -O /tmp/OrbbecSDK.deb "$DEB_URL" && \
+    dpkg -i /tmp/OrbbecSDK.deb && \
+    ldconfig && \
+    rm /tmp/OrbbecSDK.deb
+
+# ── 7. Environment ───────────────────────────────────────────────────────────
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV SHELL=/bin/bash
 
@@ -103,8 +119,10 @@ ENV SHELL=/bin/bash
 USER $USERNAME
 
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/${USERNAME}/.bashrc \
-    && echo "source /opt/microros_ws/agent_ws/install/setup.bash" >> /home/${USERNAME}/.bashrc \
-    && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc
+    && echo "source /opt/microros_ws/install/setup.bash" >> /home/${USERNAME}/.bashrc \
+    && echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/${USERNAME}/.bashrc \
+    && echo 'eval "$(register-python-argcomplete ros2)"' >> /home/${USERNAME}/.bashrc \
+    && echo 'eval "$(register-python-argcomplete colcon)"' >> /home/${USERNAME}/.bashrc
 
 WORKDIR /home/${USERNAME}/ws
 
