@@ -8,9 +8,7 @@
         }
     },
     "remoteUser": "orion_user",
-    // privileged: required for hardware device access (serial, USB, cameras)
     "privileged": true,
-    // orion_common is mounted live — changes on host reflect immediately in container
     "workspaceFolder": "/home/orion_user/ws/src/orion_common",
     "workspaceMount": "source=${localWorkspaceFolder},target=/home/orion_user/ws/src/orion_common,type=bind",
     "customizations": {
@@ -34,7 +32,7 @@
         "-e", "DISPLAY=${env:DISPLAY}",
         "--group-add", "video",
         "--group-add", "audio"
-        // "--gpus", "all"  ← enable once NVIDIA Container Toolkit is configured for CDI
+        // "--gpus", "all"  ← enable once NVIDIA Container Toolkit is configured
     ],
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",

@@ -1,14 +1,9 @@
 FROM ros:jazzy-ros-base
 
 ARG USERNAME=orion_user
-# 1001 avoids collision with 'ubuntu' (UID/GID 1000) already in osrf/ros:jazzy-ros-base.
-# Override at build time with: --build-arg USER_UID=$(id -u)
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 
-# ── 1. User setup ─────────────────────────────────────────────────────────────
-# Create group + user, grant passwordless sudo, add to hardware groups.
-# groupadd || true: tolerates GID collisions with the upstream base image.
 RUN groupadd --gid $USER_GID $USERNAME || true \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && apt-get update \
@@ -18,8 +13,6 @@ RUN groupadd --gid $USER_GID $USERNAME || true \
     && usermod -aG dialout,video,audio $USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 2. System deps + ROS 2 packages ──────────────────────────────────────────
-# Single layer: system tools, build tools, peripheral libs, ROS 2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # ---- System tools
     git \
@@ -62,22 +55,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-backward-ros \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 3. colcon mixin ───────────────────────────────────────────────────────────
-# || true: ros:jazzy-ros-base already ships 'default' mixin — add fails if it exists
 RUN colcon mixin add default \
         https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml \
     || true \
     && colcon mixin update default
 
-# ── 4. rosdep ─────────────────────────────────────────────────────────────────
-# || true: rosdep init fails (non-zero) if already initialized — safe to ignore
 RUN rosdep init || true \
     && rosdep update
 
-# ── 5. micro-ROS agent (not available as apt package for Jazzy) ──────────────
-# Built from source into /opt/microros_ws — inherited by both orion_robot and orion_dev.
-# Single RUN required: each Docker RUN is a fresh shell, so source calls cannot
-# span layers. Cleanup of src/build/log keeps the layer size minimal.
 RUN /bin/bash -c " \
     set -e && \
     mkdir -p /opt/microros_ws/src && \
@@ -95,10 +80,7 @@ RUN /bin/bash -c " \
     ros2 run micro_ros_setup build_agent.sh \
     "
 
-# ── 6. OrbbecSDK (Astra S) ───────────────────────────────────────────────────
-# Detects build architecture and installs the matching .deb from ORBBEC releases.
-# amd64 → x86-64 host/dev container; arm64 → Raspberry Pi robot container.
-RUN ARCH=$(dpkg --print-architecture) && \
+    RUN ARCH=$(dpkg --print-architecture) && \
     if [ "$ARCH" = "arm64" ]; then \
         DEB_URL="https://github.com/orbbec/OrbbecSDK/releases/download/v1.10.18/OrbbecSDK_v1.10.18_arm64.deb"; \
     elif [ "$ARCH" = "amd64" ]; then \
@@ -111,11 +93,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
     ldconfig && \
     rm /tmp/OrbbecSDK.deb
 
-# ── 7. Environment ───────────────────────────────────────────────────────────
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV SHELL=/bin/bash
 
-# ── 7. User shell setup ───────────────────────────────────────────────────────
 USER $USERNAME
 
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/${USERNAME}/.bashrc \

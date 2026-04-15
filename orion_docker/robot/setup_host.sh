@@ -25,10 +25,7 @@ if ! command -v docker &>/dev/null; then
     exit 1
 fi
 
-# ── 1. udev rules ─────────────────────────────────────────────────────────────
-# Installs the example rules from orion_bringup as a starting point.
-# IMPORTANT: edit /etc/udev/rules.d/99-orion.rules after installation to match
-#            the actual serial/ID_PATH attributes of YOUR devices.
+# Do not forget to validate that the udev rules apply to your devices
 UDEV_SRC="${REPO_ROOT}/orion_bringup/example_udev.rules"
 UDEV_DST="/etc/udev/rules.d/99-orion.rules"
 
@@ -40,20 +37,16 @@ echo "  → ${UDEV_DST}"
 echo "  ⚠  Review and update the rules to match your device attributes:"
 echo "     sudo nano ${UDEV_DST}"
 
-# ── 2. dialout group ──────────────────────────────────────────────────────────
 echo "Adding ${USER} to the 'dialout' group..."
 sudo usermod -aG dialout "${USER}"
 echo "  → Log out and back in for the group change to take effect."
 
-# ── 3. docker group (allow running docker without sudo) ───────────────────────
 if ! groups "${USER}" | grep -q docker; then
     echo "Adding ${USER} to the 'docker' group..."
     sudo usermod -aG docker "${USER}"
     echo "  → Log out and back in for the group change to take effect."
 fi
 
-# ── 4. systemd service ────────────────────────────────────────────────────────
-# Creates a service that starts orion_robot container on boot.
 # Edit the CAMERA_TYPE and other args below to match your hardware setup.
 SERVICE_DST="/etc/systemd/system/orion_robot.service"
 
