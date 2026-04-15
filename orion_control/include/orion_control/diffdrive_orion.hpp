@@ -114,7 +114,7 @@ namespace orion_control
                 }
             );
 
-            this->sub_left_enc_ = this->create_subscription<std_msgs::msg::Int64>(
+            this->sub_right_enc_ = this->create_subscription<std_msgs::msg::Int64>(
                 "/diff_ctl_right_enc", rclcpp::QoS(1),
                 [this](const std_msgs::msg::Int64::SharedPtr enc_pos)
                 {
