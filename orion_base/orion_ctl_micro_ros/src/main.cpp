@@ -292,10 +292,12 @@ void timer_fwd_callback(rcl_timer_t * timer, int64_t last_call_tm)
 
 void cmd_servo_left_callback(const void *msgin)
 {
-    servo_left.setPositionRad((float) servo_left_cmd.data + M_PI_2);
+    const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+    servo_left.setPositionRad((float)msg->data + M_PI_2);
 }
 
 void cmd_servo_right_callback(const void *msgin)
 {
-    servo_right.setPositionRad((float) servo_right_cmd.data + M_PI_2);
+    const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+    servo_right.setPositionRad((float)msg->data + M_PI_2);
 }

@@ -1,6 +1,7 @@
 // //////////////////////// Include Libraries //////////////////////////////
 // ------------------------- Custom dependencies ---------------------------
 #include "pid.hpp" // Custom PID class header
+#include "constants.hpp" // Robot constants (PID_RATE, gains, PWM limits)
 
 // ////////////////////////// CLASS DEFINITIONS ////////////////////////////
 namespace diff
@@ -38,6 +39,14 @@ namespace diff
 
         // Sum previous output
         output += this->last_output_;
+
+        // Dead-zone compensation: motors don't move below ~60 PWM due to static friction.
+        // Remap small non-zero commands to the deadzone threshold to avoid wasted PWM range.
+        if (output > 0.0f && output < diff::ROBOT_CONST::PWM_DEADZONE) {
+            output = diff::ROBOT_CONST::PWM_DEADZONE;
+        } else if (output < 0.0f && output > -diff::ROBOT_CONST::PWM_DEADZONE) {
+            output = -diff::ROBOT_CONST::PWM_DEADZONE;
+        }
 
         // Clamp to avoid saturation
         if(output > (float)this->pwm_max_)

@@ -6,7 +6,7 @@ namespace diff
     /**
      * Struct that contains the constants of the controller. This aims for a
      * PID controller that implements clamping and anti-saturation mechanism
-     * 
+     *
      * Attributes list:
      * - PID_RATE : Hz rate of the PID
      * - PID_T : Period of the PID.
@@ -16,6 +16,7 @@ namespace diff
      * - PID_KO : Constant to avoid big number at control output
      * - PWM_MAX : Max pwm. If output is greater, clamp.
      * - PWM_MIN : Min pwm. If output is less, clamp.
+     * - PWM_DEADZONE : Min PWM threshold to overcome motor static friction (~50-70)
      */
     struct ROBOT_CONST
     {
@@ -27,6 +28,7 @@ namespace diff
         static constexpr float PID_KO {50.0f};
         static const int PWM_MAX {255};
         static const int PWM_MIN {-255};
+        static constexpr float PWM_DEADZONE {60.0f};
     };
 }
 
