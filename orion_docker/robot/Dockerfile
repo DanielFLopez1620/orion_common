@@ -16,7 +16,7 @@ RUN /bin/bash -c " \
     apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -y \
-        --skip-keys="sounddevice webrtcvad python3-sounddevice pytest" && \
+        --skip-keys sounddevice webrtcvad python3-sounddevice pytest python3-pytest python3-mediapipe && \
     rm -rf /var/lib/apt/lists/* && \
     colcon build \
         --parallel-workers 2 \

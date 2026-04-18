@@ -1,6 +1,6 @@
 # ORION Docker
 
-Containerized environments for developing and deploying the ORION robot on ROS 2 Jazzy.
+Containerized environments for developing and deploying ORION robot on ROS 2 Jazzy.
 
 ---
 
@@ -266,11 +266,11 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 ## Troubleshooting
 
-**`Authorization required` when launching RViz2 or Gazebo**
+### **`Authorization required` when launching RViz2 or Gazebo**
 
 Run `xhost +local:docker` on the host. See [X11 display](#x11-display-rviz2-gazebo) above.
 
-**`fatal: detected dubious ownership` in git**
+### **`fatal: detected dubious ownership` in git**
 
 The container changed file ownership on the bind-mounted directory. Fix with:
 
@@ -278,15 +278,15 @@ The container changed file ownership on the bind-mounted directory. Fix with:
 sudo chown -R $USER:$USER /path/to/orion_common
 ```
 
-**`failed to discover GPU vendor from CDI`**
+### **`failed to discover GPU vendor from CDI`**
 
 The `--gpus all` flag requires NVIDIA Container Toolkit with CDI configured. Remove or comment out `"--gpus", "all"` in `devcontainer.json` to run without GPU passthrough.
 
-**`Cannot locate rosdep definition for [orion_chat]`**
+### **`Cannot locate rosdep definition for [orion_chat]`**
 
 This means `orion_chat` is not present in `ws/src/` when rosdep runs. Verify that `vcs import` completed successfully in `post_create.sh` and that the `teatro` branch of `orion_chat` was cloned.
 
-**`libdc1394.so.22: not found` when building depth_ydlidar_os30a**
+### **`libdc1394.so.22: not found` when building depth_ydlidar_os30a**
 
 The ABI symlink is missing. This is normally baked into `orion_dev`. If building outside the devcontainer, run:
 
@@ -295,10 +295,14 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
            /usr/lib/x86_64-linux-gnu/libdc1394.so.22
 ```
 
-**micro-ROS agent not found after rebuild**
+### **micro-ROS agent not found after rebuild**
 
 The agent is installed at `/opt/microros_ws/install/`. Verify it is sourced in `.bashrc`:
 
 ```bash
 source /opt/microros_ws/install/setup.bash
 ```
+
+### **Problems related with ORION robot**
+
+In case of issues related to the robot, please go to the proper directory of the problem, for example, for ESP32's issues go to the [orion_base/README.md](/orion_base/README.md)
