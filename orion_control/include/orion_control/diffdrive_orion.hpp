@@ -102,7 +102,7 @@ namespace orion_control
                 "/diff_ctl_motor_cmd", rclcpp::QoS(1));
 
             this->pub_timer_= this->create_wall_timer(
-                std::chrono::milliseconds(100),
+                std::chrono::milliseconds(50),
                 std::bind(&OrionDiffBridgeNode::publish_commands, this)
             );
 
