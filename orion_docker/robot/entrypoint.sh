@@ -4,6 +4,7 @@
 set -e
 
 source /opt/ros/${ROS_DISTRO}/setup.bash
+source /opt/microros_ws/install/setup.bash
 source /home/orion_user/ws/install/setup.bash
 
 exec "$@"

@@ -7,6 +7,17 @@ USER root
 
 COPY repos.yaml /tmp/robot_repos.yaml
 
+# ── 1. Runtime deps not in orion_base ────────────────────────────────────────
+# These packages run ON the robot. Navigation, SLAM, and visualization
+# run on the external PC and are intentionally excluded here.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-nav2-lifecycle-manager \
+    ros-${ROS_DISTRO}-laser-filters \
+    ros-${ROS_DISTRO}-v4l2-camera \
+    ros-${ROS_DISTRO}-joy \
+    ros-${ROS_DISTRO}-teleop-twist-joy \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN /bin/bash -c " \
     set -e && \
     mkdir -p /home/${USERNAME}/ws/src && \
