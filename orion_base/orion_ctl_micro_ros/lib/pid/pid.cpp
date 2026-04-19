@@ -40,11 +40,11 @@ namespace diff
         // Sum previous output
         output += this->last_output_;
 
-        // Dead-zone compensation: motors don't move below ~60 PWM due to static friction.
-        // Remap small non-zero commands to the deadzone threshold to avoid wasted PWM range.
-        if (output > 0.0f && output < diff::ROBOT_CONST::PWM_DEADZONE) {
+        // Dead-zone compensation: only applied when setpoint direction matches output direction.
+        // Avoids bang-bang behavior when decelerating or reversing through zero.
+        if (this->setpoint_ > 0.0f && output > 0.0f && output < diff::ROBOT_CONST::PWM_DEADZONE) {
             output = diff::ROBOT_CONST::PWM_DEADZONE;
-        } else if (output < 0.0f && output > -diff::ROBOT_CONST::PWM_DEADZONE) {
+        } else if (this->setpoint_ < 0.0f && output < 0.0f && output > -diff::ROBOT_CONST::PWM_DEADZONE) {
             output = -diff::ROBOT_CONST::PWM_DEADZONE;
         }
 
