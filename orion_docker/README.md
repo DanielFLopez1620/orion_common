@@ -69,11 +69,11 @@ echo "xhost +local:docker" >> ~/.profile
 
 #### ORBBEC Astra S udev rules
 
-Required for the camera to be accessible from inside the container. Run once after cloning:
+Required for the camera to be accessible from inside the container. The udev rules script lives inside `depth_orbbec_astra`, which is cloned by `post_create.sh` when the container first starts. Run this **after** the container has run `post_create.sh` at least once:
 
 ```bash
-cd orion_common
-bash src/depth_orbbec_astra/orbbec_camera/scripts/install_udev_rules.sh
+# On the host (not inside the container), from the workspace root
+bash ~/ws/src/depth_orbbec_astra/orbbec_camera/scripts/install_udev_rules.sh
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
@@ -177,6 +177,14 @@ docker build -t orion_robot:latest orion_docker/robot/
 
 ### Run
 
+> **Important:** All peripheral devices (ESP32s, LIDAR, camera) must be **connected and recognized by the host before starting the container**. Docker mounts `/dev` at container start time — devices plugged in afterwards are not visible inside the container.
+>
+> Verify before starting:
+>
+> ```bash
+> ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19
+> ```
+
 The systemd service starts the container automatically on boot. To control it manually:
 
 ```bash
@@ -190,13 +198,13 @@ sudo systemctl stop orion_robot.service
 journalctl -u orion_robot.service -f
 ```
 
-To override the launch arguments at runtime (e.g. change camera):
+To run manually (e.g. to test or override launch arguments):
 
 ```bash
 docker run --rm --privileged --network host \
     -e ROS_DOMAIN_ID=0 \
     orion_robot:latest \
-    ros2 launch orion_bringup bringup.launch.py camera:=os30a ctl_type:=micro-ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro-ros
 ```
 
 ### Packages included
@@ -228,7 +236,7 @@ orion_docker/
 └── robot/
     ├── Dockerfile          ← robot deployment image (inherits base)
     ├── repos.yaml          ← packages built into the image
-    ├── entrypoint.sh       ← sources ROS + workspace, then exec CMD
+    ├── entrypoint.sh       ← sources ROS + micro-ROS + workspace, then exec CMD
     └── setup_host.sh       ← one-time RPi host setup (udev, groups, systemd)
 ```
 
@@ -295,12 +303,19 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
            /usr/lib/x86_64-linux-gnu/libdc1394.so.22
 ```
 
-### **micro-ROS agent not found after rebuild**
+### **micro-ROS agent not found**
 
-The agent is installed at `/opt/microros_ws/install/`. Verify it is sourced in `.bashrc`:
+The agent is installed at `/opt/microros_ws/install/`. For interactive shells, verify it is sourced in `.bashrc`:
 
 ```bash
 source /opt/microros_ws/install/setup.bash
+```
+
+For the robot container, the `entrypoint.sh` is what sources the environment (not `.bashrc` — `.bashrc` is only for interactive shells). Verify `entrypoint.sh` sources micro-ROS:
+
+```bash
+grep microros orion_docker/robot/entrypoint.sh
+# expected: source /opt/microros_ws/install/setup.bash
 ```
 
 ### **Problems related with ORION robot**

@@ -27,10 +27,15 @@ RUN /bin/bash -c " \
     apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -y \
-        --skip-keys sounddevice webrtcvad python3-sounddevice pytest python3-pytest python3-mediapipe && \
+        --skip-keys sounddevice \
+        --skip-keys webrtcvad  \
+        --skip-keys python3-sounddevice \
+        --skip-keys pytest \
+        --skip-keys python3-pytest \
+        --skip-keys python3-mediapipe && \
     rm -rf /var/lib/apt/lists/* && \
-    colcon build \
-        --parallel-workers 2 \
+    MAKEFLAGS="-j1" colcon build \
+        --parallel-workers 1 \
         --cmake-args -DCMAKE_BUILD_TYPE=Release && \
     rm -rf src build log && \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws \
