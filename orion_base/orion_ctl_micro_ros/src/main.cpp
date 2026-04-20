@@ -227,8 +227,19 @@ void adjust_motors_speed()
 
 void set_motor_speed(int left_speed, int right_speed)
 {
-    pid_left.enable();
-    pid_right.enable();
+    if(left_speed == 0) {
+        motor_left.set_speed(0);
+        pid_left.disable();
+    } else {
+        pid_left.enable();
+    }
+
+    if(right_speed == 0) {
+        motor_right.set_speed(0);
+        pid_right.disable();
+    } else {
+        pid_right.enable();
+    }
 
     pid_left.setSetpoint((float)left_speed / (float)diff::ROBOT_CONST::PID_RATE);
     pid_right.setSetpoint((float)right_speed / (float)diff::ROBOT_CONST::PID_RATE);
