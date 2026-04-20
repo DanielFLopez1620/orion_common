@@ -8,15 +8,26 @@
             <visual>
                 <origin xyz="0 0 0" rpy="${-pi_2} 0 0"/>
                 <geometry>
-                <mesh filename="package://orion_description/meshes/simple_arm.stl" 
+                <mesh filename="package://orion_description/meshes/simple_arm.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
-                <material name="PLAWhite"/>
+                <xacro:if value="${color == 'mdf'}">
+                    <material name="MDF"/>
+                </xacro:if>
+                <xacro:if value="${color == 'transparent'}">
+                    <material name="TransparentBlack"/>
+                </xacro:if>
+                <xacro:if value="${color == 'pla'}">
+                    <material name="PLAWhite"/>
+                </xacro:if>
+                <xacro:if value="${color == 'gold'}">
+                    <material name="Gold"/>
+                </xacro:if>
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="${-pi_2} 0 0"/>
                 <geometry>
-                <mesh filename="package://orion_description/meshes/simple_arm.stl" 
+                <mesh filename="package://orion_description/meshes/simple_arm.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>

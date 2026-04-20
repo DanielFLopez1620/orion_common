@@ -77,9 +77,9 @@
         <xacro:spacer_10x80 front="${front}" side="2" level="${level}" x="${x}"
             y="${y}" z="${z}"/>
     </xacro:macro>
-    
+
     <!--//////////////////// BASES AND LEVELS MACROS ///////////////////////-->
-    
+
     <!-- ................... Half base macro .............................. -->
     <xacro:macro name="half_base" params="level side parent x y z">
         <xacro:property name="mul" value="1"/>
@@ -101,6 +101,9 @@
             </xacro:if>
             <xacro:if value="${color == 'pla'}">
                 <material name="PLAWhite"/>
+            </xacro:if>
+            <xacro:if value="${color == 'gold'}">
+                <material name="Gold"/>
             </xacro:if>
         </visual>
         <collision>
@@ -571,7 +574,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="${-pi_2} 0 ${flex}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/servo_sup.stl" 
+            <mesh filename="package://orion_description/meshes/servo_sup.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="PLAWhite"/>
@@ -579,7 +582,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="${-pi_2} 0 ${flex}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/servo_sup.stl" 
+            <mesh filename="package://orion_description/meshes/servo_sup.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -605,7 +608,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="${-pi_2*inv} 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/mg996r.stl" 
+            <mesh filename="package://orion_description/meshes/mg996r.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="SoftBlack"/>
@@ -613,7 +616,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="${-pi_2*inv} 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/mg996r.stl" 
+            <mesh filename="package://orion_description/meshes/mg996r.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -639,7 +642,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/servo_conn.stl" 
+            <mesh filename="package://orion_description/meshes/servo_conn.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="MetalGray"/>
@@ -647,7 +650,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/servo_conn.stl" 
+            <mesh filename="package://orion_description/meshes/servo_conn.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -692,7 +695,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/speaker_sup.stl" 
+            <mesh filename="package://orion_description/meshes/speaker_sup.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="PLAWhite"/>
@@ -700,7 +703,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/speaker_sup.stl" 
+            <mesh filename="package://orion_description/meshes/speaker_sup.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -727,7 +730,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/speaker.stl" 
+            <mesh filename="package://orion_description/meshes/speaker.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="SoftBlack"/>
@@ -735,7 +738,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 ${inv}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/speaker.stl" 
+            <mesh filename="package://orion_description/meshes/speaker.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -759,7 +762,7 @@
     </xacro:macro>
 
     <!-- ///////////////////////////// WALL MACROS //////////////////////// -->
-    <xacro:macro name="complete_lateral_wall" 
+    <xacro:macro name="complete_lateral_wall"
             params="id parent side level x y z">
         <xacro:property name="muls" value="1"/>
         <xacro:if value="${side == 2}">
@@ -769,7 +772,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <xacro:if value="${color == 'mdf'}">
@@ -781,11 +784,14 @@
             <xacro:if value="${color == 'pla'}">
                 <material name="PLAWhite"/>
             </xacro:if>
+            <xacro:if value="${color == 'gold'}">
+                <material name="Gold"/>
+            </xacro:if>
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -808,7 +814,7 @@
         </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="complete_front_wall" 
+    <xacro:macro name="complete_front_wall"
             params="id parent front level x z">
         <xacro:property name="mulf" value="1"/>
         <xacro:property name="orz" value="0"/>
@@ -821,7 +827,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 ${pi_2 + orz}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <xacro:if value="${color == 'mdf'}">
@@ -833,11 +839,14 @@
             <xacro:if value="${color == 'pla'}">
                 <material name="PLAWhite"/>
             </xacro:if>
+            <xacro:if value="${color == 'gold'}">
+                <material name="Gold"/>
+            </xacro:if>
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 ${pi_2 + orz}"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/wall_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/wall_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -863,13 +872,13 @@
     <!-- /////////////////////////// Generic Metric Spacer /////////////////-->
     <xacro:macro name="metric_spacer"
             params="id parent element front side x y z">
-        
+
         <!-- Link Spacer -->
         <link name="${id}_${element}_${front}${side}">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/spacer_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/spacer_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
             <material name="Brass"/>
@@ -877,7 +886,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-            <mesh filename="package://orion_description/meshes/spacer_${id}.stl" 
+            <mesh filename="package://orion_description/meshes/spacer_${id}.stl"
                 scale="0.001 0.001 0.001"/>
             </geometry>
         </collision>
@@ -917,52 +926,52 @@
     </xacro:macro>
 
     <!-- 2 symetric hex spacers by considering offset -->
-    <xacro:macro name="x2xmetric_spacer" 
+    <xacro:macro name="x2xmetric_spacer"
                 params="id element parent offset_y x y z">
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="" side="r" x="${x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="" side="l" x="${x}" y="${y + offset_y}" z="${z}"/>
     </xacro:macro>
 
     <!-- 3  hex spacers by considering triangle -->
-    <xacro:macro name="x3xmetric_spacer" 
+    <xacro:macro name="x3xmetric_spacer"
                 params="id element parent offset_x offset_y x y z">
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="l" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="" side="r" x="${x}" y="${y + offset_y}" z="${z}"/>
     </xacro:macro>
 
     <!-- 4  hex spacers by considering mirror offset -->
-    <xacro:macro name="x4xmetric_spacer" 
+    <xacro:macro name="x4xmetric_spacer"
                 params="id element parent offset_x offset_y x y z">
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="r" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="l" x="${x + offset_x}" y="${y + offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="r" x="${x - offset_x}" y="${y + offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
     </xacro:macro>
 
     <!-- 6  hex spacers by considering mirror offset and middles-->
-    <xacro:macro name="x6xmetric_spacer" 
+    <xacro:macro name="x6xmetric_spacer"
                 params="id element parent offset_x offset_y x y z">
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="r" x="${x + offset_x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="l" x="${x + offset_x}" y="${y + offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="r" x="${x - offset_x}" y="${y + offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="l" x="${x - offset_x}" y="${y - offset_y}" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="f" side="" x="${x + offset_x}" y="0" z="${z}"/>
-        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}" 
+        <xacro:metric_spacer id="${id}" parent="${parent}" element="${element}"
             front="r" side="" x="${x - offset_x}" y="0" z="${z}"/>
     </xacro:macro>
 
@@ -983,7 +992,7 @@
             <visual name="">
                 <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <geometry>
-                    <mesh filename="package://orion_description/meshes/touch_sensor.stl" 
+                    <mesh filename="package://orion_description/meshes/touch_sensor.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="ArduinoBlue"/>
@@ -991,15 +1000,15 @@
             <collision>
                 <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <geometry>
-                    <mesh filename="package://orion_description/meshes/touch_sensor.stl" 
+                    <mesh filename="package://orion_description/meshes/touch_sensor.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
             <inertial>
                 <origin xyz="0.0 0.0 0.0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <mass value="0.001984467"/>
-                <inertia ixx="1.3218052332160457e-07" ixy="0.0" ixz="0.0" 
-                         iyy="1.0060793220379826e-07" iyz="0.0" 
+                <inertia ixx="1.3218052332160457e-07" ixy="0.0" ixz="0.0"
+                         iyy="1.0060793220379826e-07" iyz="0.0"
                          izz="2.2367231024415283e-07"/>
             </inertial>
         </link>
@@ -1037,23 +1046,34 @@
             <visual name="">
                 <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <geometry>
-                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl" 
+                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
-                <material name="PLAWhite"/>
+                <xacro:if value="${color == 'mdf'}">
+                    <material name="MDF"/>
+                </xacro:if>
+                <xacro:if value="${color == 'transparent'}">
+                    <material name="TransparentBlack"/>
+                </xacro:if>
+                <xacro:if value="${color == 'pla'}">
+                    <material name="PLAWhite"/>
+                </xacro:if>
+                <xacro:if value="${color == 'gold'}">
+                    <material name="Gold"/>
+                </xacro:if>
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <geometry>
-                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl" 
+                    <mesh filename="package://orion_description/meshes/touch_sensor_sup.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
             <inertial>
                 <origin xyz="0 0 0" rpy="${rotR} ${rotP} ${rotY}"/>
                 <mass value="0.004"/>
-                <inertia ixx="4.400208333333333e-07" ixy="0.0" ixz="0.0" 
-                         iyy="6.019366727956135e-07" iyz="0.0" 
+                <inertia ixx="4.400208333333333e-07" ixy="0.0" ixz="0.0"
+                         iyy="6.019366727956135e-07" iyz="0.0"
                          izz="2.252908394622803e-07"/>
             </inertial>
         </link>

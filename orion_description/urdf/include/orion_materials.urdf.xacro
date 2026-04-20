@@ -4,27 +4,27 @@
 
     <!-- Equivalent to RGB(0, 79, 148) -->
     <material name="ArduinoBlue">
-        <color rgba="0.0 0.31 0.58 1.0"/>  
+        <color rgba="0.0 0.31 0.58 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(26, 127, 26) -->
     <material name="RaspberryGreen">
-        <color rgba="0.1 0.5 0.1 1.0"/>  
+        <color rgba="0.1 0.5 0.1 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(179, 26, 26) -->
     <material name="DriverRed">
-        <color rgba="0.7 0.1 0.1 1.0"/>  
+        <color rgba="0.7 0.1 0.1 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(26, 26, 26) -->
     <material name="SoftBlack">
-        <color rgba="0.2 0.2 0.2 1.0"/>  
+        <color rgba="0.2 0.2 0.2 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(255, 255, 255) -->
     <material name="PureWhite">
-        <color rgba="1.0 1.0 1.0 1.0"/>  
+        <color rgba="1.0 1.0 1.0 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(240, 240, 225) -->
@@ -34,12 +34,17 @@
 
     <!-- Equivalent to RGB(181, 165, 66) -->
     <material name="Brass">
-        <color rgba="0.71 0.65 0.26 1.0"/>  
+        <color rgba="0.71 0.65 0.26 1.0"/>
+    </material>
+
+    <!-- Equivalent to RGB(293, 191, 4) -->
+    <material name="Gold">
+        <color rgba="0.71 0.65 0.26 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(128, 128, 128) -->
     <material name="MetalGray">
-        <color rgba="0.5 0.5 0.5 1.0"/>  
+        <color rgba="0.5 0.5 0.5 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(39, 39, 39) -->
@@ -49,7 +54,7 @@
 
     <!-- Equivalent to RGB(141, 141, 141) -->
     <material name="PLAGray">
-        <color rgba="0.6 0.6 0.6 1.0"/>  
+        <color rgba="0.6 0.6 0.6 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(187, 133, 89) -->
