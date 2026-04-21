@@ -38,8 +38,8 @@ mobile_base_controller:
     # Linear velocity elements
     linear.x.has_velocity_limits: true
     linear.x.has_acceleration_limits: true
-    linear.x.max_velocity: 2.791666667  # m/s
-    linear.x.min_velocity: -2.791666667 # m/s
+    linear.x.max_velocity: 0.28  # m/s (100 RPM motors, conservative limit)
+    linear.x.min_velocity: -0.28 # m/s
     linear.x.max_acceleration: 0.5 # m/s²
     linear.x.min_acceleration: -0.5 # m/s²
     linear.x.max_jerk: .NAN
@@ -48,8 +48,8 @@ mobile_base_controller:
     # Angular velocity elements
     angular.z.has_velocity_limits: true
     angular.z.has_acceleration_limits: true
-    angular.z.max_velocity: 2.791666667  # m/s
-    angular.z.min_velocity: -2.791666667 # m/s
+    angular.z.max_velocity: 0.56  # rad/s (vel_max / wheel_separation_2 ≈ 0.28 / 0.0915 ≈ 3.06, conservative: 1.5)
+    angular.z.min_velocity: -0.56 # rad/s
     angular.z.max_acceleration: 1.0  # m/s²
     angular.z.min_acceleration: -1.0 # m/s²
     angular.z.max_jerk: .NAN

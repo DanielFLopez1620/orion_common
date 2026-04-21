@@ -10,18 +10,18 @@ namespace diff
     class ControlPID
     {
     private:
-        int kp_{0};               // Proportional constant
-        int kd_{0};               // Derivative constant
-        int ki_{0};               // Integrative constant
-        int ko_{0};               // Gain constant
-        int pwm_max_{0};          // Max PWM
-        int pwm_min_{0};          // Min PWM
-        bool enabled_{false};     // PID state
-        int setpoint_{0};         // Set Point
-        int integral_term_{0};    // Integral cumulative sum
-        long last_enc_count_{0};  // Last encoder value
-        int last_input_{0};       // Last input
-        long last_output_{0};     // Last output
+        float kp_{0.0f};             // Proportional constant
+        float kd_{0.0f};             // Derivative constant
+        float ki_{0.0f};             // Integrative constant
+        float ko_{0.0f};             // Gain constant
+        int pwm_max_{0};             // Max PWM
+        int pwm_min_{0};             // Min PWM
+        bool enabled_{false};        // PID state
+        float setpoint_{0.0f};       // Set Point
+        float integral_term_{0.0f};  // Integral cumulative sum
+        long last_enc_count_{0};     // Last encoder value
+        float last_input_{0.0f};     // Last input
+        float last_output_{0.0f};    // Last output
     public:
 
         /**
@@ -32,12 +32,12 @@ namespace diff
          * @param kd Derivative constant
          * @param ki Integral constant
          * @param ko Gain constant
-         * @param pwm_min Max PWM output
-         * @param pwm_max Min PWM output
+         * @param pwm_max Max PWM output
+         * @param pwm_min Min PWM output
          */
-        ControlPID(int kp, int kd, int ki, int ko,
+        ControlPID(float kp, float kd, float ki, float ko,
             int pwm_max, int pwm_min)
-            : kp_{kp}, ki_{ki}, kd_ {kd}, ko_{ko}, pwm_min_{pwm_min}, pwm_max_(pwm_max)
+            : kp_{kp}, kd_{kd}, ki_{ki}, ko_{ko}, pwm_min_{pwm_min}, pwm_max_{pwm_max}
             {}
 
         // Method prototypes
@@ -52,9 +52,9 @@ namespace diff
 
         void reset(int enc_count);
 
-        void setSetpoint(int setpoint);
+        void setSetpoint(float setpoint);
 
-        void setTunings(int kp, int kd, int ki, int ko);
+        void setTunings(float kp, float kd, float ki, float ko);
 
     }; // class ControlPID
 

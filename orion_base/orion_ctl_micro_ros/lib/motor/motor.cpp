@@ -49,12 +49,6 @@ namespace diff
     {
         int abs_speed = abs(speed);
 
-        // Clamp PWM based on absolute value
-        if(abs_speed > this->MAX_SPEED)
-        {
-            abs_speed = this->MAX_SPEED;
-        }
-
         // Write velocity
         analogWrite(this->enable_pin_, abs_speed);
 

@@ -102,7 +102,7 @@ namespace orion_control
                 "/diff_ctl_motor_cmd", rclcpp::QoS(1));
 
             this->pub_timer_= this->create_wall_timer(
-                std::chrono::milliseconds(100),
+                std::chrono::milliseconds(50),
                 std::bind(&OrionDiffBridgeNode::publish_commands, this)
             );
 
@@ -114,7 +114,7 @@ namespace orion_control
                 }
             );
 
-            this->sub_left_enc_ = this->create_subscription<std_msgs::msg::Int64>(
+            this->sub_right_enc_ = this->create_subscription<std_msgs::msg::Int64>(
                 "/diff_ctl_right_enc", rclcpp::QoS(1),
                 [this](const std_msgs::msg::Int64::SharedPtr enc_pos)
                 {

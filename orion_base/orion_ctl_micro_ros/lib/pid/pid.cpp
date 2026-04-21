@@ -1,6 +1,7 @@
 // //////////////////////// Include Libraries //////////////////////////////
 // ------------------------- Custom dependencies ---------------------------
 #include "pid.hpp" // Custom PID class header
+#include "constants.hpp" // Robot constants (PID_RATE, gains, PWM limits)
 
 // ////////////////////////// CLASS DEFINITIONS ////////////////////////////
 namespace diff
@@ -18,35 +19,43 @@ namespace diff
         if(!this->enabled_)
         {
             // If so, take advantage to reset the PID.
-            if(this->last_input_ != 0)
+            if(this->last_input_ != 0.0f)
             {
                 reset(enc_count);
             }
             return;
         }
 
-        // Set up input
-        int input = enc_count - this->last_enc_count_;
+        // Set up input (encoder ticks since last call)
+        float input = (float)(enc_count - this->last_enc_count_);
 
         // Determinate the error
-        long err = this->setpoint_ - input;
+        float err = this->setpoint_ - input;
 
         // Calculate output
         // Considering PID with a Ko value to avoid too much increment
-        long output = (this->kp_ * err - this->kd_ * (input - this->last_input_)
+        float output = (this->kp_ * err - this->kd_ * (input - this->last_input_)
             + this->integral_term_) / this->ko_;
 
         // Sum previous output
         output += this->last_output_;
 
-        // Clamp to avoid saturation
-        if(output > this->pwm_max_)
-        {
-            output = this->pwm_max_;
+        // Dead-zone compensation: only applied when setpoint direction matches output direction.
+        // Avoids bang-bang behavior when decelerating or reversing through zero.
+        if (this->setpoint_ > 0.0f && output > 0.0f && output < diff::ROBOT_CONST::PWM_DEADZONE) {
+            output = diff::ROBOT_CONST::PWM_DEADZONE;
+        } else if (this->setpoint_ < 0.0f && output < 0.0f && output > -diff::ROBOT_CONST::PWM_DEADZONE) {
+            output = -diff::ROBOT_CONST::PWM_DEADZONE;
         }
-        else if (output < this->pwm_min_)
+
+        // Clamp to avoid saturation
+        if(output > (float)this->pwm_max_)
         {
-            output = this->pwm_min_;
+            output = (float)this->pwm_max_;
+        }
+        else if (output < (float)this->pwm_min_)
+        {
+            output = (float)this->pwm_min_;
         }
         else
         {
@@ -55,7 +64,7 @@ namespace diff
         }
 
         // Update value of the commanded output
-        computed_output = output;
+        computed_output = (int)output;
 
         // Prepare values for the next iteration
         this->last_enc_count_ = enc_count;
@@ -100,11 +109,11 @@ namespace diff
      */
     void ControlPID::reset(int enc_count)
     {
-        this->setpoint_ = 0;
-        this->integral_term_ = 0;
+        this->setpoint_ = 0.0f;
+        this->integral_term_ = 0.0f;
         this->last_enc_count_ = enc_count;
-        this->last_input_ = 0;
-        this->last_output_ = 0;
+        this->last_input_ = 0.0f;
+        this->last_output_ = 0.0f;
 
     } // void ControlPID::reset()
 
@@ -113,7 +122,7 @@ namespace diff
      *
      * @param setpoint Encoder count to achieve
      */
-    void ControlPID::setSetpoint(int setpoint)
+    void ControlPID::setSetpoint(float setpoint)
     {
         this->setpoint_ = setpoint;
 
@@ -127,7 +136,7 @@ namespace diff
      * @param ki Integral constant
      * @param ko Saturation constant
      */
-    void ControlPID::setTunings(int kp, int kd, int ki, int ko)
+    void ControlPID::setTunings(float kp, float kd, float ki, float ko)
     {
         this->kp_ = kp;
         this->kd_ = kd;

@@ -229,7 +229,6 @@ void set_motor_speed(int left_speed, int right_speed)
 {
     if(left_speed == 0) {
         motor_left.set_speed(0);
-        pid_left.reset(enc_left.read());
         pid_left.disable();
     } else {
         pid_left.enable();
@@ -237,14 +236,13 @@ void set_motor_speed(int left_speed, int right_speed)
 
     if(right_speed == 0) {
         motor_right.set_speed(0);
-        pid_right.reset(enc_right.read());
         pid_right.disable();
     } else {
         pid_right.enable();
     }
 
-    pid_left.setSetpoint(left_speed / diff::ROBOT_CONST::PID_RATE);
-    pid_right.setSetpoint(right_speed / diff::ROBOT_CONST::PID_RATE);
+    pid_left.setSetpoint((float)left_speed / (float)diff::ROBOT_CONST::PID_RATE);
+    pid_right.setSetpoint((float)right_speed / (float)diff::ROBOT_CONST::PID_RATE);
 }
 
 void error_loop() { while(1) { delay(100); } }
@@ -292,10 +290,12 @@ void timer_fwd_callback(rcl_timer_t * timer, int64_t last_call_tm)
 
 void cmd_servo_left_callback(const void *msgin)
 {
-    servo_left.setPositionRad((float) servo_left_cmd.data + M_PI_2);
+    const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+    servo_left.setPositionRad((float)msg->data + M_PI_2);
 }
 
 void cmd_servo_right_callback(const void *msgin)
 {
-    servo_right.setPositionRad((float) servo_right_cmd.data + M_PI_2);
+    const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+    servo_right.setPositionRad((float)msg->data + M_PI_2);
 }
