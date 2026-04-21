@@ -1,0 +1,37 @@
+repositories:
+  # orion_common is NOT listed here — it is bind-mounted live by devcontainer
+
+  orion_gz:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_gz.git
+    version: dev
+
+  orion_tools:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_tools.git
+    version: dev
+
+  orion_chat:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_chat
+    version: teatro
+
+  g_mov:
+    type: git
+    url: https://github.com/DanielFLopez1620/G-Mov_Project.git
+    version: dev
+
+  depth_orbbec_astra:
+    type: git
+    url: https://github.com/Tesis-ORION/depth_orbbec_astra.git
+    version: main
+
+  depth_maixsense_a010:
+    type: git
+    url: https://github.com/Tesis-ORION/depth_maixsense_a010.git
+    version: main
+
+  depth_ydlidar_os30a:
+    type: git
+    url: https://github.com/Tesis-ORION/Depth_ydlidar_os30a.git
+    version: main

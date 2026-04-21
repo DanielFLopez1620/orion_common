@@ -1,0 +1,32 @@
+repositories:
+  # Core robot packages
+  orion_common:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_common.git
+    version: main
+
+  # Interaction — required by orion_bringup (package.xml dep)
+  orion_chat:
+    type: git
+    url: https://github.com/Tesis-ORION/orion_chat.git
+    version: teatro
+
+  # Camera/servo head module
+  g_mov:
+    type: git
+    url: https://github.com/DanielFLopez1620/G-Mov_Project.git
+    version: main
+
+  # Sensor driver forks (Jazzy ports)
+  depth_maixsense_a010:
+    type: git
+    url: https://github.com/Tesis-ORION/depth_maixsense_a010.git
+    version: main
+
+  depth_ydlidar_os30a:
+    type: git
+    url: https://github.com/Tesis-ORION/Depth_ydlidar_os30a.git
+    version: main
+
+  # depth_orbbec_astra intentionally excluded:
+  # compilation fails on RPi4 (OOM with single thread, >1h build time)
