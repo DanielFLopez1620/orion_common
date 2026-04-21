@@ -161,7 +161,7 @@ This script:
 Before building, verify that all peripheral device symlinks exist on the host — the workspace build does not require them, but it confirms udev rules are correctly applied:
 
 ```bash
-# Validate udev rules for ESP32s, LIdDAR and your camera (astra s or a010 should appear, os30a depend on other configuration so it may not be listed)
+# Validate udev rules for ESP32s, LIDAR and your camera
 ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19 /dev/ttyA010
 ```
 
@@ -173,7 +173,7 @@ docker build -t orion_base:latest orion_docker/base/
 docker build -t orion_robot:latest orion_docker/robot/
 ```
 
-> The workspace is built with `--parallel-workers 2` to avoid running out of memory on RPi4. If the build is killed by the OOM killer, reduce to `--parallel-workers 1` in `robot/Dockerfile` and rebuild. You can monitor memory in a second terminal with `watch -n5 free -h`.
+> The workspace is built with `--parallel-workers 1` and `MAKEFLAGS="-j1"` (one package at a time, one compiler thread per package). This is the safe default for RPi4 with 2–4 GB RAM. On RPi4 with 4 GB you can raise `--parallel-workers` to `2` in `robot/Dockerfile` to cut build time roughly in half. Monitor memory during the build with `watch -n5 free -h`. If the build is killed by the OOM killer, add swap before retrying: `sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile`.
 
 ### Run
 
@@ -266,7 +266,8 @@ No manual steps required — it is baked into the image.
 The ORBBEC camera requires udev rules to be installed on the **host machine** (not inside the container). Run once after cloning:
 
 ```bash
-bash src/depth_orbbec_astra/orbbec_camera/scripts/install_udev_rules.sh
+# Run on the host after post_create.sh has cloned the repos
+bash ~/ws/src/depth_orbbec_astra/orbbec_camera/scripts/install_udev_rules.sh
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 

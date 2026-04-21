@@ -65,15 +65,14 @@ ExecStartPre=-/usr/bin/docker rm   orion_robot_container
 
 # --- Edit the launch arguments to match your hardware ---
 # camera options : a010 | os30a | astra_s
-# ctl_type       : micro-ros | serial
+# ctl_type       : micro_ros | serial
 ExecStart=/usr/bin/docker run \
-    --name orion_robot_container \
     --rm \
     --privileged \
     --network host \
     -e ROS_DOMAIN_ID=0 \
     orion_robot:latest \
-    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro-ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro_ros
 
 Restart=on-failure
 StandardOutput=journal
