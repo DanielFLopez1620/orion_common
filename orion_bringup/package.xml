@@ -11,9 +11,10 @@
 
   <depend>orion_description</depend>
   <depend>orion_control</depend>
-  <depend>orion_chat</depend>
+  <exec_depend>orion_chat</exec_depend>
   <depend>depth_maixsense_a010</depend>
   <depend>depth_ydlidar_os30a</depend>
+  <depend>ldlidar_component</depend>
   <!--depend>orbbec_camera</depend-->
   <!--depend>orbbec_camera_msgs</depend-->
 
