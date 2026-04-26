@@ -1,59 +1,59 @@
-# RPi Camera v1.3 (OV5647) en Ubuntu Server 24.04 — RPi 4
-### Para uso con `camera_ros` en ROS 2 Jazzy | ORION Project — DFD Team
+# RPi Camera v1.3 (OV5647) on Ubuntu Server 24.04 — Raspberry Pi 4
+### For use with `camera_ros` in ROS 2 Jazzy
 
 ---
 
-## Contexto
+## Background
 
-La **RPi Camera Module v1.3** usa el sensor **OV5647**. En Ubuntu Server 24.04, activarla y conectarla a ROS 2 Jazzy requiere varios pasos no obvios, principalmente porque:
+The **RPi Camera Module v1.3** uses the **OV5647** sensor. Getting it to work on Ubuntu Server 24.04 and connecting it to ROS 2 Jazzy requires several non-obvious steps, mainly because:
 
-- Ubuntu 24.04 incluye una versión *upstream* de `libcamera` que **no soporta hardware de Raspberry Pi**
-- Los binarios `rpicam-*` no vienen de `libcamera` sino de un repo separado (`rpicam-apps`)
-- El encoder `libav` incluido en `rpicam-apps` es incompatible con la versión de FFmpeg en Ubuntu 24.04
-- Los permisos de `/dev/dma_heap` bloquean el acceso sin configuración adicional
-- `ros-jazzy-camera-ros` instalado por apt trae su propia `libcamera` que **entra en conflicto** con el fork RPi compilado desde source, causando crashes de IPA proxy
-- El encoding nativo del OV5647 (`NV21`) no es compatible con RViz ni rqt_image_view sin parámetros explícitos
+- Ubuntu 24.04 ships an *upstream* version of `libcamera` that **has no Raspberry Pi hardware support**
+- The `rpicam-*` binaries do not come from `libcamera` — they live in a separate repo (`rpicam-apps`)
+- The `libav` encoder bundled in `rpicam-apps` is incompatible with the FFmpeg version in Ubuntu 24.04
+- `/dev/dma_heap` permissions block access for non-root users without extra configuration
+- `ros-jazzy-camera-ros` installed via apt ships its own `libcamera` that **conflicts** with the RPi fork built from source, causing IPA proxy crashes
+- The OV5647 native encoding (`NV21`) is not compatible with RViz or rqt_image_view without explicit parameters
 
 ---
 
-## Prerrequisitos
+## Prerequisites
 
 - Raspberry Pi 4
 - Ubuntu Server 24.04 (64-bit, aarch64)
-- ROS 2 Jazzy instalado (`/opt/ros/jazzy`)
-- RPi Camera Module v1.3 conectada al puerto CSI (ribbon cable con contactos metálicos orientados hacia los puertos HDMI)
-- Acceso a internet desde la RPi
+- ROS 2 Jazzy installed at `/opt/ros/jazzy`
+- RPi Camera Module v1.3 connected to the CSI port (ribbon cable with metal contacts facing the HDMI ports)
+- Internet access from the RPi
 
 ---
 
-## Paso 1 — Conexión física
+## Step 1 — Physical connection
 
-Conectar la cámara al puerto **CSI** de la RPi 4. El ribbon cable debe insertarse con los contactos metálicos apuntando hacia los puertos HDMI. Tirar suavemente del clip negro, insertar el cable y presionar el clip de vuelta.
+Connect the camera to the **CSI port** on the RPi 4. The ribbon cable must be inserted with the metal contacts facing the HDMI ports. Gently pull the black clip, insert the cable straight, and press the clip back until it clicks.
 
-> ⚠️ **Longitud máxima recomendada del ribbon:** hasta 50 cm para uso confiable. Cables más largos pueden funcionar pero son propensos a fallos de señal CSI (el sensor responde por I2C pero los frames hacen timeout). Para uso en robots móviles considerar adaptadores CSI-HDMI de Arducam que permiten hasta 10 m.
+> ⚠️ **Maximum recommended ribbon length:** up to 50 cm for reliable operation. Longer cables may work but are prone to CSI signal failures (sensor responds over I2C but frames time out). For mobile robots, consider Arducam CSI-to-HDMI extenders that support up to 10 m.
 
 ---
 
-## Paso 2 — Configurar `/boot/firmware/config.txt`
+## Step 2 — Configure `/boot/firmware/config.txt`
 
 ```bash
 sudo nano /boot/firmware/config.txt
 ```
 
-Agregar o modificar:
+Add or modify:
 
 ```ini
-# Deshabilitar autodetección (causa conflictos con OV5647 en Ubuntu)
+# Disable auto-detection (causes conflicts with OV5647 on Ubuntu)
 camera_auto_detect=0
 
-# Cargar el overlay del sensor OV5647
+# Load the OV5647 sensor overlay
 dtoverlay=ov5647
 ```
 
-> ⚠️ El archivo correcto en Ubuntu 24.04 es `/boot/firmware/config.txt`, **no** `/boot/config.txt`.
-> Con `camera_auto_detect=1` sin el dtoverlay explícito, el dispositivo `/dev/video0` no se crea correctamente.
+> ⚠️ The correct file on Ubuntu 24.04 is `/boot/firmware/config.txt`, **not** `/boot/config.txt`.
+> With `camera_auto_detect=1` and no explicit dtoverlay, `/dev/video0` is not created correctly.
 
-Reiniciar:
+Reboot:
 
 ```bash
 sudo reboot
@@ -61,7 +61,7 @@ sudo reboot
 
 ---
 
-## Paso 3 — Verificar detección a nivel de kernel
+## Step 3 — Verify kernel detection
 
 ```bash
 ls -l /dev/video*
@@ -69,36 +69,36 @@ v4l2-ctl --list-devices
 sudo dmesg | grep -i -E "camera|ov5647|unicam|csi"
 ```
 
-Output esperado en dmesg:
+Expected dmesg output:
 
 ```
-# Sensor detectado correctamente — NO debe aparecer "i2c read error"
+# Sensor detected correctly — "i2c read error" must NOT appear
 /soc/csi@7e801000: Fixed dependency cycle(s) with /soc/i2c0mux/i2c@1/ov5647@36
 ```
 
-> ⚠️ Si aparece `ov5647_read: i2c read error, reg: 300a = -5` → el sensor no responde por I2C. Revisar conexión física del cable antes de continuar.
+> ⚠️ If you see `ov5647_read: i2c read error, reg: 300a = -5` → the sensor is not responding over I2C. Check the physical cable connection before continuing.
 
 ---
 
-## Paso 4 — Eliminar libcamera del sistema (versión Ubuntu, sin soporte RPi)
+## Step 4 — Remove system libcamera (Ubuntu version, no RPi support)
 
-Ubuntu 24.04 instala por defecto `libcamera 0.2.x`, que es la versión upstream **sin soporte para Raspberry Pi**. Debe eliminarse antes de compilar el fork oficial de RPi para evitar conflictos de linking.
+Ubuntu 24.04 installs `libcamera 0.2.x` by default — the upstream version **without Raspberry Pi support**. It must be removed before building the RPi fork to prevent linking conflicts.
 
 ```bash
 sudo apt remove --purge libcamera-dev libcamera0.2 -y
 sudo ldconfig
 ```
 
-Verificar que no quedan restos:
+Verify no leftovers remain:
 
 ```bash
 ldconfig -p | grep libcamera
-# No debe mostrar nada, o solo paths de /usr/local/
+# Should show nothing, or only paths under /usr/local/
 ```
 
 ---
 
-## Paso 5 — Instalar dependencias de compilación
+## Step 5 — Install build dependencies
 
 ```bash
 sudo apt update && sudo apt full-upgrade -y
@@ -111,55 +111,64 @@ sudo apt install -y \
   libdrm-dev libexpat1-dev \
   libepoxy-dev libexif-dev \
   libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev \
+  libgles2-mesa-dev \
   v4l-utils
 ```
 
+> ⚠️ `libgles2-mesa-dev` provides the `GLES2/gl2.h` headers required by libcamera's EGL module. Without it, the build fails with `fatal error: GLES2/gl2.h: No such file or directory`.
+
 ---
 
-## Paso 6 — Compilar libcamera (fork de Raspberry Pi)
+## Step 6 — Build libcamera (Raspberry Pi fork)
+
+> ⚠️ **RAM warning:** compilation requires ~1.5 GB of free memory. Use `-j2` to limit parallel jobs and prevent the OOM killer from terminating `cc1plus`. If free RAM is below 1 GB, create a temporary swap file first:
+> ```bash
+> sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+> sudo mkswap /swapfile && sudo swapon /swapfile
+> ```
 
 ```bash
 cd ~
 git clone https://github.com/raspberrypi/libcamera.git
 cd libcamera
 meson setup build
-ninja -C build
+ninja -C build -j2
 sudo ninja -C build install
 ```
 
-Registrar las librerías instaladas:
+Register the installed libraries:
 
 ```bash
 echo "/usr/local/lib/aarch64-linux-gnu" | sudo tee /etc/ld.so.conf.d/rpicam.conf
 sudo ldconfig
 ```
 
-Verificar:
+Verify:
 
 ```bash
 ldconfig -p | grep libcamera
-# Debe mostrar entradas apuntando SOLO a /usr/local/lib/aarch64-linux-gnu
+# Must show entries pointing ONLY to /usr/local/lib/aarch64-linux-gnu
 ```
 
 ---
 
-## Paso 7 — Compilar rpicam-apps
+## Step 7 — Build rpicam-apps
 
-`rpicam-hello`, `rpicam-still`, `rpicam-vid` etc. son parte de un repo **separado** de `libcamera`.
+`rpicam-hello`, `rpicam-still`, `rpicam-vid` etc. live in a **separate repo** from `libcamera`.
 
-> ⚠️ **Omisión necesaria:** El flag `-Denable_libav=disabled` es requerido porque la versión de `libavcodec` en Ubuntu 24.04 (v60.x) es incompatible con el encoder de `rpicam-apps`. Para el uso con `camera_ros` en ROS 2 esto no tiene impacto funcional.
+> ⚠️ **Required omission:** The `-Denable_libav=disabled` flag is necessary because `libavcodec` on Ubuntu 24.04 (v60.x) is incompatible with the `rpicam-apps` encoder. This has no impact on `camera_ros` usage in ROS 2.
 
 ```bash
 cd ~
 git clone https://github.com/raspberrypi/rpicam-apps.git
 cd rpicam-apps
 meson setup build --buildtype=release -Denable_libav=disabled
-ninja -C build
+ninja -C build -j2
 sudo ninja -C build install
 sudo ldconfig
 ```
 
-Verificar binarios:
+Verify binaries:
 
 ```bash
 which rpicam-hello
@@ -168,40 +177,40 @@ rpicam-hello --version
 
 ---
 
-## Paso 8 — Configurar permisos de dma_heap
+## Step 8 — Configure dma_heap permissions
 
-Sin este paso, `rpicam-hello` y `camera_ros` fallan con `Could not open any dmaHeap device` para usuarios no-root.
+Without this step, `rpicam-hello` and `camera_ros` fail with `Could not open any dmaHeap device` for non-root users.
 
 ```bash
-# Agregar usuario al grupo video
+# Add user to video group
 sudo usermod -aG video $USER
 
-# Crear regla udev
+# Create udev rule
 echo 'SUBSYSTEM=="dma_heap", GROUP="video", MODE="0660"' | \
   sudo tee /etc/udev/rules.d/99-dma-heap.rules
 
-# Aplicar reglas
+# Apply rules
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
 
-**Cerrar sesión y volver a conectar por SSH** para que el grupo aplique:
+**Log out and reconnect via SSH** for the group change to take effect:
 
 ```bash
 exit
-# reconectar...
-groups  # debe incluir "video"
+# reconnect...
+groups  # must include "video"
 ```
 
 ---
 
-## Paso 9 — Verificación de libcamera
+## Step 9 — Verify libcamera
 
 ```bash
 rpicam-hello --list-cameras
 ```
 
-Output esperado:
+Expected output:
 
 ```
 Available cameras
@@ -210,53 +219,62 @@ Available cameras
     Modes: 'SGBRG10_CSI2P' : 640x480 [58.92 fps] ...
 ```
 
-Test de captura de imagen:
+Capture test:
 
 ```bash
 rpicam-still -o /tmp/test.jpg
 
-# Transferir al PC para verificar visualmente:
-# (desde el PC) scp ubuntu@<IP_RPI>:/tmp/test.jpg ~/Desktop/
+# Transfer to PC to verify visually:
+# (from PC) scp ubuntu@<RPI_IP>:/tmp/test.jpg ~/Desktop/
 ```
 
 ---
 
-## Paso 10 — Configurar camera_ros para ROS 2 Jazzy
+## Step 10 — Set up camera_ros for ROS 2 Jazzy
 
-### 10.1 — Eliminar ros-jazzy-libcamera (conflicto crítico)
+### 10.1 — Remove ros-jazzy-libcamera (critical conflict)
 
-`ros-jazzy-camera-ros` instalado por apt arrastra su propia `libcamera` en `/opt/ros/jazzy/lib/`. Esta versión **es ABI-incompatible** con el fork RPi compilado desde source, causando crashes del IPA proxy con este error:
+`ros-jazzy-camera-ros` installed via apt pulls its own `libcamera` into `/opt/ros/jazzy/lib/`. This version is **ABI-incompatible** with the RPi fork built from source, causing IPA proxy crashes:
 
 ```
 FATAL Serializer control_serializer.cpp:626 A list of V4L2 controls requires a ControlInfoMap
 ERROR IPAProxy raspberrypi_ipa_proxy.cpp:316 Failed to call start: -110
 ```
 
-La causa es que el `raspberrypi_ipa_proxy` compilado desde source y la `libcamera.so` del apt hablan versiones distintas del protocolo de serialización — aunque ambas sean "0.7.0", son builds distintos con ABI incompatible.
+The root cause: the `raspberrypi_ipa_proxy` built from source and the apt `libcamera.so` use different serialization protocol layouts — even if both report version "0.7.0", they are different builds with incompatible ABI.
 
-Eliminar la libcamera de ROS:
+Remove the ROS libcamera:
 
 ```bash
-sudo apt remove --purge ros-jazzy-libcamera -y
+sudo apt remove --purge ros-jazzy-libcamera ros-jazzy-camera-ros -y
 sudo ldconfig
 
-# Verificar que ya no existe en el path de ROS
+# Verify it no longer exists in the ROS path
 ls /opt/ros/jazzy/lib/libcamera.so* 2>/dev/null
 ls /opt/ros/jazzy/lib/libcamera-base.so* 2>/dev/null
-# Ambos deben retornar vacío
+# Both must return empty
 
-# Confirmar que ldconfig apunta solo a /usr/local/
+# Confirm ldconfig points only to /usr/local/
 ldconfig -p | grep "libcamera.so"
-# Solo debe mostrar /usr/local/lib/aarch64-linux-gnu/
+# Must show only /usr/local/lib/aarch64-linux-gnu/ entries
 ```
 
-> ⚠️ Los archivos `libcamera_calibration_parsers.so` y `libcamera_info_manager.so` que permanecen en `/opt/ros/jazzy/lib/` son paquetes de ROS con nombre similar pero **completamente distintos** de libcamera — no tocarlos.
+> ⚠️ The files `libcamera_calibration_parsers.so` and `libcamera_info_manager.so` that remain in `/opt/ros/jazzy/lib/` are ROS packages with similar names but **completely unrelated** to libcamera — do not remove them.
 
-### 10.2 — Configurar variables de entorno
+### 10.2 — Install camera-info and ROS dependencies
+
+```bash
+sudo apt install -y \
+  ros-jazzy-camera-info-manager \
+  ros-jazzy-image-transport \
+  ros-jazzy-image-transport-plugins
+```
+
+### 10.3 — Set environment variables
 
 ```bash
 cat >> ~/.bashrc << 'EOF'
-# libcamera RPi fork — evitar conflictos con versión de apt/ROS
+# libcamera RPi fork — prevent conflicts with apt/ROS version
 export PKG_CONFIG_PATH=/usr/local/lib/aarch64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
 export LIBCAMERA_IPA_MODULE_PATH=/usr/local/lib/aarch64-linux-gnu/libcamera
 export LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera
@@ -264,30 +282,27 @@ EOF
 source ~/.bashrc
 ```
 
-### 10.3 — Compilar camera_ros desde source
+### 10.4 — Build camera_ros from source
 
-Dado que el paquete apt de `camera_ros` linkea contra la libcamera de ROS (incompatible), debe compilarse desde source para que use el fork RPi:
+The apt package links against the ROS libcamera (incompatible). It must be built from source to use the RPi fork:
 
 ```bash
-# Crear workspace
+# Create workspace
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws
 
-# Clonar camera_ros
+# Clone camera_ros
 git clone https://github.com/christianrauch/camera_ros.git src/camera_ros
 
-# Remover camera_ros de apt si estaba instalado
-sudo apt remove --purge ros-jazzy-camera-ros -y
-
-# Compilar apuntando a /usr/local donde está el fork RPi
+# Build pointing to /usr/local where the RPi fork lives
 source /opt/ros/jazzy/setup.bash
 colcon build --packages-select camera_ros \
   --cmake-args -DCMAKE_PREFIX_PATH="/usr/local"
 
-# Sourcear el workspace
+# Source the workspace
 source ~/ros2_ws/install/setup.bash
 ```
 
-Agregar el source al `.bashrc`:
+Add to `.bashrc`:
 
 ```bash
 echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
@@ -296,17 +311,17 @@ source ~/.bashrc
 
 ---
 
-## Paso 11 — Lanzar camera_ros
+## Step 11 — Launch camera_ros
 
-### Comando básico
+### Basic command
 
 ```bash
 ros2 run camera_ros camera_node
 ```
 
-### Con parámetros explícitos (recomendado)
+### With explicit parameters (recommended)
 
-El OV5647 en su modo nativo usa `NV21` (YUV420 semi-planar), que **no es compatible** con RViz ni `rqt_image_view`. Usar `XRGB8888` para máxima compatibilidad:
+The OV5647 natively outputs `NV21` (YUV420 semi-planar), which **is not compatible** with RViz or `rqt_image_view`. Use `XRGB8888` for maximum compatibility:
 
 ```bash
 ros2 run camera_ros camera_node --ros-args \
@@ -315,93 +330,91 @@ ros2 run camera_ros camera_node --ros-args \
   -p height:=480
 ```
 
-### Resoluciones disponibles del OV5647
+### OV5647 available resolutions
 
-| Resolución | FPS | Uso recomendado |
+| Resolution | FPS | Recommended use |
 |---|---|---|
-| 640x480 | 58.92 fps | HRI tiempo real, detección de personas |
-| 1296x972 | 43.25 fps | Balance calidad/rendimiento ✅ |
-| 1920x1080 | 30.62 fps | Grabación, mapping |
-| 2592x1944 | 15.63 fps | Máxima resolución, baja frecuencia |
+| 640x480 | 58.92 fps | Real-time HRI, person detection |
+| 1296x972 | 43.25 fps | Quality/performance balance ✅ |
+| 1920x1080 | 30.62 fps | Recording, mapping |
+| 2592x1944 | 15.63 fps | Maximum resolution, low framerate |
 
-### Formatos de pixel disponibles
+### Available pixel formats
 
-| Formato | Compatibilidad | Notas |
+| Format | Compatibility | Notes |
 |---|---|---|
-| `XRGB8888` | RViz ✅, rqt ✅ | Recomendado para visualización |
-| `YUYV` | rqt ✅ | Menor ancho de banda que XRGB |
-| `NV21` | ❌ RViz/rqt | Formato nativo, requiere conversión explícita |
+| `XRGB8888` | RViz ✅, rqt ✅ | Recommended for visualization |
+| `YUYV` | rqt ✅ | Lower bandwidth than XRGB |
+| `NV21` | ❌ RViz/rqt | Native format, requires explicit conversion |
 
 ---
 
-## Paso 12 — Verificar publicación en ROS 2
+## Step 12 — Verify ROS 2 publishing
 
 ```bash
-# En otra terminal
+# In another terminal
 source /opt/ros/jazzy/setup.bash
 source ~/ros2_ws/install/setup.bash
 
 ros2 topic list
-# Debe mostrar: /image_raw  /camera_info
+# Should show: /image_raw  /camera_info
 
 ros2 topic hz /image_raw
-# Verificar framerate
+# Verify framerate
 
-# Visualizar en rqt_image_view
+# Visualize with rqt_image_view
 ros2 run rqt_image_view rqt_image_view
 ```
 
-> ℹ️ El warning `Camera calibration file [...] not found` es **normal** hasta que se realice la calibración con `camera_calibration`. No bloquea el funcionamiento básico del nodo.
+> ℹ️ The warning `Camera calibration file [...] not found` is **expected** until the camera is calibrated with `camera_calibration`. It does not block basic node operation.
 
 ---
 
 ## Troubleshooting
 
-| Síntoma | Causa probable | Fix |
+| Symptom | Likely cause | Fix |
 |---|---|---|
-| `rpicam-hello: command not found` | Falta compilar `rpicam-apps` o PATH incorrecto | `export PATH=$PATH:/usr/local/bin` |
-| `Could not open any dmaHeap device` | Permisos de `/dev/dma_heap` | Paso 8 completo + reconectar SSH |
-| `No cameras available` después de permisos | `config.txt` incorrecto o cable mal conectado | Verificar Paso 2 y conexión física |
-| Error `libavcodec API version is too old` | Incompatibilidad FFmpeg/rpicam-apps | Compilar con `-Denable_libav=disabled` |
-| Dos versiones de libcamera en `ldconfig` | Ubuntu libcamera no eliminada | Paso 4 |
-| `ninja` falla con Boost en `meson setup` | Falta `libboost-program-options-dev` | `sudo apt install libboost-program-options-dev` + `rm -rf build` |
-| `Failed to call start: -110` en camera_ros | ABI mismatch libcamera ROS vs fork RPi | Paso 10.1: eliminar `ros-jazzy-libcamera` + recompilar |
-| `FATAL Serializer` + crash IPA proxy | Misma causa que arriba | Mismo fix |
-| `Unsupported image encoding [nv21]` en RViz | Formato nativo no compatible | Lanzar con `-p format:=XRGB8888` |
-| Cámara detectada por I2C pero timeout en CSI | Cable dañado o puerto CSI dañado | Probar cable nuevo; si falla con 4+ cables distintos → módulo o puerto dañado |
-| `i2c read error = -5` en dmesg | Sensor no responde físicamente | Revisar ribbon; si persiste → cámara dañada |
+| `rpicam-hello: command not found` | `rpicam-apps` not built or PATH wrong | `export PATH=$PATH:/usr/local/bin` |
+| `Could not open any dmaHeap device` | `/dev/dma_heap` permissions | Complete Step 8 + reconnect SSH |
+| `No cameras available` after permissions fix | Wrong `config.txt` or loose cable | Check Step 2 and physical connection |
+| `libavcodec API version is too old` | FFmpeg/rpicam-apps incompatibility | Build with `-Denable_libav=disabled` |
+| Two libcamera versions in `ldconfig` | Ubuntu libcamera not removed | Step 4 |
+| `ninja` fails with Boost in `meson setup` | Missing `libboost-program-options-dev` | `sudo apt install libboost-program-options-dev` + `rm -rf build` |
+| `fatal error: GLES2/gl2.h` | Missing OpenGL ES headers | `sudo apt install libgles2-mesa-dev` |
+| `cc1plus: Killed signal` during compilation | Out of memory (OOM killer) | Create swap + use `ninja -j2` |
+| `Failed to call start: -110` in camera_ros | ABI mismatch: ROS libcamera vs RPi fork | Step 10.1: remove `ros-jazzy-libcamera` + rebuild |
+| `FATAL Serializer` + IPA proxy crash | Same cause as above | Same fix |
+| `Unsupported image encoding [nv21]` in RViz | Native format not compatible | Launch with `-p format:=XRGB8888` |
+| Camera detected over I2C but CSI timeout | Damaged cable or damaged CSI port | Try a new cable; if fails with 4+ cables → module or port damaged |
+| `i2c read error = -5` in dmesg | Sensor not physically responding | Check ribbon; if persists → camera damaged |
 
 ---
 
-## Diagnóstico de hardware — ¿Módulo o puerto CSI dañado?
+## Hardware diagnostics — Module or CSI port damaged?
 
-El OV5647 tiene dos buses independientes: **I2C** (configuración, señales lentas) y **CSI MIPI** (transferencia de frames, alta velocidad). Es posible que el sensor responda por I2C pero el transmisor CSI esté dañado por ESD u otro daño físico.
+The OV5647 has two independent buses: **I2C** (configuration, slow signals) and **CSI MIPI** (frame transfer, high-speed). It is possible for the sensor to respond over I2C while the CSI transmitter is damaged (e.g. from ESD).
 
 ```bash
-# Verificar respuesta I2C del sensor
+# Check I2C response from the sensor
 sudo apt install i2c-tools
 sudo i2cdetect -y 10
-# "UU" en posición 0x36 → kernel lo tiene reservado, sensor responde
-# "--" en posición 0x36 → sensor no responde = cámara dañada
+# "UU" at position 0x36 → kernel has it reserved, sensor is alive
+# "--" at position 0x36 → sensor not responding = likely damaged camera
 ```
 
-Para separar si el problema es el módulo o el puerto CSI de la RPi: probar el mismo módulo en otra RPi. Si falla en ambas → módulo dañado. Si funciona en la otra → puerto CSI de la placa original dañado.
+To isolate whether the issue is the module or the RPi's CSI port: test the same module on another RPi. If it fails on both → module damaged. If it works on the other → CSI port on the original board is damaged.
 
 ---
 
-## Versiones verificadas
+## Verified versions
 
-| Componente | Versión |
+| Component | Version |
 |---|---|
 | Ubuntu Server | 24.04 LTS (aarch64) |
 | Raspberry Pi | 4 |
-| Sensor | OV5647 (RPi Camera v1.3) |
+| Sensor | OV5647 (RPi Camera Module v1.3) |
 | libcamera (RPi fork) | 0.7.0 |
 | rpicam-apps | 1.11.1 |
 | ROS 2 | Jazzy |
-| camera_ros | compilado desde source (github.com/christianrauch/camera_ros) |
+| camera_ros | built from source (github.com/christianrauch/camera_ros) |
 | GCC | 13.3.0 |
-
----
-
-*Documentado por DFD Team — ORION Project*
