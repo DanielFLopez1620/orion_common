@@ -20,8 +20,8 @@ mobile_base_controller:
     pose_covariance_diagonal : [0.001, 0.001, 0.0, 0.0, 0.0, 0.01]
     twist_covariance_diagonal: [0.001, 0.0, 0.0, 0.0, 0.0, 0.01]
 
-    # Timeout for commands
-    # cmd_vel_timeout: 0.5
+    # Timeout for commands — aligned with ESP32 cmd_timeout_ms (1000 ms)
+    cmd_vel_timeout: 1.0
 
     # Frames to consider
     base_frame_id: base_link
@@ -33,7 +33,6 @@ mobile_base_controller:
 
     # Command considerations
     publish_limited_velocity: true
-    use_stamped_vel: false
 
     # Linear velocity elements
     linear.x.has_velocity_limits: true

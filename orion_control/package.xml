@@ -5,14 +5,14 @@
     <version>0.4.0</version>
     <description>Package that contains the controller configuration for ORION robot</description>
     <maintainer email="dfelipe.lopez@gmail.com">DanielFLopez1620</maintainer>
-    <license>BS3 Cluase 3</license>
+    <license>BSD-3-Clause</license>
 
     <buildtool_depend>ament_cmake</buildtool_depend>
 
     <depend>rclcpp</depend>
     <depend>orion_description</depend>
     <depend>rclcpp_lifecycle</depend>
-    <depend>sensor_msgs</depend>
+    <depend>hardware_interface</depend>
     <depend>pluginlib</depend>
 
     <exec_depend>joint_state_broadcaster</exec_depend>

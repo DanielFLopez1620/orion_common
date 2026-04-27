@@ -80,11 +80,11 @@ namespace fwd
         {
             if(diff > 0)
             {
-                this->setPositionDeg(pos + (diff > 10 ? 10 : diff));
+                this->setPositionDeg(pos - (diff > 10 ? 10 : diff));
             }
             else
             {
-                this->setPositionDeg(pos - (diff < -10 ? 10 : diff));
+                this->setPositionDeg(pos + (-diff > 10 ? 10 : -diff));
             }
         }
     }

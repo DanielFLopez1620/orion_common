@@ -4,7 +4,7 @@ package_name = 'orion_utils_py'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.3.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -16,7 +16,7 @@ setup(
     maintainer='dan1620',
     maintainer_email='dfelipe.lopez@gmail.com',
     description='Common python utilities and emos',
-    license='BSD-Clause-3',
+    license='BSD-3-Clause',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
@@ -26,6 +26,7 @@ setup(
             'happy_birthday = orion_utils_py.happy_birthday:main',
             'demo_theater = orion_utils_py.demo_theater:main',
             'emotion_try = orion_utils_py.emotion_try:main',
+            'hi_human = orion_utils_py.hi_human:main',
         ],
     },
 )
