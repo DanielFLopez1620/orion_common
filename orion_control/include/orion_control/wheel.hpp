@@ -18,7 +18,6 @@ namespace orion_control
         double cmd_ = 0;             // Current command
         double pos_ = 0;             // Current pose
         double vel_ = 0;             // Current velocity
-        double vel_setpoint_ = 0;    // Setpoint of velocity
         double rads_per_tick_ = 0;   // How many radians between tics
 
     }; // class Wheel

@@ -139,13 +139,19 @@ namespace orion_control
         const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Fwd:: Begin [on_activate]...");
+        if (!this->bridge_node_)
+        {
+            RCLCPP_ERROR(this->logger_, "Fwd:: Bridge node not initialized — cannot activate.");
+            return hardware_interface::CallbackReturn::ERROR;
+        }
         RCLCPP_INFO(this->logger_, "Fwd:: End [on_activate]...");
         return hardware_interface::CallbackReturn::SUCCESS;
 
     } // on_activate()
 
     /**
-     * For now just used to log that deactivate was passed.
+     * Holds servo at current position on deactivation — no zero-position command
+     * to avoid moving arms to an unsafe pose.
      *
      * @return Success if deactivate was completed safely.
      */
@@ -203,7 +209,7 @@ namespace orion_control
             this->servo_cmd_->data = (float) this->servo_.cmd_;
         }
 
-        RCLCPP_DEBUG(this->logger_, "Fwd:: Begin [write]...");
+        RCLCPP_DEBUG(this->logger_, "Fwd:: End [write]...");
         return hardware_interface::return_type::OK;
 
     } // write()

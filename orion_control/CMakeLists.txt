@@ -11,8 +11,6 @@ find_package(hardware_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 
-include (CMakePackageConfigHelpers)
-
 install(
     DIRECTORY config
     DESTINATION share/${PROJECT\_NAME}

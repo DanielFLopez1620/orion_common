@@ -25,8 +25,8 @@ from controller_manager.launch_utils import generate_load_controller_launch_desc
 # //////////////////////////// GLOBAL DEFINITIONS //////////////////////////////
 ARGS = [
     DeclareLaunchArgument('camera', default_value='os30a',
-        description="Choose a cam for the robot (os30a, astra_s, a010)",
-        choices=['os30a', 'astra_s', 'a010']),
+        description="Choose a cam for the robot (os30a, a010). astra_s pending driver support.",
+        choices=['os30a', 'a010']),
     DeclareLaunchArgument('servo',default_value='true',
         description="Boolean to include or not the servos",
         choices=['true', 'false']),
@@ -230,7 +230,8 @@ def generate_launch_description():
             "serial",
             "--dev",
             "/dev/ttyESP32_1"
-        ]
+        ],
+        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('ctl_type'), "' == 'micro_ros'"]))
     ))
 
     ld.add_action(Node(
@@ -242,7 +243,8 @@ def generate_launch_description():
             "serial",
             "--dev",
             "/dev/ttyESP32_2"
-        ]
+        ],
+        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('ctl_type'), "' == 'micro_ros'"]))
     ))
 
     # Laser filter related to prevent considering self as obstacle
