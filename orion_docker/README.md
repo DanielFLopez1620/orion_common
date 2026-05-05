@@ -39,7 +39,7 @@ orion_dev   orion_robot
 The base image must be built before `orion_dev` or `orion_robot`.
 
 ```bash
-git clone https://github.com/Tesis-ORION/orion_common.git
+git clone https://github.com/DanielFLopez1620/orion_common.git
 cd orion_common
 
 docker build -t orion_base:latest orion_docker/base/
@@ -135,7 +135,7 @@ Unlike `orion_dev`, the robot image **compiles the workspace inside the image** 
 Before building or running the container, prepare the host with:
 
 ```bash
-git clone https://github.com/Tesis-ORION/orion_common.git
+git clone https://github.com/DanielFLopez1620/orion_common.git
 cd orion_common
 
 bash orion_docker/robot/setup_host.sh

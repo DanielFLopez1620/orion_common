@@ -1,14 +1,22 @@
+# ROS 2 build artifacts
 build/
+install/
 logs/
 bin/
-install/
 
 # Python
 *.pyc
+*.pyo
+*.egg-info/
+dist/
 __pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # PlatformIO
 .pio/
+.platformio/
 
 # Generated docs
 *.dox
@@ -17,12 +25,13 @@ __pycache__/
 # Editor artifacts
 .project
 .cproject
+.vscode/
 CMakeLists.txt.user
 qtcreator-*
 *.user
 *~
 .#*
-.vscode
+.idea/
 
 # CAD backups
 *.FCBak
@@ -31,3 +40,7 @@ qtcreator-*
 orion_docker/install
 orion_docker/log
 orion_docker/src
+
+# Environment
+.env
+.env.local

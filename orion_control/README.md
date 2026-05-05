@@ -31,7 +31,7 @@ You can find the next codes:
 
 - [diffdrive_orion](/orion_control/src/diffdrive_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Diff Drive Controller*. It is focused on the implementation for the read/write methods based on the topics of [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the DC motors, which are based on a PID controller (for each motor) by using the double encoder count to determinate speed and direction, while also doing the control loop.
 
-- [forward_orion](/orion_control/src/forward_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Forward Command Controller*. It is focused to the read/write methods on the topics - - - [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the servo motors, where it has a write/read position (default) and a option to use an incremental move (can be cahnged in the commented notes of the servo callback).
+- [forward_orion](/orion_control/src/forward_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Forward Command Controller*. It is focused on the read/write methods on the topics from [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the servo motors, where it has write/read position (default) and an option to use incremental moves (can be changed in the commented notes of the servo callback).
 - [wheel](/orion_control/src/wheel.cpp): Wheel object implementation to consideringduring the DiffDrive Controller, mainly focused on wheel params like encoder counts per revolution and methods for this conversion.
 
 ---
@@ -70,7 +70,7 @@ If you add more controllers to the robot, do not forget to add them to the **con
 
 You can also confirm this by moving the wheel of your robot manually and you note a little deviation over time, for example, 20° over 20 laps.
 
-This may be cause by a small difference on ther wheel size and the wheel separation. To fix this, you can measure your robot and change the params of [mobile_base_controller.yaml](/orion_control/config/mobile_base_controller.yaml).
+This may be caused by a small difference in the wheel size and wheel separation. To fix this, you can measure your robot and change the params of [mobile_base_controller.yaml](/orion_control/config/mobile_base_controller.yaml).
 
 Additionally you can check the encoder count of your robot, for more information check on [orion_base](/orion_base/README.md) and the next point on this section.
 

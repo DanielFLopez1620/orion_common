@@ -2,9 +2,9 @@
 
 ## 🌟 Overview
 
-This directory contians the embedded codes for the **ESP32**s of the **ORION** robot. They were build by using [PlatformIO](https://platformio.org/) and C/C++.
+This directory contains the embedded codes for the **ESP32**s of the **ORION** robot. They were build by using [PlatformIO](https://platformio.org/) and C/C++.
 
-To check the robot electronic connections, review the [Electronics and Schmatics](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics) on the Wiki.
+To check the robot electronic connections, review the [Electronics and Schematics](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics) on the Wiki.
 
 ---
 
@@ -156,7 +156,7 @@ Once the ESP32 naming has been done, we can proceed with the upload:
     cd /path/to/orion_itneraction_micro_ros
     ~~~
 
-3. Install the depdencies.
+3. Install the dependencies.
 
     In the case of VS Code, go to the **platformio.ini** file and save (Ctrl+S), it should start the configuration of the *PlatformIO* extension.
 
@@ -222,13 +222,13 @@ You can check more info of the screen on [TFT 22 ILI9225 Wiki](https://github.co
 
 ### Robot moving the in the wrong direction
 
-This may be caused by the wiring of the motor according to its manufacturer or a mismatch in the cable connection. However, you do not require to dissambly the robot, you can go to the [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the values.
+This may be caused by the wiring of the motor according to its manufacturer or a mismatch in the cable connection. However, you do not require to disassemble the robot, you can go to the [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the values.
 
-For thsi purpose try to exchange the values of the **Forward** and **Backward** pins, do the test for each wheel individually to ensure the movement, you can even run the µ-ROS code and use the instructions in [orion_ctl_micro_ros](/orion_base/orion_ctl_micro_ros/README.md) to move the motors manually.
+For this purpose try to exchange the values of the **Forward** and **Backward** pins, do the test for each wheel individually to ensure the movement, you can even run the µ-ROS code and use the instructions in [orion_ctl_micro_ros](/orion_base/orion_ctl_micro_ros/README.md) to move the motors manually.
 
 ### Feedback of wheel rotation is inverse
 
-Teh encoder lecture should increase when the wheels move forward, and dicrease otherwise. If the direction is wrong when checking RViz2 while the **ros2_controllers** are active or you read the output of the encoder of each motor and it is not the expected increment/decrement, go to [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the encoder channels (A and B) pins and do a test.
+The encoder reading should increase when the wheels move forward, and decrease otherwise. If the direction is wrong when checking RViz2 while the **ros2_controllers** are active or you read the output of the encoder of each motor and it is not the expected increment/decrement, go to [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the encoder channels (A and B) pins and do a test.
 
 ### Robot is going too fast
 
@@ -240,8 +240,8 @@ This is caused as the ESP32 connection wasn't updated with the proper udev rules
 
 The reasons you can consider for this are:
 
-- You changed the eSP32 and the attributes are therefore differnt.
-- You are using environmental attributes, like ID_PATH, and changed the order connecttions.
+- You changed the ESP32 and the attributes are therefore different.
+- You are using environmental attributes, like ID_PATH, and changed the order of connections.
 - The device isn't connected, so the udev rules isn't applied. Check the cable and the element in case they are damaged.
 
 ### /dev/ttyESP32_2 not uploading program

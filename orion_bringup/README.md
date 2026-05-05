@@ -2,7 +2,7 @@
 
 ## 🌟 Overview
 
-This repository contains teh bringup and start up of the ORION robot. Before using this package, do not forget to upload the codes on the two ESP32 on [orion_base](/orion_base/README.md)
+This repository contains the bringup and startup of the ORION robot. Before using this package, do not forget to upload the codes on the two ESP32 on [orion_base](/orion_base/README.md)
 
 ---
 
