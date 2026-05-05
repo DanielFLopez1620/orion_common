@@ -2,7 +2,7 @@ repositories:
   # Core robot packages
   orion_common:
     type: git
-    url: https://github.com/Tesis-ORION/orion_common.git
+    url: https://github.com/DanielFLopez1620/orion_common.git
     version: main
 
   # Interaction — required by orion_bringup (package.xml dep)
