@@ -147,6 +147,9 @@ void setup()
     servo_right.begin();
 
 
+    // Single-channel quadrature decode: only ENCA triggers the ISR; ENCB is
+    // sampled inside the ISR via digitalRead(). This halves the effective
+    // encoder resolution compared to full quadrature (both edges, both channels).
     attachInterrupt(diff::HARDWARE::ML_ENCA, &read_left_enc, CHANGE);
     attachInterrupt(diff::HARDWARE::MR_ENCA, &read_right_enc, CHANGE);
 
@@ -245,7 +248,18 @@ void set_motor_speed(int left_speed, int right_speed)
     pid_right.setSetpoint((float)right_speed / (float)diff::ROBOT_CONST::PID_RATE);
 }
 
-void error_loop() { while(1) { delay(100); } }
+void error_loop()
+{
+    pinMode(LED_BUILTIN, OUTPUT);
+    while(1)
+    {
+        Serial.println("[ERROR] micro-ROS init failed — halted.");
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(200);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(200);
+    }
+}
 
 void timer_diff_callback(rcl_timer_t * timer, int64_t last_call_tm)
 {

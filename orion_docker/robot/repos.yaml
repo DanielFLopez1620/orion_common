@@ -2,7 +2,7 @@ repositories:
   # Core robot packages
   orion_common:
     type: git
-    url: https://github.com/Tesis-ORION/orion_common.git
+    url: https://github.com/DanielFLopez1620/orion_common.git
     version: main
 
   # Interaction — required by orion_bringup (package.xml dep)
@@ -27,6 +27,12 @@ repositories:
     type: git
     url: https://github.com/Tesis-ORION/Depth_ydlidar_os30a.git
     version: main
+
+  # LDRobot LD19 lidar driver (provides ldlidar_component package/plugin)
+  ldrobot_lidar_ros2:
+    type: git
+    url: https://github.com/Myzhar/ldrobot-lidar-ros2.git
+    version: jazzy
 
   # depth_orbbec_astra intentionally excluded:
   # compilation fails on RPi4 (OOM with single thread, >1h build time)

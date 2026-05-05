@@ -70,6 +70,9 @@ namespace orion_control
             std::string left_wheel_name {"left_wheel"};
             std::string right_wheel_name {"right_wheel"};
             int enc_tics_per_rev {0};
+            std::string motor_cmd_topic {"/diff_ctl_motor_cmd"};
+            std::string left_enc_topic {"/diff_ctl_left_enc"};
+            std::string right_enc_topic {"/diff_ctl_right_enc"};
         };
 
         Config config_;
@@ -90,6 +93,9 @@ namespace orion_control
     public:
         OrionDiffBridgeNode(
             const std::string& name,
+            const std::string& motor_cmd_topic,
+            const std::string& left_enc_topic,
+            const std::string& right_enc_topic,
             std_msgs::msg::Int64::SharedPtr left_enc,
             std_msgs::msg::Int64::SharedPtr right_enc,
             std_msgs::msg::Int64MultiArray::SharedPtr cmd_speed)
@@ -99,7 +105,7 @@ namespace orion_control
           cmd_speed_ptr_(cmd_speed)
         {
             this->pub_cmd_speed_ = this->create_publisher<std_msgs::msg::Int64MultiArray>(
-                "/diff_ctl_motor_cmd", rclcpp::QoS(1));
+                motor_cmd_topic, rclcpp::QoS(1));
 
             this->pub_timer_= this->create_wall_timer(
                 std::chrono::milliseconds(50),
@@ -107,7 +113,7 @@ namespace orion_control
             );
 
             this->sub_left_enc_ = this->create_subscription<std_msgs::msg::Int64>(
-                "/diff_ctl_left_enc", rclcpp::QoS(1),
+                left_enc_topic, rclcpp::QoS(1),
                 [this](const std_msgs::msg::Int64::SharedPtr enc_pos)
                 {
                     left_enc_ptr_->data = enc_pos->data;
@@ -115,7 +121,7 @@ namespace orion_control
             );
 
             this->sub_right_enc_ = this->create_subscription<std_msgs::msg::Int64>(
-                "/diff_ctl_right_enc", rclcpp::QoS(1),
+                right_enc_topic, rclcpp::QoS(1),
                 [this](const std_msgs::msg::Int64::SharedPtr enc_pos)
                 {
                     right_enc_ptr_->data = enc_pos->data;

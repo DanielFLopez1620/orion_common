@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
     <name>orion</name>
-    <version>0.4.0</version>
+    <version>1.8.4</version>
     <description>Meta package for ORION robot</description>
     <maintainer email="dfelipe.lopez@gmail.com">DanielFLopez1620</maintainer>
     <license>BSD-3-Clause</license>
@@ -13,7 +13,7 @@
     <depend>orion_control</depend>
     <depend>orion_description</depend>
     <depend>orion_utils_py</depend>
-    <depend>orion_chat</depend>
+    <exec_depend>orion_chat</exec_depend>
 
     <test_depend>ament_lint_auto</test_depend>
     <test_depend>ament_lint_common</test_depend>

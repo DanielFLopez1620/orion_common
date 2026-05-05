@@ -43,6 +43,18 @@ namespace orion_control
         this->config_.enc_tics_per_rev =
             std::stoi(info_.hardware_parameters.at("enc_ticks_per_rev"));
 
+        // Optional topic overrides — fall back to defaults if not specified in URDF
+        auto read_param = [&](const std::string& key, const std::string& fallback) {
+            auto it = info_.hardware_parameters.find(key);
+            return (it != info_.hardware_parameters.end()) ? it->second : fallback;
+        };
+        this->config_.motor_cmd_topic =
+            read_param("motor_cmd_topic", this->config_.motor_cmd_topic);
+        this->config_.left_enc_topic =
+            read_param("left_enc_topic", this->config_.left_enc_topic);
+        this->config_.right_enc_topic =
+            read_param("right_enc_topic", this->config_.right_enc_topic);
+
         // Set up wheels
         this->left_wheel_.Setup(
             this->config_.left_wheel_name, this->config_.enc_tics_per_rev);
@@ -54,6 +66,9 @@ namespace orion_control
         {
             this->bridge_node_ = std::make_shared<OrionDiffBridgeNode>(
                 info_.name,
+                this->config_.motor_cmd_topic,
+                this->config_.left_enc_topic,
+                this->config_.right_enc_topic,
                 this->left_enc_,
                 this->right_enc_,
                 this->cmd_speed_);
@@ -172,13 +187,18 @@ namespace orion_control
         const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Diff: Begin [on_activate]...");
+        if (!this->bridge_node_)
+        {
+            RCLCPP_ERROR(this->logger_, "Diff: Bridge node not initialized — cannot activate.");
+            return hardware_interface::CallbackReturn::ERROR;
+        }
         RCLCPP_INFO(this->logger_, "Diff: End [on_activate]...");
         return hardware_interface::CallbackReturn::SUCCESS;
 
     } // on_activate()
 
     /**
-     * For now just used to log that deactivate was passed.
+     * Sends zero velocity to both wheels before releasing control.
      *
      * @return Success if deactivate was completed safely.
      */
@@ -186,6 +206,7 @@ namespace orion_control
         const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Diff: Begin [on_deactivate]...");
+        this->cmd_speed_->data = {0, 0};
         RCLCPP_INFO(this->logger_, "Diff: End [on_deactivate]...");
         return hardware_interface::CallbackReturn::SUCCESS;
 
@@ -253,7 +274,7 @@ namespace orion_control
         // Populate message
         this->cmd_speed_->data = {left_cmd, right_cmd};
 
-        RCLCPP_DEBUG(this->logger_, "Diff: Begin [write]...");
+        RCLCPP_DEBUG(this->logger_, "Diff: End [write]...");
         return hardware_interface::return_type::OK;
     }
 

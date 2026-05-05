@@ -19,6 +19,10 @@
 // ----------------------- Cutom requierements -------------------------------
 #include "screen.hpp"
 
+// Set to 1 to use bitmap emotion sprites; set to 0 for geometric fallback
+// (useful for debugging without the full bitmap array flashed)
+#define USE_BITMAP_DISPLAY 1
+
 // //////////////////////// GLOBAL DEFINITIONS ////////////////////////////////
 
 // --------------------------- Definitions ------------------------------------
@@ -35,6 +39,7 @@ rcl_publisher_t ts_ur_publisher;
 rcl_publisher_t ts_ul_publisher;
 rcl_publisher_t ts_lr_publisher;
 rcl_publisher_t ts_ll_publisher;
+rcl_publisher_t heartbeat_publisher;
 
 // Define susbscribers
 rcl_subscription_t emotion_subscriber;
@@ -45,6 +50,7 @@ std_msgs__msg__Bool ts_ul_msg;
 std_msgs__msg__Bool ts_lr_msg;
 std_msgs__msg__Bool ts_ll_msg;
 std_msgs__msg__Int32 emotion_msg;
+std_msgs__msg__Bool heartbeat_msg;
 
 // Define executor
 rclc_executor_t executor;
@@ -134,6 +140,12 @@ void setup()
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
 		"interaction/touch_ll"));
 
+    RCCHECK(rclc_publisher_init_default(
+        &heartbeat_publisher,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+        "interaction/heartbeat"));
+
     // Create subscriber
     RCCHECK(rclc_subscription_init_default(
 		&emotion_subscriber,
@@ -192,10 +204,11 @@ void loop()
  */
 void error_loop()
 {
-	while(1)
-	{
-		delay(100);
-	}
+    while(1)
+    {
+        Serial.println("[ERROR] micro-ROS init failed — halted.");
+        delay(400);
+    }
 } // void error_loop()
 
 /**
@@ -221,6 +234,14 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         RCSOFTCHECK(rcl_publish(&ts_ul_publisher, &ts_ul_msg, NULL));
         RCSOFTCHECK(rcl_publish(&ts_lr_publisher, &ts_lr_msg, NULL));
         RCSOFTCHECK(rcl_publish(&ts_ll_publisher, &ts_ll_msg, NULL));
+
+        // Publish heartbeat at ping_interval_ms rate
+        if (millis() - last_ping_time >= ping_interval_ms)
+        {
+            heartbeat_msg.data = true;
+            RCSOFTCHECK(rcl_publish(&heartbeat_publisher, &heartbeat_msg, NULL));
+            last_ping_time = millis();
+        }
 	}
 } // void timer_callback()
 
@@ -236,11 +257,11 @@ void emotion_callback(const void *msgin)
     int value = emotion->data;
     if(previous_emotion != value)
     {
-        // Bitmap emotion
+#if USE_BITMAP_DISPLAY
         screen.drawEmotion(value);
-
-        // Geometry emotion
-        // screen.displayEmotion(value);
+#else
+        screen.displayEmotion(value);
+#endif
 
         // Update emotion
         previous_emotion = value;
