@@ -106,8 +106,8 @@ fwd::ServoMotor servo_right(max_servo_pos, min_servo_pos, fwd::HARDWARE::SERVO_R
 void setup()
 {
     safe_startup_pins();
-    motor_left.safe_init();
-    motor_right.safe_init();
+    motor_left.safeInit();
+    motor_right.safeInit();
 
     Serial.begin(115200);
     set_microros_serial_transports(Serial);
@@ -181,8 +181,8 @@ void setup()
 void loop()
 {
     if (received_motor_cmd && (millis() - last_cmd_time > cmd_timeout_ms)) {
-        motor_left.set_speed(0);
-        motor_right.set_speed(0);
+        motor_left.setSpeed(0);
+        motor_right.setSpeed(0);
         pid_left.disable();
         pid_right.disable();
         received_motor_cmd = false;
@@ -192,8 +192,8 @@ void loop()
 }
 
 void safe_startup() {
-    motor_left.set_speed(0);
-    motor_right.set_speed(0);
+    motor_left.setSpeed(0);
+    motor_right.setSpeed(0);
     pid_left.disable();
     pid_right.disable();
 
@@ -262,8 +262,8 @@ void adjust_motors_speed()
     pid_left.compute(enc_left.read(), motor_left_sp);
     pid_right.compute(enc_right.read(), motor_right_sp);
 
-    if(pid_left.enabled()) motor_left.set_speed(motor_left_sp);
-    if(pid_right.enabled()) motor_right.set_speed(motor_right_sp);
+    if(pid_left.enabled()) motor_left.setSpeed(motor_left_sp);
+    if(pid_right.enabled()) motor_right.setSpeed(motor_right_sp);
 }
 
 /*
@@ -274,14 +274,14 @@ void adjust_motors_speed()
 void set_motor_speed(int left_speed, int right_speed)
 {
     if(left_speed == 0) {
-        motor_left.set_speed(0);
+        motor_left.setSpeed(0);
         pid_left.disable();
     } else {
         pid_left.enable();
     }
 
     if(right_speed == 0) {
-        motor_right.set_speed(0);
+        motor_right.setSpeed(0);
         pid_right.disable();
     } else {
         pid_right.enable();

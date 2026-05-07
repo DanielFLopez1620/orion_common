@@ -4,6 +4,17 @@
 
 Code oriented to implement the TFT ILI9225 Screen and four capacitive touch sensors with a µ-ROS application, in order to use these elements for HRI behaviors with the ORION robot.
 
+---
+
+## Code Structure
+
+- **`src/main.cpp`** — Main application: micro-ROS initialization, touch sensor reading, emotion display callbacks, and heartbeat publishing.
+- **`lib/screen/screen.hpp`** — Screen driver abstraction: pin definitions, class declaration for TFT ILI9225.
+- **`lib/screen/screen.cpp`** — Screen driver implementation: bitmap and geometric emotion rendering.
+- **`lib/screen/emotions.hpp`** — Bitmap arrays and color definitions for each emotion.
+
+---
+
 Let's get an overview on the connections:
 
 - **Screen:** TFT ILI9225
@@ -25,14 +36,14 @@ Let's get an overview on the connections:
   - **Lower Left:** GPIO35
   - Connect all of the touch sensors to 5V and GND.
 
-For more information about the connections, check the [ORION Wiki](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
+For more information about the connections, check the [ORION Wiki](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
 
 ## Uploading and running application
 
-1. Prepare thw **Platformio** workspace: Install dependencies, build and upload
+1. Prepare the **Platformio** workspace: Install dependencies, build and upload
 
     ~~~bash
-    cd /path/to/orion_ctl_micro_ros
+    cd /path/to/orion_interaction_micro_ros
     pio lib install
     pio run
     pio run --target upload
@@ -88,14 +99,14 @@ For more information about the connections, check the [ORION Wiki](https://githu
 8. Give the proper permissions to the device.
 
     ~~~bash
-    sudo chmod 777 /dev/ttyESP32_1
-    sudo chmod 666 /dev/ttyUSB0 # Or the proper device
+    sudo chmod 777 /dev/ttyESP32_2
+    sudo chmod 666 /dev/ttyUSB1 # Or the proper device
     ~~~
 
 9. You are ready to experiment with the application.
 
     ~~~bash
-    ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyESP32_1
+    ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyESP32_2
     ~~~
 
 ## Topics
@@ -113,7 +124,8 @@ So you should watch the next topics:
 /interaction/touch_ul (std_msgs/msg/Bool)
 /interaction/touch_lr (std_msgs/msg/Bool)
 /interaction/touch_ll (std_msgs/msg/Bool)
-/emotion/int (std_msgs/msg/Bool)
+/interaction/heartbeat (std_msgs/msg/Bool)
+/emotion/int (std_msgs/msg/Int32)
 ~~~
 
 With this, you can do the next:

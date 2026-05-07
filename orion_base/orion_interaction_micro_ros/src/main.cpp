@@ -1,3 +1,23 @@
+/**
+ * @file main.cpp
+ * @brief Interaction firmware for ORION robot ESP32 #2 (micro-ROS)
+ *
+ * Implements micro-ROS communication for:
+ * - Touch sensor reading (4 capacitive sensors)
+ * - TFT ILI9225 screen control (emotion display)
+ * - Heartbeat publishing for connectivity monitoring
+ *
+ * Publishes:
+ *   - /interaction/touch_ur (Bool): upper-right touch sensor state
+ *   - /interaction/touch_ul (Bool): upper-left touch sensor state
+ *   - /interaction/touch_lr (Bool): lower-right touch sensor state
+ *   - /interaction/touch_ll (Bool): lower-left touch sensor state
+ *   - /interaction/heartbeat (Bool): periodic connectivity heartbeat
+ *
+ * Subscribes to:
+ *   - /emotion/int (Int32): emotion index [0-6] to display on screen
+ */
+
 // ////////////////////// DEPENDENCIES AND LIBRARIES //////////////////////////
 // ---------------------- Required Arduino Libraries --------------------------
 #include <Arduino.h>
@@ -16,7 +36,7 @@
 #include <std_msgs/msg/bool.h>
 #include <std_msgs/msg/int32.h>
 
-// ----------------------- Cutom requierements -------------------------------
+// ----------------------- Custom requirements --------------------------------
 #include "screen.hpp"
 
 // Set to 1 to use bitmap emotion sprites; set to 0 for geometric fallback
@@ -27,7 +47,7 @@
 
 // --------------------------- Definitions ------------------------------------
 
-// Define touch sensors pints
+// Define touch sensor pins
 #define TS_UR_PIN 4         // Upper right
 #define TS_UL_PIN 34        // Upper left
 #define TS_LR_PIN 2         // Lower right
@@ -55,7 +75,7 @@ std_msgs__msg__Bool heartbeat_msg;
 // Define executor
 rclc_executor_t executor;
 
-// Definte supporter
+// Define supporter
 rclc_support_t support;
 
 // Define memory allocator
@@ -69,7 +89,7 @@ rcl_timer_t timer;
 
 // Time tools
 unsigned long last_ping_time = 0;
-const unsigned long ping_interval_ms = 1000; 
+const unsigned long ping_interval_ms = 1000;
 
 // Helpers
 int previous_emotion = 0;
@@ -199,8 +219,9 @@ void loop()
 
 // ///////////////////////// FUNCTION DEFINITIONS ////////////////////////////
 
-/**
- * Loop to handle errors
+/*
+ * Halts execution printing an error message on serial.
+ * Called when micro-ROS initialization fails.
  */
 void error_loop()
 {
@@ -209,14 +230,12 @@ void error_loop()
         Serial.println("[ERROR] micro-ROS init failed — halted.");
         delay(400);
     }
-} // void error_loop()
+}
 
-/**
- * Function that will be linked to the timer in order to publish
- * the message data.
- *
- * @param timer Pointer to timer object
- * @param last_call_time Last time the timer was called
+/*
+ * Timer callback: reads touch sensors, publishes their states and heartbeat.
+ * @param timer Pointer to the timer object
+ * @param last_call_time Timestamp of previous callback invocation
  */
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
@@ -243,13 +262,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
             last_ping_time = millis();
         }
 	}
-} // void timer_callback()
+}
 
-/**
- * Callback that manages std_msgs/msgs/Int32 in order to desplay an emotion
- * on screen.
- * 
- * @param msgin Pointer to the message received
+/*
+ * Callback for emotion commands from /emotion/int.
+ * Displays the corresponding emotion on screen only if it changed.
+ * @param msgin Pointer to Int32 message with emotion index [0-6]
  */
 void emotion_callback(const void *msgin)
 {
@@ -262,9 +280,6 @@ void emotion_callback(const void *msgin)
 #else
         screen.displayEmotion(value);
 #endif
-
-        // Update emotion
         previous_emotion = value;
     }
-    
-} // emotion_callback()
+}

@@ -42,7 +42,7 @@ namespace diff
          * @param speed PWM value: negative=forward, positive=backward, 0=stop
          *        Range: [-255, 255] (0-255 mapped to PWM duty cycle)
          */
-        void set_speed(int speed);
+        void setSpeed(int speed);
 
         /*
          * Stops motor immediately by clearing PWM and direction pins.
@@ -53,7 +53,7 @@ namespace diff
          * Safely initializes all motor pins to OUTPUT and LOW state.
          * Prevents accidental motor startup during initialization.
          */
-        void safe_init();
+        void safeInit();
 
     }; // class MotorDriver
 

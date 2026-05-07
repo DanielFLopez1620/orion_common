@@ -11,7 +11,7 @@
 // /////////////////////// CLASS DEFINITIONS ///////////////////////////////
 namespace diff
 {
-    void MotorDriver::safe_init()
+    void MotorDriver::safeInit()
     {
         pinMode(this->enable_pin_, OUTPUT);
         analogWrite(this->enable_pin_, 0);
@@ -26,12 +26,12 @@ namespace diff
 
     void MotorDriver::begin()
     {
-        this->safe_init();
+        this->safeInit();
         this->stop();
 
     }
 
-    void MotorDriver::set_speed(int speed)
+    void MotorDriver::setSpeed(int speed)
     {
         int abs_speed = abs(speed);
 
