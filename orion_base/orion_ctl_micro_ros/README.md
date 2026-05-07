@@ -6,6 +6,24 @@ Code using two JGA25-371 DC Motors in order to subscribe to a twist topic in ord
 
 This is aimed to mount a code capable for a integration with multiple hardware interfaces of ros2_control (a [DiffDriveController](/orion_control/src/diffdrive_orion.cpp) and two [ForwardCommandControllers](/orion_control/src/forward_orion.cpp)).
 
+---
+
+## Code Structure
+
+The project is organized as follows:
+
+- **`src/main.cpp`** — Main application logic: micro-ROS initialization, callbacks, control loops, and hardware setup.
+- **`lib/hardware/hardware.hpp`** — GPIO pin definitions for motors, encoders, and servos. Update here if pinout changes.
+- **`lib/motor/`** — DC motor driver abstraction (`MotorDriver` class): speed control and direction.
+- **`lib/encoder/`** — Encoder reading and pulse counting for odometry feedback.
+- **`lib/pid/`** — PID controller implementation for speed control loop.
+- **`lib/servo/`** — Servo motor control for the two arm servos (position-based).
+- **`lib/constants/constants.hpp`** — PID tuning constants, PWM limits, and control rates.
+
+---
+
+## Hardware Connections
+
 NOTE: The motors are connected in a special way in the L298 driver, as OUT1 (+) and OUT2 (-) are for the right motor, and OUT3 (+) and OUT4(-) are for the left motor. Check the **hardware** file on the **lib** directory for more about connections.
 
 A brief note on them is shown below:
@@ -30,11 +48,11 @@ A brief note on them is shown below:
 - Ensure that the L298N doesn't use the 12V to power on, as you will use the 5V from the ESP32 to power it on.
 - The battery stack should provide between 9.6 V to 12.6 V, although this, make sure to connect this output to the DC motors supply at the L298N.
 
-For more information about the connections, check the [ORION Wiki](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
+For more information about the connections, check the [ORION Wiki](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
 
 ## Uploading and running application
 
-1. Prepare thw **Platformio** workspace: Install dependencies, build and upload
+1. Prepare the **Platformio** workspace: Install dependencies, build and upload
 
     ~~~bash
     cd /path/to/orion_ctl_micro_ros
@@ -135,9 +153,9 @@ With this, you can do the next
     ros2 topic echo /diff_ctl_right_enc
     ~~~
 
-    Start moving the motors manually and check the increment/decrement of both, based on the front (positive) and back (negative) directions. If they are inverted check connections or review ports on code ([harwdare.hpp](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp))
+    Start moving the motors manually and check the increment/decrement of both, based on the front (positive) and back (negative) directions. If they are inverted check connections or review ports on code ([hardware.hpp](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp))
 
-- You can command the motors by using a muti array topic as shown below:
+- You can command the motors by using a multi-array topic as shown below:
 
     ~~~bash
     ros2 topic pub /diff_ctl_motor_cmd std_msgs/msg/Int64MultiArray "layout:

@@ -1,3 +1,24 @@
+/**
+ * @file main.cpp
+ * @brief Actuator control firmware for ORION robot ESP32 (micro-ROS)
+ *
+ * Implements micro-ROS communication for:
+ * - DC motor control (left/right) via PID feedback loops
+ * - Encoder reading for odometry
+ * - Servo motor positioning (left/right arms)
+ *
+ * Publishes:
+ *   - /diff_ctl_left_enc (Int64): left encoder count
+ *   - /diff_ctl_right_enc (Int64): right encoder count
+ *   - /fwd_servo_left_feedback (Float32): left servo position (radians)
+ *   - /fwd_servo_right_feedback (Float32): right servo position (radians)
+ *
+ * Subscribes to:
+ *   - /diff_ctl_motor_cmd (Int64MultiArray): [left_speed, right_speed]
+ *   - /fwd_servo_left_cmd (Float32): servo command (radians)
+ *   - /fwd_servo_right_cmd (Float32): servo command (radians)
+ */
+
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 
@@ -189,6 +210,12 @@ void safe_startup() {
     delay(500);
 }
 
+// ---- FUNCTION DEFINITIONS -----
+
+/*
+ * Initializes all motor/servo pins as outputs and sets them to LOW.
+ * Ensures safe startup without accidental motor movement.
+ */
 void safe_startup_pins()
 {
     pinMode(diff::HARDWARE::ML_FORW, OUTPUT);
@@ -211,9 +238,20 @@ void safe_startup_pins()
 }
 
 
+/**
+ * ISR for left encoder pulse (attached to ML_ENCA, single-channel quadrature) 
+ */
 void IRAM_ATTR read_left_enc() { enc_left.readEnc(); }
+
+/*
+ * ISR for right encoder pulse (attached to MR_ENCA, single-channel quadrature) 
+*/
 void IRAM_ATTR read_right_enc() { enc_right.readEnc(); }
 
+/*
+ * Computes PID output and updates motor speeds based on encoder feedback.
+ * Called periodically by timer_diff_callback.
+ */
 void adjust_motors_speed()
 {
     if (!received_motor_cmd) return;
@@ -228,6 +266,11 @@ void adjust_motors_speed()
     if(pid_right.enabled()) motor_right.set_speed(motor_right_sp);
 }
 
+/*
+ * Sets motor speed setpoints and enables/disables PID controllers.
+ * @param left_speed target encoder count change per cycle (0 to stop)
+ * @param right_speed target encoder count change per cycle (0 to stop)
+ */
 void set_motor_speed(int left_speed, int right_speed)
 {
     if(left_speed == 0) {
@@ -248,6 +291,10 @@ void set_motor_speed(int left_speed, int right_speed)
     pid_right.setSetpoint((float)right_speed / (float)diff::ROBOT_CONST::PID_RATE);
 }
 
+/*
+ * Halts execution with LED blink pattern and serial error message.
+ * Called when micro-ROS initialization fails.
+ */
 void error_loop()
 {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -261,6 +308,10 @@ void error_loop()
     }
 }
 
+/*
+ * Timer callback for differential drive control (called at PID rate).
+ * Computes motor speeds via PID and publishes encoder feedback.
+ */
 void timer_diff_callback(rcl_timer_t * timer, int64_t last_call_tm)
 {
     RCLC_UNUSED(last_call_tm);
@@ -275,6 +326,10 @@ void timer_diff_callback(rcl_timer_t * timer, int64_t last_call_tm)
     }
 }
 
+/*
+ * Callback for motor speed commands from /diff_ctl_motor_cmd.
+ * Expects Int64MultiArray with [left_speed, right_speed].
+ */
 void cmd_motor_callback(const void *msgin)
 {
     const std_msgs__msg__Int64MultiArray * msg = (const std_msgs__msg__Int64MultiArray *) msgin;
@@ -288,6 +343,10 @@ void cmd_motor_callback(const void *msgin)
     set_motor_speed(msg->data.data[0], msg->data.data[1]);
 }
 
+/*
+ * Timer callback for servo feedback publishing.
+ * Publishes current servo positions at fixed rate.
+ */
 void timer_fwd_callback(rcl_timer_t * timer, int64_t last_call_tm)
 {
     RCLC_UNUSED(last_call_tm);
@@ -302,12 +361,20 @@ void timer_fwd_callback(rcl_timer_t * timer, int64_t last_call_tm)
     }
 }
 
+/*
+ * Callback for left servo command from /fwd_servo_left_cmd.
+ * Expects Float32 position in radians (centered at 0, range ~[-π/2, π/2]).
+ */
 void cmd_servo_left_callback(const void *msgin)
 {
     const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
     servo_left.setPositionRad((float)msg->data + M_PI_2);
 }
 
+/*
+ * Callback for right servo command from /fwd_servo_right_cmd.
+ * Expects Float32 position in radians (centered at 0, range ~[-π/2, π/2]).
+ */
 void cmd_servo_right_callback(const void *msgin)
 {
     const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;

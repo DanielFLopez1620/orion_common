@@ -3,33 +3,50 @@
 
 namespace diff
 {
-    /**
-     * Class oriented to define two-channel encoders to get feedback of the
-     * direction and speed of a DC Motor.
+    /*
+     * Quadrature encoder decoder for motor speed/position feedback.
+     * Implements single-channel counting (ENCA edge-triggered, ENCB sampled).
+     * Maintains cumulative encoder count (volatile for ISR safety).
      */
     class EncoderDriver
     {
     private:
-        int enc_a_{0};  // Pin of the encoder's channel A
-        int enc_b_{0};  // Pin of the encoder's channel B
-
-        volatile int pos_i_{0};  // Encoder count sum
+        int enc_a_{0};        // GPIO pin for encoder channel A (interrupt source)
+        int enc_b_{0};        // GPIO pin for encoder channel B (sampled in ISR)
+        volatile int pos_i_{0};  // Cumulative encoder count (modified by ISR)
 
     public:
-        /**
-         * User defined constructor to set up the encoder channels.
-         *
-         * @param enc_a Pin of the encoder's channel A
-         * @param enc_b Pin of the encoder's channel B
+        /*
+         * Constructor that sets up encoder GPIO pins.
+         * @param enc_a GPIO pin for channel A (edge-triggered)
+         * @param enc_b GPIO pin for channel B (direction indicator)
          */
         EncoderDriver(const int& enc_a, const int& enc_b)
             : enc_a_{enc_a}, enc_b_ {enc_b}
         {}
 
-        // Methods prototypes
+        /*
+         * Initializes encoder pins as inputs.
+         * Call once during setup, before attachInterrupt.
+         */
         void begin();
+
+        /*
+         * Reads current encoder count with interrupt masking (atomic).
+         * @return Cumulative encoder ticks (can be negative)
+         */
         int read();
+
+        /*
+         * ISR handler for encoder channel A (single-channel quadrature).
+         * Samples channel B to determine direction: A_diff != B means backward.
+         * MUST be attached as ISR callback, not called directly.
+         */
         void IRAM_ATTR readEnc();
+
+        /*
+         * Resets encoder count to zero.
+         */
         void reset();
 
     }; // class EncoderDriver
