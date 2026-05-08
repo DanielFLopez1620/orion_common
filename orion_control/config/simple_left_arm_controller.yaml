@@ -1,3 +1,7 @@
+# simple_left_arm_controller.yaml
+# ForwardCommandController for the ORION left arm servo (servo_conn1_joint).
+# Sends position commands (radians) directly to the ForwardOrion hardware interface.
+
 simple_left_arm_controller:
   ros__parameters:
     type: forward_command_controller/ForwardCommandController

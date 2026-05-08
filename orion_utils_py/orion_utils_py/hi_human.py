@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
+"""Execute a greeting sequence for ORION demos with motion and arm gestures."""
 
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import TwistStamped
-from std_msgs.msg import Float64MultiArray, Int32
 import time
 
+import rclpy
+from geometry_msgs.msg import TwistStamped
+from rclpy.node import Node
+from std_msgs.msg import Float64MultiArray, Int32
+
+
 class OrionSimpleSequence(Node):
+    """Publish a greeting sequence of emotions, motion, arm waves, and rotation."""
+
     def __init__(self):
+        """Initialize cmd_vel, left arm, and emotion publishers."""
         super().__init__('orion_simple_sequence')
 
-        # Publishers
         self.cmd_vel_pub = self.create_publisher(
             TwistStamped,
             '/mobile_base_controller/cmd_vel',
@@ -32,12 +37,24 @@ class OrionSimpleSequence(Node):
         self.get_logger().info('ORION simple sequence node started')
 
     def publish_emotion(self, emotion_id: int):
+        """Publish an emotion index to the emotion topic.
+
+        Args:
+            emotion_id: Integer emotion identifier to publish.
+        """
         msg = Int32()
         msg.data = emotion_id
         self.emotion_pub.publish(msg)
         self.get_logger().info(f'Emotion set to {emotion_id}')
 
     def move_forward(self, speed: float, duration: float, hz: float = 20.0):
+        """Publish forward velocity at the given rate, then stop.
+
+        Args:
+            speed: Forward linear velocity in m/s.
+            duration: Time in seconds to move before stopping.
+            hz: Publishing rate in Hz.
+        """
         twist = TwistStamped()
         twist.twist.linear.x = speed
         twist.twist.angular.z = 0.0
@@ -55,6 +72,12 @@ class OrionSimpleSequence(Node):
         self.cmd_vel_pub.publish(twist)
 
     def wave_left_arm(self, start: float = 0.0, end: float = 1.57):
+        """Move the left arm from start to end position and back.
+
+        Args:
+            start: Initial and final joint angle in radians.
+            end: Target joint angle in radians for the wave peak.
+        """
         msg = Float64MultiArray()
         msg.data = [start]
         self.left_arm_pub.publish(msg)
@@ -69,6 +92,13 @@ class OrionSimpleSequence(Node):
         self.get_logger().info('Left arm greeting executed')
 
     def rotate_right(self, angular_speed: float, duration: float, hz: float = 20.0):
+        """Publish rightward rotation commands at the given rate, then stop.
+
+        Args:
+            angular_speed: Magnitude of angular velocity in rad/s (applied as negative).
+            duration: Time in seconds to rotate before stopping.
+            hz: Publishing rate in Hz.
+        """
         twist = TwistStamped()
         twist.twist.linear.x = 0.0
         twist.twist.angular.z = -angular_speed  # negative = right
@@ -87,6 +117,7 @@ class OrionSimpleSequence(Node):
 
 
 def main(args=None):
+    """Run the ORION greeting sequence and shut down."""
     rclpy.init(args=args)
     node = OrionSimpleSequence()
 

@@ -1,3 +1,11 @@
+/*
+ * @file constants.hpp
+ * @brief Robot-wide constants for ORION differential drive and PID control.
+ *
+ * Centralizes PID gains, PWM limits, encoder resolution, wheel geometry,
+ * and control rate. Adjust these values when tuning or swapping motors.
+ */
+
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 

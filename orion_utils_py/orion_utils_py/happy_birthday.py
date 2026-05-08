@@ -1,19 +1,27 @@
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Int64, Float64MultiArray, String
+#!/usr/bin/env python3
+"""Execute a birthday greeting sequence with arm oscillation and TTS for ORION."""
+
 import math
 import time
 
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float64MultiArray, Int64, String
+
 
 class OrionCelebrator(Node):
+    """Publish a birthday greeting with arm oscillation and TTS for ORION."""
 
     def __init__(self):
+        """Initialize publishers, send greeting message, and start arm timer."""
         super().__init__('orion_celebrator')
 
         # --- Publishers ---
         self.emotion_pub = self.create_publisher(Int64, '/emotion/int', 10)
-        self.arm_right_pub = self.create_publisher(Float64MultiArray, '/simple_right_arm_controller/commands', 10)
-        self.arm_left_pub = self.create_publisher(Float64MultiArray, '/simple_left_arm_controller/commands', 10)
+        self.arm_right_pub = self.create_publisher(
+            Float64MultiArray, '/simple_right_arm_controller/commands', 10)
+        self.arm_left_pub = self.create_publisher(
+            Float64MultiArray, '/simple_left_arm_controller/commands', 10)
         self.tts_pub = self.create_publisher(String, '/orion_response', 10)
 
         # --- Publish emotion once at start ---
@@ -28,12 +36,15 @@ class OrionCelebrator(Node):
 
         # --- Publish creative birthday message ---
         bday_msg = String()
-        bday_msg.data = "¡Feliz cumpleaños! Que tus circuitos brillen más que mis LEDs, y que tengas un año lleno de aventuras épicas."
+        bday_msg.data = (
+            '¡Feliz cumpleaños! Que tus circuitos brillen más que mis LEDs, '
+            'y que tengas un año lleno de aventuras épicas.'
+        )
         self.tts_pub.publish(bday_msg)
         self.get_logger().info(f'TTS message published: {bday_msg.data}')
 
     def arm_motion_callback(self):
-        """Make arms oscillate between -1 and 1 rad (sine wave)."""
+        """Oscillate both arms between -1 and 1 rad using a sine wave."""
         elapsed = time.time() - self.start_time
         angle = math.sin(elapsed * 2.0)
 
@@ -49,6 +60,7 @@ class OrionCelebrator(Node):
 
 
 def main(args=None):
+    """Spin OrionCelebrator node until keyboard interrupt."""
     rclpy.init(args=args)
     node = OrionCelebrator()
     try:

@@ -1,3 +1,11 @@
+/*
+ * @file servo.hpp
+ * @brief Servo motor driver for ORION arm positioning.
+ *
+ * Wraps the ESP32Servo library to provide degree and radian interfaces
+ * with configurable min/max angle limits for the left and right arm servos.
+ */
+
 #ifndef SERVO_HPP
 #define SERVO_HPP
 

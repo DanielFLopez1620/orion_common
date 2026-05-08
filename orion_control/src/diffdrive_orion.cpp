@@ -2,19 +2,6 @@
 
 namespace orion_control
 {
-    /**
-     * Diff control actions to implement on initialization of the controller
-     * that includes the set up of the motors command and state variables,
-     * the locking of the executor to add the nodes that interacts with µ-ROS
-     * reading the encoders and writing the PWMs, and the callback return
-     * definitions.
-     *
-     * @param params Parameters required for the initialization of a hardware
-     *      interface component.
-     *
-     * @return ERROR if params were not validated or if it was not possible to
-     *      add the bridge nodes, otherwise SUCCESS
-     */
     hardware_interface::CallbackReturn DiffDriveOrion::on_init(
         const hardware_interface::HardwareComponentInterfaceParams& params)
     {
@@ -88,11 +75,6 @@ namespace orion_control
 
     } // on_init()
 
-    /**
-     * For now, just used to log that that configure was passed.
-     *
-     * @return Success if the on_configure was passed without any issues.
-     */
     hardware_interface::CallbackReturn DiffDriveOrion::on_configure(const rclcpp_lifecycle::State&)
     {
         RCLCPP_INFO(this->logger_, "Diff: Begin [on_configure]...");
@@ -101,12 +83,6 @@ namespace orion_control
 
     } // on_configure()
 
-    /**
-     * Expose the read-only variables for feedback on the control process.
-     *
-     * @return Vector of the state interfaces used, in this case the wheel
-     *      speed and position.
-     */
     std::vector<hardware_interface::StateInterface> DiffDriveOrion::export_state_interfaces()
     {
         RCLCPP_INFO(this->logger_, "Diff: Begin [export_state_interfaces]...");
@@ -146,12 +122,6 @@ namespace orion_control
 
     } // export_state_interfaces()
 
-    /**
-     * Expose the writable variables for commands of the controller.
-     *
-     * @return Vector of the command interfaces used, in this case, the motor
-     *   command velocity.
-     */
     std::vector<hardware_interface::CommandInterface> DiffDriveOrion::export_command_interfaces()
     {
         RCLCPP_INFO(this->logger_, "Diff: Begin [export_command_interfaces]...");
@@ -178,11 +148,6 @@ namespace orion_control
 
     } // export_command_interfaces()
 
-    /**
-     * For now just used to log that activate was passed.
-     *
-     * @return Success if on_activate was completed safely.
-     */
     hardware_interface::CallbackReturn DiffDriveOrion::on_activate(
         const rclcpp_lifecycle::State&)
     {
@@ -197,11 +162,6 @@ namespace orion_control
 
     } // on_activate()
 
-    /**
-     * Sends zero velocity to both wheels before releasing control.
-     *
-     * @return Success if deactivate was completed safely.
-     */
     hardware_interface::CallbackReturn DiffDriveOrion::on_deactivate(
         const rclcpp_lifecycle::State&)
     {
@@ -212,17 +172,6 @@ namespace orion_control
 
     } // on_deactivate()
 
-    /**
-     * Read the sensor (encoders) updates and stores its value, where
-     * the position is read ticks per second and analyzed to obtain
-     * velocity and position.
-     *
-     * @param time [Unused] stores the time when called
-     * @param duration Stores the duration (period) of the read
-     *
-     * @return OK if the reading process was completely safely. Otherwise,
-     *      it will raise an error.
-     */
     hardware_interface::return_type DiffDriveOrion::read(
         const rclcpp::Time&, const rclcpp::Duration& period)
     {
@@ -250,16 +199,6 @@ namespace orion_control
         return hardware_interface::return_type::OK;
     }
 
-    /**
-     * Write to the actuator (wheel velocity) to command the objective
-     * received, where the velocity is in radians per second.
-     *
-     * @param time [Unused] stores the time when called
-     * @param duration [Unused] Stores the duration (period) of the read
-     *
-     * @return OK if the writing process was completely safely. Otherwise,
-     *      it will raise an error.
-     */
     hardware_interface::return_type DiffDriveOrion::write(
         const rclcpp::Time&, const rclcpp::Duration&)
     {

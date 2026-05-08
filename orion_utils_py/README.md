@@ -24,7 +24,7 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 
 ### check_mov
 
-Node that moves the robot and validate the movement with logs over the */odom topic*:
+Node that subscribes to */cmd_vel* and */odom* topics to measure the latency between sending a velocity command and detecting the first observed movement:
 
 ~~~bash
 ros2 run orion_utils_py check_mov
@@ -54,7 +54,7 @@ A simple node intended to say hi to that special person:
 ros2 run orion_utils_py happy_birthday
 ~~~
 
-### introducing_orion.py
+### introducing_orion
 
 A demo node that covers simple arm and motor moves with emotions to display the capabilities of ORION.
 
@@ -73,7 +73,7 @@ ros2 run orion_utils_py laser_filter
 
 ## ⚠️ Troubleshooting
 
-### Ranges not filter the columns of the robot
+### Ranges do not filter the columns of the robot
 
 In case the position of your LIDAR differs from the one mentioned in the Wiki or in the robot_description, you can manually changes the ranges as it is managed as a parameter.
 

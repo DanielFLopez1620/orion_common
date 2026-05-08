@@ -1,3 +1,20 @@
+"""
+bringup.launch.py — ORION robot full bringup for real-hardware deployment.
+
+Launches: robot_state_publisher, ros2_control_node, micro-ROS agents (ESP32_1
+and ESP32_2), LD19 LIDAR (lifecycle), depth camera driver (A010 or OS30A),
+laser filter, ros2_controllers, and orion_chat (TTS/STT/LLM).
+
+Launch arguments:
+  camera      : 'os30a' | 'a010'  (default: 'os30a')
+  servo       : 'true'  | 'false' (default: 'true')
+  g_mov       : 'true'  | 'false' (default: 'false', A010 only)
+  rasp        : 'rpi4'  | 'rpi5'  (default: 'rpi5')
+  simplified  : 'true'  | 'false' (default: 'false')
+  ctl_type    : 'micro_ros' | 'serial' (default: 'micro_ros')
+  motor       : '100'   | '1000'  (default: '100', nominal RPM at 12V)
+"""
+
 # ///////////////////////////// REQUIRED LIBRARIES //////////////////////////////
 # .............................. Python libraries ...............................
 import os
@@ -49,27 +66,30 @@ ARGS = [
 
 def get_argument(context, arg):
     """
-    Get the context when performing the Launch Configuration
+    Resolve a launch argument to its string value at execution time.
+
+    Args:
+        context: OpaqueFunction execution context.
+        arg: Name of the declared launch argument.
+
+    Returns:
+        Resolved string value of the argument.
     """
     return LaunchConfiguration(arg).perform(context)
 
 def load_controllers(context):
     """
-    Load controllers by considering OpaqueFunctions to allow all of them to load
-    in a asynchronous way.
+    Spawn ros2_controllers via OpaqueFunction for asynchronous loading.
 
-    It is used as recommended in:
-    https://github.com/pal-robotics/tiago_robot/blob/humble-devel/tiago_controller_configuration/launch/default_controllers.launch.py
+    Always loads mobile_base_controller and joint_state_broadcaster.
+    Adds left/right arm controllers when the 'servo' argument is 'true'.
+    Pattern recommended by PAL Robotics for controller spawning.
 
-    Params
-    ---
-    Context : context
-        Context provided by OpaqueFunction
+    Args:
+        context: OpaqueFunction execution context.
 
-    Returns
-    ---
-    controller : Array of launch description actions
-        Actions linked to the controllers spawners
+    Returns:
+        List of launch description actions for each controller spawner.
     """
     pkg_ctl = get_package_share_directory('orion_control')
     mobile_base_path = os.path.join(pkg_ctl, 'config', 'mobile_base_controller.yaml')
@@ -104,9 +124,16 @@ def load_controllers(context):
 
 def generate_robot_bringup(context):
     """
-    For generating the robot description, consider the URDF/Xacro file provided,
-    but modifying the meshes source path in order to make it available to
-    Gazebo Harmonic.
+    Build the robot description from xacro and return the core bringup nodes.
+
+    Processes orion.urdf.xacro with the resolved launch arguments as mappings,
+    then returns a robot_state_publisher node and a ros2_control_node.
+
+    Args:
+        context: OpaqueFunction execution context.
+
+    Returns:
+        List containing [rsp_node, controller_node].
     """
     # Paths to consider
     pkg_gmov = get_package_share_directory('g_mov_description')
@@ -159,16 +186,24 @@ def generate_robot_bringup(context):
 
 def setup_lidar(context):
     """
-    The LD19 node uses lifecycle, so here it is the implementation of the
-    container for a proper usage of the LIDAR
+    Set up the LD19 LIDAR inside an isolated composable node container.
+
+    The ldlidar_component runs as a lifecycle node managed by nav2_lifecycle_manager.
+    Intra-process communication is enabled for lower latency.
+
+    Args:
+        context: OpaqueFunction execution context.
+
+    Returns:
+        List containing [ldlidar_container, load_composable_node].
     """
     lidar_elements = []
     lidar_params = os.path.join(get_package_share_directory('orion_bringup'),
-	'config', 'ldlidar.yaml')
+        'config', 'ldlidar.yaml')
 
     # Add composable container for isolated components
     ldlidar_container = ComposableNodeContainer(
-	name='ldlidar_container',
+        name='ldlidar_container',
         package='rclcpp_components',
         namespace='',
         executable='component_container_isolated',
@@ -186,7 +221,7 @@ def setup_lidar(context):
         extra_arguments=[{'use_intra_process_comms': True}]
     )
 
-    # Lode LiDAR Nodes
+    # Load LiDAR node into the container
     load_composable_node = LoadComposableNodes(
         target_container='ldlidar_container',
         composable_node_descriptions=[ldlidar_component]
@@ -198,7 +233,7 @@ def setup_lidar(context):
 
 def generate_launch_description():
     """
-    Launch description for common bringup of the ORION robot
+    Assemble and return the full ORION bringup LaunchDescription.
     """
     # Paths
     lidar_config = os.path.join(
@@ -217,7 +252,7 @@ def generate_launch_description():
     ld.add_action(Node(
         package='nav2_lifecycle_manager',
         executable='lifecycle_manager',
-	output="screen",
+        output="screen",
         parameters=[lidar_config]
     ))
 

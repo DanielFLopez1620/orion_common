@@ -1,3 +1,11 @@
+/*
+ * @file pid.hpp
+ * @brief Discrete PID controller for differential drive motor speed regulation.
+ *
+ * Computes PWM output from encoder feedback, with configurable gains, output
+ * clamping, and a dead-zone guard to prevent motor stall at low commands.
+ */
+
 #ifndef PID_HPP
 #define PID_HPP
 

@@ -1,4 +1,4 @@
-# 🤖 ORION Commons
+# 🤖 ORION Bringup
 
 ## 🌟 Overview
 
@@ -19,7 +19,7 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 ## 📚 Table of Contents
 
 - [📝 Udev rules set up](#-udev-rules-set-up)
-- [🚀 Launch files](#-udev-rules-set-up)
+- [🚀 Launch files](#-launch-files)
 - [🚀 Setup of bringup on Startup](#-setup-of-bringup-on-startup)
 - [⚠️ Troubleshooting](#️-troubleshooting)
 
@@ -81,7 +81,7 @@ SUBSYSTEM=="usb", ATTR{idProduct}=="0402", ATTR{idVendor}=="2bc5", MODE:="0666",
 
 - **MaixSense A010:** when connecting this device, you may notice it gives two USB devices, one for the device itself and another one for debugging, keep this in mind when using the rules as you may get a duplicated device.
 
-- **OS30A:** As a note, you  do not need a rules for the OS30A, as it is configured to use its serial in the launch files for the camera.
+- **OS30A:** As a note, you do not need rules for the OS30A, as it is configured to use its serial in the launch files for the camera.
 
 - **ESP32:** As there are two ESP32 and there is a high probability you bought the two ESP32 from the same batch, they may end with the same attributes. That is the reason, you should prefer a environmental attribute like the **ID_PATH** to distinguish both devices.
 
@@ -112,7 +112,7 @@ ros2 launch orion_bringup bringup.launch.py camera:=a010
 
 ## 🚀 Setup of bringup on Startup
 
-You can enable the robots bringup launch in order to start as the Raspberry Pi is being initialized, for this case, we will use services and actions for **systemd**.
+You can enable the robot's bringup launch in order to start as the Raspberry Pi is being initialized, for this case, we will use services and actions for **systemd**.
 
 ### 📋 Prerequisites
 

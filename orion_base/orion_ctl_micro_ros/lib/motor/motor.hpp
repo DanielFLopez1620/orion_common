@@ -1,3 +1,11 @@
+/*
+ * @file motor.hpp
+ * @brief DC motor driver abstraction for L298N-style H-bridge modules.
+ *
+ * Controls motor speed (PWM via enable pin) and direction (forward/backward
+ * GPIO pins) for the ORION differential drive base.
+ */
+
 #ifndef MOTOR_HPP
 #define MOTOR_HPP
 

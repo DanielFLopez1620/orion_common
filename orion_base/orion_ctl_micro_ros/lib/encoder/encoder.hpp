@@ -1,3 +1,12 @@
+/*
+ * @file encoder.hpp
+ * @brief Quadrature encoder driver for ORION wheel odometry.
+ *
+ * Single-channel interrupt-driven encoder reading (ENCA triggers ISR,
+ * ENCB sampled inside ISR for direction). Provides atomic tick count
+ * and reset for PID feedback loops.
+ */
+
 #ifndef ENCODER_HPP
 #define ENCODER_HPP
 

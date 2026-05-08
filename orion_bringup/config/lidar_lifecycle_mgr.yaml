@@ -1,3 +1,8 @@
+# lidar_lifecycle_mgr.yaml
+# nav2_lifecycle_manager configuration for the LD19 LIDAR node.
+# Manages lifecycle transitions (configure/activate) and automatic respawn
+# on bond timeout.
+
 /**:
   ros__parameters:
     autostart: True
