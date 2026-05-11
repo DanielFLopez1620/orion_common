@@ -35,6 +35,9 @@ ARGS = [
     DeclareLaunchArgument('motor', default_value='100',
         description="Select your motor nominal speed (rpm) at 12V",
         choices=['1000', '100']),
+    DeclareLaunchArgument('color', default_value='gold',
+        description="Visual color for structural panels",
+        choices=['gold', 'mdf', 'transparent', 'pla']),
 ]
 
 # //////////////////////////// LAUNCH DEFINITION //////////////////////////////
@@ -65,6 +68,7 @@ def generate_launch_description():
                     ' ros2_control:=', LaunchConfiguration('ros2_control'),
                     ' simplified:=', LaunchConfiguration('simplified'),
                     ' motor:=', LaunchConfiguration('motor'),
+                    ' color:=', LaunchConfiguration('color'),
                     ' ctl_type:=micro_ros'
                 ])
             }]

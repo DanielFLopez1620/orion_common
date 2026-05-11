@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <!-- @file orion_ros2_control.urdf.xacro
      @brief ros2_control hardware interface tags for ORION differential drive and servo arms.
-     Exposes DiffDriveOrion and ForwardOrion plugins to the controller manager. -->
+     Exposes DiffDriveOrion and ForwardOrion plugins to the controller manager.
+
+     NOTE on naming: `coupling_11_joint` / `coupling_12_joint` are the rotating
+     joints that physically act as the differential-drive wheel joints. The
+     URDF chain is motor_shaft -> coupling (continuous) -> ring (fixed) ->
+     neumatic / tire (fixed). The coupling is treated as the wheel joint to
+     keep the mechanical chain physically faithful to the real hardware. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:if value="${ros2_control}">
         <xacro:if value="${ctl_type == 'micro_ros'}">

@@ -63,4 +63,21 @@
         <color rgba="0.72 0.52 0.35 1.0"/>
     </material>
 
+    <!-- Selects the visual material for structural panels based on the global
+         ${color} property. Supported values: 'mdf', 'transparent', 'pla', 'gold'. -->
+    <xacro:macro name="apply_color_material">
+        <xacro:if value="${color == 'mdf'}">
+            <material name="MDF"/>
+        </xacro:if>
+        <xacro:if value="${color == 'transparent'}">
+            <material name="TransparentBlack"/>
+        </xacro:if>
+        <xacro:if value="${color == 'pla'}">
+            <material name="PLAWhite"/>
+        </xacro:if>
+        <xacro:if value="${color == 'gold'}">
+            <material name="Gold"/>
+        </xacro:if>
+    </xacro:macro>
+
 </robot>

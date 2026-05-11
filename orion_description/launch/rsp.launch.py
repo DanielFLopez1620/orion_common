@@ -42,7 +42,10 @@ ARGS = [
         choices=['serial', 'micro_ros']),
     DeclareLaunchArgument('gazebo', default_value='false',
         description="To use GZ configurations",
-        choices=['true', 'false'])
+        choices=['true', 'false']),
+    DeclareLaunchArgument('color', default_value='gold',
+        description="Visual color for structural panels",
+        choices=['gold', 'mdf', 'transparent', 'pla']),
 ]
 
 # /////////////////////////// FUNCTIONS DEFINITIONS ////////////////////////////
@@ -73,10 +76,13 @@ def generate_robot_description(context):
     Returns:
         list: Single-element list containing the configured robot_state_publisher Node.
     """
-    pkg_gmov = get_package_share_directory('g_mov_description')
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')
 
+    # NOTE: g_mov_description is required indirectly when g_mov:=true (via
+    # xacro:include inside orion_cameras.urdf.xacro). Pending removal of the
+    # external dependency; until then the package must be installed only when
+    # g_mov:=true is selected at launch time.
     mappings = {
         'camera': get_argument(context, 'camera'),
         'servo': get_argument(context, 'servo'),
@@ -87,6 +93,7 @@ def generate_robot_description(context):
         'simplified': get_argument(context, 'simplified'),
         'motor': get_argument(context, 'motor'),
         'ctl_type': get_argument(context, 'ctl_type'),
+        'color': get_argument(context, 'color'),
     }
 
     robot_description_config = xacro.process_file(xacro_file, mappings=mappings)

@@ -42,6 +42,8 @@ You can visualize the */robot_description* of the robot with the [model_vis.laun
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   ros2_control : Boolean (true/false) to indicate usage of ros2_controllers
 #   simplified : Boolean (true/false) to indicate if use the simplified URDF model
+#   motor : Motor nominal RPM at 12V, '100' or '1000'.
+#   color : Visual color for structural panels ('gold', 'mdf', 'transparent', 'pla').
 #
 ros2 launch orion_description model_vis.launch.py camera:=os30a
 ~~~
@@ -64,9 +66,15 @@ To launch the */robot_description* of the robot with the [rsp.launch.py](/orion_
 #   simplified : Boolean (true/false) to indicate the usage of the simplified URDF model (non-functional parts omitted).
 #   ctl_type: Control type can be 'micro-ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
+#   color : Visual color for structural panels ('gold', 'mdf', 'transparent', 'pla').
 #
 ros2 launch orion_description rsp.launch.py
 ~~~
+
+> **Note on dependencies:** when `g_mov:=true` is used (together with `camera:=a010`),
+> the URDF includes `g_mov_description/urdf/g_mov_macros.urdf.xacro` from the
+> external package `g_mov_description`. That package must be installed in the
+> workspace for the launch to succeed in that configuration.
 
 ![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/rps.gif)
 

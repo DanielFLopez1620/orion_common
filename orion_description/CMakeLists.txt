@@ -11,7 +11,7 @@ find_package(xacro REQUIRED)
 
 install(
   DIRECTORY launch meshes rviz urdf
-  DESTINATION share/${PROJECT\_NAME}
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
