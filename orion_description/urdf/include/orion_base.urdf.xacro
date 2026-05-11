@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
+<!-- @file orion_base.urdf.xacro
+     @brief Mobile platform definition for ORION: base links, levels, spacers,
+     drive motors, caster wheel, floor components, sensors, and walls. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-
-    <!-- This xacro file aims for adding the mobile platform to the robot-->
 
     <!-- ////////////////////////// BASE LINK //////////////////////////////-->
     <link name="base_link"/>
@@ -15,8 +16,8 @@
     </joint>
 
     <!-- ///////////////////////// PROPERTIES //////////////////////////////-->
-    <xacro:property name="level_height" value="0.08"/>
-    <xacro:property name="thickness" value="0.0025"/>
+    <xacro:property name="level_height" value="0.08"/>   <!-- m: vertical distance between platform levels -->
+    <xacro:property name="thickness" value="0.0025"/>    <!-- m: platform panel thickness -->
 
     <!-- /////////////////////////// LEVELS ///////////////////////////////-->
     <xacro:com_base level="0" parent="middle_base" x="0" y="0"
@@ -53,8 +54,6 @@
         z="-0.0225"/>
     <xacro:motor_dc front="1" side="2" x="-0.0025" y="${0.05418+0.036/2}"
         z="-0.0225"/>
-
-
 
     <!-- /////////////////////// CASTER WHEEL //////////////////////////-->
     <xacro:x4xmetric_spacer id="m4x17" element="caster" parent="base_l0_s2"
@@ -543,7 +542,7 @@
     <xacro:complete_front_wall id="flidar" parent="base_l1_s2" front="2"
         x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="1"/>
 
-    <!-- ////////////////// THIRD FLOOR COMPONENTES ////////////////////// -->
+    <!-- ////////////////// THIRD FLOOR COMPONENTS ////////////////////// -->
     <xacro:if value="${rasp == 'rpi4'}">
         <xacro:speakers_mount parent="base_l2_s2" front="2" side="1" x="-0.0025"
             y="0.0685" z= "0.0025"/>
@@ -612,13 +611,13 @@
         <xacro:complete_front_wall id="stereo" parent="base_l2_s2" front="2"
             x="${0.115/2}" z="${0.082/2 + 0.0025/2}" level="2"/>
     </xacro:if>
-    <!-- ////////////////// FOURTH FLOOR COMPONENTES ////////////////////// -->
+    <!-- ////////////////// FOURTH FLOOR COMPONENTS ////////////////////// -->
 
     <xacro:unless value="${simplified}">
         <xacro:x4xmetric_spacer id="m3x10" element="${rasp}" parent="base_l3_s2"
         offset_x="${0.049/2}" offset_y="${0.058/2}" x="0" y="0.0435" z="0.0025"/>
         
-        <!-- Link Rasberry Pi -->
+        <!-- Link Raspberry Pi -->
         <link name="${rasp}">
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 ${-pi_2}"/>
@@ -753,7 +752,7 @@
             <origin xyz="0.004 0 0.0125" rpy="0 0 0"/>
         </joint>
         <xacro:if value="${gazebo}">
-            <gazebo reference="esp32_adapter">
+            <gazebo reference="esp32_2_adapter">
                 <mu1>1.0</mu1>
                 <mu2>1.0</mu2>
             </gazebo>
@@ -790,7 +789,7 @@
             <origin xyz="0.002 0 0.01" rpy="0 0 0"/>
         </joint>
         <xacro:if value="${gazebo}">
-            <gazebo reference="esp32">
+            <gazebo reference="esp32_2">
                 <mu1>1.0</mu1>
                 <mu2>1.0</mu2>
             </gazebo>

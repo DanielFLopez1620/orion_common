@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!-- @file orion.urdf.xacro
+     @brief Top-level robot description for ORION. Declares all configurable
+     properties (camera, servo, rasp, motor, ctl_type, etc.) and includes
+     the modular xacro files for materials, macros, base, arms, cameras,
+     and ros2_control tags. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orion">
 
     <xacro:property name="camera" default="$(arg camera)"/>

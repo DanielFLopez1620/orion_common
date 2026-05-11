@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
+<!-- @file orion_cameras.urdf.xacro
+     @brief Camera link definitions for ORION: Astra S, OS30A, and MaixSense A010. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- Mounting level for cameras: level 2, side 1 (third platform from base) -->
     <xacro:property name="level_cam" value="base_l2_s1"/>
 
     <!--  //////////////////////// ASTRA_S CAM ///////////////////////////// -->

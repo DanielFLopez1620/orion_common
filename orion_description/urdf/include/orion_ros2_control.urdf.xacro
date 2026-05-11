@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!-- @file orion_ros2_control.urdf.xacro
+     @brief ros2_control hardware interface tags for ORION differential drive and servo arms.
+     Exposes DiffDriveOrion and ForwardOrion plugins to the controller manager. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:if value="${ros2_control}">
         <xacro:if value="${ctl_type == 'micro_ros'}">
@@ -17,6 +20,9 @@
                         <param name="enc_ticks_per_rev">1248</param>
                     </xacro:if>
                 </hardware>
+                <!-- NOTE: command interface limits (~26.7 RPM) are conservative vs
+                     physical joint limits (10.47 rad/s for 100 RPM motors).
+                     Review against mobile_base_controller.yaml if updating motor specs. -->
                 <joint name="coupling_11_joint">
                     <command_interface name="velocity">
                     <param name="min">-2.791666667</param>

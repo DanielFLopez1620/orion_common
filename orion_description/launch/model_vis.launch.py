@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""Launch the ORION model visualization with RViz and joint_state_publisher_gui."""
+
 # ///////////////////////////// REQUIRED LIBRARIES //////////////////////////////
 # .............................. Python libraries ...............................
 import os
@@ -14,10 +17,10 @@ ARGS = [
     DeclareLaunchArgument('camera', default_value='os30a',
         description="Choose a cam for the robot (os30a, astra_s, a010)",
         choices=['os30a', 'astra_s', 'a010']),
-    DeclareLaunchArgument('servo',default_value='true',
+    DeclareLaunchArgument('servo', default_value='true',
         description="Boolean to include or not the servos",
         choices=['true', 'false']),
-    DeclareLaunchArgument('g_mov',default_value='false',
+    DeclareLaunchArgument('g_mov', default_value='false',
         description="When using camera a010, whether to include or not G Mov",
         choices=['true', 'false']),
     DeclareLaunchArgument('rasp', default_value='rpi5',
@@ -27,33 +30,33 @@ ARGS = [
         description="Whether to use ros2_control tags for motor controllers",
         choices=['true', 'false']),
     DeclareLaunchArgument('simplified', default_value='false',
-        description="To ignore no-functional components in the URDF description",
+        description="To ignore non-functional components in the URDF description",
         choices=['true', 'false']),
     DeclareLaunchArgument('motor', default_value='100',
-        description="Select your  motor nominal speed (rpm) at 12V",
+        description="Select your motor nominal speed (rpm) at 12V",
         choices=['1000', '100']),
 ]
 
 # //////////////////////////// LAUNCH DEFINITION //////////////////////////////
+
+
 def generate_launch_description():
-    # Generate launch description
+    """Return the LaunchDescription for ORION model visualization."""
     ld = LaunchDescription(ARGS)
 
-    # Define paths
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')
     rviz_config_file = os.path.join(pkg_description, 'rviz', 'model_viz.rviz')
 
-    # Node for robot state publisher
     ld.add_action(
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            name="robot_state_publisher",
+            name='robot_state_publisher',
             output='screen',
             parameters=[{
                 'robot_description': Command([
-                    'xacro ', xacro_file, 
+                    'xacro ', xacro_file,
                     ' camera:=', LaunchConfiguration('camera'),
                     ' servo:=', LaunchConfiguration('servo'),
                     ' g_mov:=', LaunchConfiguration('g_mov'),
@@ -68,7 +71,6 @@ def generate_launch_description():
         )
     )
 
-    # Node for joint state publisher gui
     ld.add_action(
         Node(
             package='joint_state_publisher_gui',
@@ -77,7 +79,6 @@ def generate_launch_description():
         )
     )
 
-    # Node for RVIZ2
     ld.add_action(
         Node(
             package='rviz2',

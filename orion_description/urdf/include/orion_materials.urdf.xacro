@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
+<!-- @file orion_materials.urdf.xacro
+     @brief Material and color definitions used across the ORION URDF. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<!-- This xacro file aims for defining materials and color properties for the URDF-->
 
     <!-- Equivalent to RGB(0, 79, 148) -->
     <material name="ArduinoBlue">
@@ -37,9 +38,9 @@
         <color rgba="0.71 0.65 0.26 1.0"/>
     </material>
 
-    <!-- Equivalent to RGB(293, 191, 4) -->
+    <!-- Equivalent to RGB(212, 173, 54) -->
     <material name="Gold">
-        <color rgba="0.71 0.65 0.26 1.0"/>
+        <color rgba="0.83 0.68 0.21 1.0"/>
     </material>
 
     <!-- Equivalent to RGB(128, 128, 128) -->
