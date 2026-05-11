@@ -1,11 +1,11 @@
 # simple_right_arm_controller.yaml
-# ForwardCommandController for the ORION right arm servo (servo_conn2_joint).
+# ForwardCommandController for the ORION right arm servo (servo_conn_2_joint).
 # Sends position commands (radians) directly to the ForwardOrion hardware interface.
 
 simple_right_arm_controller:
   ros__parameters:
     type: forward_command_controller/ForwardCommandController
     joints:
-      - servo_conn2_joint
+      - servo_conn_2_joint
     interface_name: position
     update_rate: 20 # Hz

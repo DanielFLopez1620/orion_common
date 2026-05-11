@@ -53,9 +53,9 @@
                         <plugin>orion_control/ForwardOrion</plugin>
                         <param name="feedback_topic">fwd_servo_left_feedback</param>
                         <param name="cmd_topic">fwd_servo_left_cmd</param>
-                        <param name="servo_name">servo_conn1_joint</param>
+                        <param name="servo_name">servo_conn_1_joint</param>
                     </hardware>
-                    <joint name="servo_conn1_joint">
+                    <joint name="servo_conn_1_joint">
                         <command_interface name="position" />
                         <state_interface name="position" />
                     </joint>
@@ -65,9 +65,9 @@
                         <plugin>orion_control/ForwardOrion</plugin>
                         <param name="feedback_topic">fwd_servo_right_feedback</param>
                         <param name="cmd_topic">fwd_servo_right_cmd</param>
-                        <param name="servo_name">servo_conn2_joint</param>
+                        <param name="servo_name">servo_conn_2_joint</param>
                     </hardware>
-                    <joint name="servo_conn2_joint">
+                    <joint name="servo_conn_2_joint">
                         <command_interface name="position" />
                         <state_interface name="position" />
                     </joint>

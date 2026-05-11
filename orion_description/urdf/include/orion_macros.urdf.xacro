@@ -659,7 +659,7 @@
                     izz="3.332367339025419e-07"/>
         </inertial>
         </link>
-        <joint name="servo_conn${side}_joint" type="revolute">
+        <joint name="servo_conn_${side}_joint" type="revolute">
             <axis xyz="0.0 0.0 1.0"/>
             <parent link="servo_${side}"/>
             <child link="servo_conn_${side}"/>
