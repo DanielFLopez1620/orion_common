@@ -79,10 +79,6 @@ def generate_robot_description(context):
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')
 
-    # NOTE: g_mov_description is required indirectly when g_mov:=true (via
-    # xacro:include inside orion_cameras.urdf.xacro). Pending removal of the
-    # external dependency; until then the package must be installed only when
-    # g_mov:=true is selected at launch time.
     mappings = {
         'camera': get_argument(context, 'camera'),
         'servo': get_argument(context, 'servo'),

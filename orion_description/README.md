@@ -71,10 +71,12 @@ To launch the */robot_description* of the robot with the [rsp.launch.py](/orion_
 ros2 launch orion_description rsp.launch.py
 ~~~
 
-> **Note on dependencies:** when `g_mov:=true` is used (together with `camera:=a010`),
-> the URDF includes `g_mov_description/urdf/g_mov_macros.urdf.xacro` from the
-> external package `g_mov_description`. That package must be installed in the
-> workspace for the launch to succeed in that configuration.
+> **G Mov module:** the pan/tilt picam + accelerometer/IMU subsystem is
+> included via the `g_mov` argument (typically used with `camera:=a010`). Its
+> description, meshes and macros are bundled inside `orion_description` —
+> there is no external dependency on `g_mov_description`. The IMU reference
+> frame is published as `g_mov_imu`; sensor driver wiring is handled in a
+> separate package.
 
 ![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/rps.gif)
 

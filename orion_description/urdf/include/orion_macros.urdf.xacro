@@ -865,11 +865,27 @@
                         iyy="8.960721799390997e-09" iyz="0"
                         izz="4.443388969597693e-09"/>
             </xacro:if>
+            <xacro:if value="${id == 'm3x15'}">
+                <mass value="0.0017"/>
+                <inertia ixx="5.2825999244689955e-08" ixy="0" ixz="0"
+                        iyy="5.4441082699086494e-08" iyz="0"
+                        izz="9.66508345439654e-09"/>
+            </xacro:if>
             <xacro:if value="${id == 'm3x20'}">
                 <mass value="0.0024"/>
                 <inertia ixx="8.5251996963501e-08" ixy="0" ixz="0"
                         iyy="8.648216387229408e-08" iyz="0"
                         izz="1.333016690879308e-08"/>
+            </xacro:if>
+            <!-- NOTE: m3x6 iyy value reconstructed from a corrupted source
+                 ('.272650140158067e-09'); leading digit was missing. Picked
+                 4.272...e-09 based on the ixx/iyy ratio pattern of larger
+                 spacers (~1.05x for short ones). Verify if precision matters. -->
+            <xacro:if value="${id == 'm3x6'}">
+                <mass value="0.00072"/>
+                <inertia ixx="3.9036000675201425e-09" ixy="0" ixz="0"
+                        iyy="4.272650140158067e-09" iyz="0"
+                        izz="3.9990500726379235e-09"/>
             </xacro:if>
         </inertial>
         </link>

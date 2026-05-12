@@ -11,6 +11,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 # //////////////////////////// GLOBAL DEFINITIONS //////////////////////////////
 ARGS = [
@@ -58,19 +59,22 @@ def generate_launch_description():
             name='robot_state_publisher',
             output='screen',
             parameters=[{
-                'robot_description': Command([
-                    'xacro ', xacro_file,
-                    ' camera:=', LaunchConfiguration('camera'),
-                    ' servo:=', LaunchConfiguration('servo'),
-                    ' g_mov:=', LaunchConfiguration('g_mov'),
-                    ' rasp:=', LaunchConfiguration('rasp'),
-                    ' gazebo:=false',
-                    ' ros2_control:=', LaunchConfiguration('ros2_control'),
-                    ' simplified:=', LaunchConfiguration('simplified'),
-                    ' motor:=', LaunchConfiguration('motor'),
-                    ' color:=', LaunchConfiguration('color'),
-                    ' ctl_type:=micro_ros'
-                ])
+                'robot_description': ParameterValue(
+                    Command([
+                        'xacro ', xacro_file,
+                        ' camera:=', LaunchConfiguration('camera'),
+                        ' servo:=', LaunchConfiguration('servo'),
+                        ' g_mov:=', LaunchConfiguration('g_mov'),
+                        ' rasp:=', LaunchConfiguration('rasp'),
+                        ' gazebo:=false',
+                        ' ros2_control:=', LaunchConfiguration('ros2_control'),
+                        ' simplified:=', LaunchConfiguration('simplified'),
+                        ' motor:=', LaunchConfiguration('motor'),
+                        ' color:=', LaunchConfiguration('color'),
+                        ' ctl_type:=micro_ros'
+                    ]),
+                    value_type=str
+                )
             }]
         )
     )

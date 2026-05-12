@@ -36,6 +36,7 @@
     <!-- Include other files -->
     <xacro:include filename="$(find orion_description)/urdf/include/orion_materials.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_macros.urdf.xacro"/>
+    <xacro:include filename="$(find orion_description)/urdf/include/orion_g_mov.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_base.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_arms.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_cameras.urdf.xacro"/>

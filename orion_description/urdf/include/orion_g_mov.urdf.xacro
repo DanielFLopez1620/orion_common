@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<!-- @file orion_g_mov.urdf.xacro
+     @brief G Mov module: pan/tilt RGB camera + accelerometer/IMU subsystem.
+     Originally a separate ROS package (g_mov_description); the description
+     has been merged here so orion_description is self-contained.
+     All links and joints are prefixed with g_mov_ to avoid name collisions
+     with the rest of the robot. Reuses the existing metric_spacer macro and
+     existing meshes (mg996r.stl, servo_conn.stl, spacer_m3xN.stl) when
+     equivalent. IMU sensor wiring and ros2_control for the tilt servo are
+     handled outside this package. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ////////////////////// G MOV CAMERA LINKS MACRO ///////////////////
+         Camera frames for the G Mov picam. Kept separate from the main
+         camera_link/camera_link_optical so both sensors can coexist. -->
+    <xacro:macro name="g_mov_add_cam_links" params="x y z R P Y parent">
+        <link name="g_mov_cam_link"/>
+        <joint name="g_mov_cam_joint" type="fixed">
+            <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
+            <parent link="${parent}"/>
+            <child link="g_mov_cam_link"/>
+        </joint>
+
+        <link name="g_mov_cam_link_optical"/>
+        <joint name="g_mov_optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${R} ${P} ${Y}"/>
+            <parent link="g_mov_cam_link"/>
+            <child link="g_mov_cam_link_optical"/>
+        </joint>
+    </xacro:macro>
+
+    <!-- /////////////////////// G MOV ASSEMBLY MACRO //////////////////////
+         Builds the full G Mov stack on top of `parent`:
+           - 4 lower metric spacers (between parent platform and accel_base)
+           - accel_base + accel module + g_mov_imu reference frame
+           - 4 upper metric spacers (between accel_base and servo_base)
+           - servo_base + servo (MG996R) + servo_conn (revolute tilt joint)
+           - picam_sup + picam + camera reference frames -->
+    <xacro:macro name="g_mov_assem" params="parent spacer offset x y z">
+        <!-- Height between platforms is derived from the chosen spacer. -->
+        <xacro:property name="heigh_level" value="0.005"/>
+        <xacro:if value="${spacer == 'm3x20'}">
+            <xacro:property name="heigh_level" value="0.020"/>
+        </xacro:if>
+        <xacro:if value="${spacer == 'm3x15'}">
+            <xacro:property name="heigh_level" value="0.015"/>
+        </xacro:if>
+        <xacro:if value="${spacer == 'm3x10'}">
+            <xacro:property name="heigh_level" value="0.010"/>
+        </xacro:if>
+        <xacro:if value="${spacer == 'm3x6'}">
+            <xacro:property name="heigh_level" value="0.006"/>
+        </xacro:if>
+
+        <!-- Lower spacers: parent platform -> accel_base. -->
+        <xacro:x4xmetric_spacer id="${spacer}" element="g_mov_lower"
+            parent="${parent}" offset_x="${0.06365/2}" offset_y="${offset}"
+            x="${x}" y="${y}" z="${z}"/>
+
+        <!-- ......................... Accel base ........................ -->
+        <link name="g_mov_accel_base">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/accel_base.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="PLAGray"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/accel_base.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.008"/>
+                <inertia ixx="1.1233333333333333e-06" ixy="0" ixz="0"
+                        iyy="3.458666666666666e-06" iyz="0"
+                        izz="4.576666666666666e-06"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_accel_base_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="g_mov_accel_base"/>
+            <origin xyz="${x} ${y} ${z + heigh_level}" rpy="0 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_accel_base"/>
+
+        <!-- ..................... Accelerometer module .................. -->
+        <link name="g_mov_accel">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/accel.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="ArduinoBlue"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/accel.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.009"/>
+                <inertia ixx="4.064043630409241e-07" ixy="0" ixz="0"
+                        iyy="2.879643941116337e-07" iyz="0"
+                        izz="5.367750071525579e-07"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_accel_joint" type="fixed">
+            <parent link="g_mov_accel_base"/>
+            <child link="g_mov_accel"/>
+            <origin xyz="0.00025 0 0.00175" rpy="0 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_accel"/>
+
+        <!-- IMU reference frame. Plugin/driver wiring is pending and handled
+             outside this package. -->
+        <link name="g_mov_imu"/>
+        <joint name="g_mov_imu_joint" type="fixed">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <parent link="g_mov_accel"/>
+            <child link="g_mov_imu"/>
+        </joint>
+
+        <!-- Upper spacers: accel_base -> servo_base. -->
+        <xacro:x4xmetric_spacer id="${spacer}" element="g_mov_upper"
+            parent="g_mov_accel_base" offset_x="${0.06365/2}" offset_y="${offset}"
+            x="0" y="0" z="0.00175"/>
+
+        <!-- ........................ Servo base .......................... -->
+        <link name="g_mov_servo_base">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/servo_base.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="PLAGray"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/servo_base.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.012"/>
+                <inertia ixx="2.21e-06" ixy="0" ixz="0"
+                        iyy="5.713e-06" iyz="0"
+                        izz="6.8649999999999995e-06"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_servo_base_joint" type="fixed">
+            <parent link="g_mov_accel_base"/>
+            <child link="g_mov_servo_base"/>
+            <origin xyz="0.00025 0 ${0.00175+heigh_level}" rpy="0 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_servo_base"/>
+
+        <!-- ........................... Servo ............................ -->
+        <!-- MG996R servo; reuses the mg996r.stl mesh shared with the arms. -->
+        <link name="g_mov_servo">
+            <visual>
+                <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/mg996r.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="SoftBlack"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/mg996r.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+                <mass value="0.055"/>
+                <inertia ixx="1.1155878535842904e-05" ixy="0" ixz="0"
+                        iyy="2.1057527828089415e-05" iyz="0"
+                        izz="1.3568315958913178e-05"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_servo_joint" type="fixed">
+            <parent link="g_mov_servo_base"/>
+            <child link="g_mov_servo"/>
+            <origin xyz="0 -0.01625 ${0.00175 + 0.01}" rpy="0 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_servo"/>
+
+        <!-- ....................... Servo connector ..................... -->
+        <!-- Reuses the servo_conn.stl mesh shared with the arms. -->
+        <link name="g_mov_servo_conn">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/servo_conn.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="MetalGray"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/servo_conn.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.0024"/>
+                <inertia ixx="8.40345435933159e-08" ixy="0" ixz="0"
+                        iyy="8.401908867990422e-08" iyz="0"
+                        izz="1.5995363227322013e-07"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_servo_conn_joint" type="revolute">
+            <parent link="g_mov_servo"/>
+            <child link="g_mov_servo_conn"/>
+            <limit lower="${-pi/4}" upper="${pi/6}" effort="0.92" velocity="6.0"/>
+            <dynamics damping="0.05" friction="0.02"/>
+            <axis xyz="0.0 0.0 1.0"/>
+            <origin xyz="0.01 0.042 0" rpy="${-pi/2} 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_servo_conn"/>
+
+        <!-- ......................... Picam support ....................... -->
+        <link name="g_mov_picam_sup">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 ${-pi/2} ${pi/2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/picam_sup.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="PLAGray"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="0 ${-pi/2} ${pi/2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/picam_sup.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 ${-pi/2} ${pi/2}"/>
+                <mass value="0.008"/>
+                <inertia ixx="2.2308333333333333e-06" ixy="0" ixz="0"
+                        iyy="1.5268333333333331e-06" iyz="0"
+                        izz="3.1123333333333332e-06"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_picam_sup_joint" type="fixed">
+            <parent link="g_mov_servo_conn"/>
+            <child link="g_mov_picam_sup"/>
+            <origin xyz="0 0 0.005" rpy="0 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_picam_sup"/>
+
+        <!-- ........................... Picam ............................ -->
+        <link name="g_mov_picam">
+            <visual>
+                <origin xyz="0 0 0" rpy="${-pi/2} ${pi} ${-pi/2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/picam.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+                <material name="RaspberryGreen"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${-pi/2} ${pi} ${-pi/2}"/>
+                <geometry>
+                    <mesh filename="package://orion_description/meshes/picam.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="${-pi/2} 0 ${pi/2}"/>
+                <mass value="0.008"/>
+                <inertia ixx="2.2308333333333333e-06" ixy="0" ixz="0"
+                        iyy="1.5268333333333331e-06" iyz="0"
+                        izz="3.1123333333333332e-06"/>
+            </inertial>
+        </link>
+        <joint name="g_mov_picam_joint" type="fixed">
+            <parent link="g_mov_picam_sup"/>
+            <child link="g_mov_picam"/>
+            <origin xyz="0.038 0.004 -0.0275" rpy="${pi/2} 0 0"/>
+        </joint>
+        <xacro:gazebo_friction link="g_mov_picam"/>
+
+        <!-- Camera reference frames. -->
+        <xacro:g_mov_add_cam_links x="0.0065" y="0.0" z="-0.0025"
+            R="${-pi/2}" P="0" Y="${-pi/2}" parent="g_mov_picam"/>
+    </xacro:macro>
+</robot>
