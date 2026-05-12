@@ -94,8 +94,9 @@ def load_controllers(context):
     pkg_ctl = get_package_share_directory('orion_control')
     mobile_base_path = os.path.join(pkg_ctl, 'config', 'mobile_base_controller.yaml')
     joint_broad_path = os.path.join(pkg_ctl, 'config', 'joint_state_broadcaster.yaml')
-    left_arm_path = os.path.join(pkg_ctl, 'config', 'simple_left_arm_controller.yaml')
-    right_arm_path = os.path.join(pkg_ctl, 'config', 'simple_right_arm_controller.yaml')
+    left_arm_path    = os.path.join(pkg_ctl, 'config', 'simple_left_arm_controller.yaml')
+    right_arm_path   = os.path.join(pkg_ctl, 'config', 'simple_right_arm_controller.yaml')
+    g_mov_path       = os.path.join(pkg_ctl, 'config', 'g_mov_servo_controller.yaml')
 
 
     controllers = [
@@ -114,10 +115,15 @@ def load_controllers(context):
             controller_name="simple_left_arm_controller",
             controller_params_file=left_arm_path
         ))
-
         controllers.append(generate_load_controller_launch_description(
             controller_name="simple_right_arm_controller",
             controller_params_file=right_arm_path
+        ))
+
+    if LaunchConfiguration('g_mov').perform(context) == 'true':
+        controllers.append(generate_load_controller_launch_description(
+            controller_name="g_mov_servo_controller",
+            controller_params_file=g_mov_path
         ))
 
     return controllers
@@ -135,8 +141,6 @@ def generate_robot_bringup(context):
     Returns:
         List containing [rsp_node, controller_node].
     """
-    # Paths to consider
-    pkg_gmov = get_package_share_directory('g_mov_description')
     pkg_description = get_package_share_directory('orion_description')
     xacro_file = os.path.join(pkg_description, 'urdf', 'orion.urdf.xacro')
     pkg_control = get_package_share_directory('orion_control')

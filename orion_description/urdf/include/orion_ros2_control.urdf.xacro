@@ -73,6 +73,21 @@
                     </joint>
                 </ros2_control>
             </xacro:if>
+
+            <xacro:if value="${g_mov}">
+                <ros2_control name="FwdGMovRealRobot" type="system">
+                    <hardware>
+                        <plugin>orion_control/ForwardOrion</plugin>
+                        <param name="feedback_topic">fwd_servo_g_mov_feedback</param>
+                        <param name="cmd_topic">fwd_servo_g_mov_cmd</param>
+                        <param name="servo_name">g_mov_servo_conn_joint</param>
+                    </hardware>
+                    <joint name="g_mov_servo_conn_joint">
+                        <command_interface name="position" />
+                        <state_interface name="position" />
+                    </joint>
+                </ros2_control>
+            </xacro:if>
         </xacro:if>
     </xacro:if>
 </robot>
