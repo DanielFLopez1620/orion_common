@@ -40,6 +40,7 @@ echo "     sudo nano ${UDEV_DST}"
 
 echo "Adding ${USER} to the 'dialout' and 'i2c' groups..."
 sudo usermod -aG dialout "${USER}"
+sudo groupadd -f i2c
 sudo usermod -aG i2c "${USER}"
 echo "  → Log out and back in for the group changes to take effect."
 

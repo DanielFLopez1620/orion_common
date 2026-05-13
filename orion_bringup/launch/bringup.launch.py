@@ -326,4 +326,23 @@ def generate_launch_description():
     ld.add_action(OpaqueFunction(function=load_controllers))
     ld.add_action(OpaqueFunction(function=setup_lidar))
 
+    # G Mov module nodes — only when g_mov:=true
+    g_mov_condition = IfCondition(
+        PythonExpression(["'", LaunchConfiguration('g_mov'), "' == 'true'"])
+    )
+    ld.add_action(Node(
+        package='orion_utils_py',
+        executable='mpu6050_node',
+        name='mpu6050_node',
+        output='screen',
+        condition=g_mov_condition
+    ))
+    ld.add_action(Node(
+        package='orion_utils_py',
+        executable='g_mov_servo_node',
+        name='g_mov_servo_node',
+        output='screen',
+        condition=g_mov_condition
+    ))
+
     return ld
