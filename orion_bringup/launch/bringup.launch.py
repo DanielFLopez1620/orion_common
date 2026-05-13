@@ -3,7 +3,7 @@ bringup.launch.py — ORION robot full bringup for real-hardware deployment.
 
 Launches: robot_state_publisher, ros2_control_node, micro-ROS agents (ESP32_1
 and ESP32_2), LD19 LIDAR (lifecycle), depth camera driver (A010 or OS30A),
-laser filter, ros2_controllers, and orion_chat (TTS/STT/LLM).
+laser filter, and ros2_controllers.
 
 Launch arguments:
   camera      : 'os30a' | 'a010'  (default: 'os30a')
@@ -245,12 +245,6 @@ def generate_launch_description():
         'config', 'lidar_lifecycle_mgr.yaml'
     )
 
-    orion_chat_launch_path = os.path.join(
-        get_package_share_directory('orion_chat'),
-        'launch',
-        'orion_robot_launch.py'
-    )
-
     ld = LaunchDescription(ARGS)
 
     ld.add_action(Node(
@@ -331,16 +325,5 @@ def generate_launch_description():
     ld.add_action(OpaqueFunction(function=generate_robot_bringup))
     ld.add_action(OpaqueFunction(function=load_controllers))
     ld.add_action(OpaqueFunction(function=setup_lidar))
-
-    # To enable IA/TTS/STT/LLM functionalities
-    ld.add_action(IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(orion_chat_launch_path)
-    ))
-
-    ld.add_action(Node(
-        package='orion_chat',
-        executable='audio_recorder',
-        output="screen",
-    ))
 
     return ld

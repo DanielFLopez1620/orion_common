@@ -83,7 +83,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 docker build -t orion_dev:latest orion_docker/dev/
 ```
 
-> First build takes ~10 minutes — installs Nav2, SLAM Toolbox, Cartographer, simulation stack, and orion_chat Python dependencies.
+> First build takes ~10 minutes — installs Nav2, SLAM Toolbox, Cartographer, and the simulation stack.
 
 ### Open in VS Code
 
@@ -95,7 +95,7 @@ Ctrl + Shift + P → Dev Containers: Reopen in Container
 
 VS Code will start the container and automatically run `orion_docker/dev/post_create.sh`, which:
 
-- Clones the external repositories (`orion_gz`, `orion_tools`, `orion_chat`, sensor drivers) into `ws/src/`
+- Clones the external repositories (`orion_gz`, `orion_tools`, sensor drivers) into `ws/src/`
 - Runs `rosdep install` for any remaining dependencies
 
 > **Important:** Open the `orion_common` root directory in VS Code — not a subdirectory.
@@ -212,8 +212,6 @@ docker run --rm --privileged --network host \
 | Package | Source |
 | --- | --- |
 | `orion_common` (description, control, bringup) | `main` branch |
-| `orion_chat` | `teatro` branch |
-| `g_mov` | `main` branch |
 | `depth_maixsense_a010` | `main` branch |
 | `depth_ydlidar_os30a` | `main` branch |
 
@@ -243,13 +241,6 @@ orion_docker/
 ---
 
 ## Dependency notes
-
-### orion_chat
-
-`orion_chat` declares pip-only dependency keys (`sounddevice`, `webrtcvad`, `pytest`) that are not in the rosdep database for Ubuntu 24.04 Noble. Both Dockerfiles handle this:
-
-- **`orion_dev`**: pip packages are pre-installed at image build time; `post_create.sh` skips them via `--skip-keys` and runs `orion_chat`'s own `install_apt.sh` and `requirements.txt`.
-- **`orion_robot`**: `rosdep install` skips the same keys via `--skip-keys` during the workspace build step inside the image.
 
 ### depth_ydlidar_os30a (eYs3D / libdc1394)
 
@@ -290,10 +281,6 @@ sudo chown -R $USER:$USER /path/to/orion_common
 ### **`failed to discover GPU vendor from CDI`**
 
 The `--gpus all` flag requires NVIDIA Container Toolkit with CDI configured. Remove or comment out `"--gpus", "all"` in `devcontainer.json` to run without GPU passthrough.
-
-### **`Cannot locate rosdep definition for [orion_chat]`**
-
-This means `orion_chat` is not present in `ws/src/` when rosdep runs. Verify that `vcs import` completed successfully in `post_create.sh` and that the `teatro` branch of `orion_chat` was cloned.
 
 ### **`libdc1394.so.22: not found` when building depth_ydlidar_os30a**
 

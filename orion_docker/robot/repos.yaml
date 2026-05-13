@@ -5,18 +5,6 @@ repositories:
     url: https://github.com/DanielFLopez1620/orion_common.git
     version: main
 
-  # Interaction — required by orion_bringup (package.xml dep)
-  orion_chat:
-    type: git
-    url: https://github.com/Tesis-ORION/orion_chat.git
-    version: teatro
-
-  # Camera/servo head module
-  g_mov:
-    type: git
-    url: https://github.com/DanielFLopez1620/G-Mov_Project.git
-    version: main
-
   # Sensor driver forks (Jazzy ports)
   depth_maixsense_a010:
     type: git

@@ -13,8 +13,6 @@
     <depend>orion_control</depend>
     <depend>orion_description</depend>
     <depend>orion_utils_py</depend>
-    <exec_depend>orion_chat</exec_depend>
-
     <test_depend>ament_lint_auto</test_depend>
     <test_depend>ament_lint_common</test_depend>
 

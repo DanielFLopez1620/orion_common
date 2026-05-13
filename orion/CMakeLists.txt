@@ -10,7 +10,6 @@ find_package(orion_bringup REQUIRED)
 find_package(orion_control REQUIRED)
 find_package(orion_description REQUIRED)
 # find_package(orion_utils_py REQUIRED)
-# find_package(orion_chat REQUIRED)
 
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)

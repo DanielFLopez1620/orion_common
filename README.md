@@ -54,8 +54,6 @@ To build you robot, review the hardware changes and learn about the versions of 
 
 These components provide extended capabilities for sensors, simulation, perception, and interaction:
 
-- 💬 **[`orion_chat`](https://github.com/Tesis-ORION/orion_chat)** 🤖 Natural Language Processing interface for interacting with the robot and send commands (for example, specify arm movement or command a velocity to the robot).
-
 - 🧿 **[`orion_gz`](https://github.com/Tesis-ORION/orion_gz)** 🏙️ Simulation of the robot in GZ Harmonic that integrates native plugins, bridges between ROS 2 and GZ with [`ros_gz_bridge`](https://github.com/gazebosim/ros_gz/tree/ros2/ros_gz_bridge), and the integration of [`ros2_control`](https://control.ros.org/) with [`gz_ros2_control`](https://github.com/ros-controls/gz_ros2_control).
 
 - 📄 **[`orion_tools`](https://github.com/DanielFLopez1620/orion_tools)** 🔧 A collection of packages for using SLAM, Nav2 and teleoperation with the robot.
@@ -102,17 +100,7 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
     git clone https://github.com/Tesis-ORION/depth_orbbec_astra.git
     ~~~
 
-4. Install the [`orion_chat`](https://github.com/Tesis-ORION/orion_chat) package:
-
-    ~~~bash
-    git clone -b teatro https://github.com/Tesis-ORION/orion_chat.git
-    git clone https://github.com/Tesis-ORION/audio_messages.git
-    cd orion_chat
-    ./install_apt.sh
-    pip install -r requirements.txt --break-system-packages
-    ~~~
-
-5. Implement the additional installs recommended on the cameras READMEs, for more info check [Maixsense A010](https://github.com/DanielFLopez1620/depth_maixsense_a010), [YDLidar OS30A](https://github.com/Tesis-ORION/Depth_ydlidar_os30a) and [ORBBEC ASTRA S](https://github.com/Tesis-ORION/depth_orbbec_astra) packages.
+4. Implement the additional installs recommended on the cameras READMEs, for more info check [Maixsense A010](https://github.com/DanielFLopez1620/depth_maixsense_a010), [YDLidar OS30A](https://github.com/Tesis-ORION/Depth_ydlidar_os30a) and [ORBBEC ASTRA S](https://github.com/Tesis-ORION/depth_orbbec_astra) packages.
 
     ~~~bash
     # --------- General
@@ -129,14 +117,7 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
     ros-$ROS_DISTRO-backward-ros libdw-dev
     ~~~
 
-6. Install external packages dependencies for the G-Mov package (pi cam and servo) in the source
-
-    ~~~bash
-    cd ~/ros2_ws/src
-    git clone https://github.com/DanielFLopez1620/G-Mov_Project.git
-    ~~~
-
-7. Install all the dependencies:
+5. Install all the dependencies:
 
     ~~~bash
     sudo apt update
@@ -147,15 +128,15 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
     rosdep install --from-paths src --ignore-src -r -y
     ~~~
 
-8. After the installation is complete, build the package with the provided options to avoid errors with other packages in development:
+6. After the installation is complete, build the package with the provided options to avoid errors with other packages in development:
 
     ~~~bash
     cd ~/ros2_ws
-    colcon build --symlink-install --packages-select g_mov_description orion orion_description orion_control
+    colcon build --symlink-install --packages-select orion orion_description orion_control
     source install/setup.bash
     ~~~
 
-9. You are ready to explore the usage of the robot on this PC, now proceed with the robot [bringup](/orion_bringup/README.md)
+7. You are ready to explore the usage of the robot on this PC, now proceed with the robot [bringup](/orion_bringup/README.md)
 
 ---
 

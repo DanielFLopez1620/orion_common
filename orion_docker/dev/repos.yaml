@@ -11,16 +11,6 @@ repositories:
     url: https://github.com/Tesis-ORION/orion_tools.git
     version: dev
 
-  orion_chat:
-    type: git
-    url: https://github.com/Tesis-ORION/orion_chat
-    version: teatro
-
-  g_mov:
-    type: git
-    url: https://github.com/DanielFLopez1620/G-Mov_Project.git
-    version: dev
-
   depth_orbbec_astra:
     type: git
     url: https://github.com/Tesis-ORION/depth_orbbec_astra.git
