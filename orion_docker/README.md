@@ -144,7 +144,8 @@ bash orion_docker/robot/setup_host.sh
 This script:
 
 - Installs udev rules for all robot peripherals (`/etc/udev/rules.d/99-orion.rules`)
-- Adds the current user to the `dialout` and `docker` groups
+- Adds the current user to the `dialout`, `i2c`, and `docker` groups
+- Enables the I2C bus in `/boot/firmware/config.txt` (required for the MPU6050 IMU)
 - Installs and enables the `orion_robot.service` systemd unit
 
 > **Important:** After running the script, edit the udev rules to match the actual
@@ -161,8 +162,9 @@ This script:
 Before building, verify that all peripheral device symlinks exist on the host — the workspace build does not require them, but it confirms udev rules are correctly applied:
 
 ```bash
-# Validate udev rules for ESP32s, LIDAR and your camera
+# Validate udev rules for ESP32s, LIDAR, camera, and I2C bus
 ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19 /dev/ttyA010
+ls -la /dev/i2c-1
 ```
 
 ```bash
@@ -183,6 +185,7 @@ docker build -t orion_robot:latest orion_docker/robot/
 >
 > ```bash
 > ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19
+> ls -la /dev/i2c-1   # MPU6050 — must exist if using g_mov
 > ```
 
 The systemd service starts the container automatically on boot. To control it manually:

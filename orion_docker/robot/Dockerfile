@@ -24,12 +24,8 @@ RUN /bin/bash -c " \
     apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -y \
-        --skip-keys sounddevice \
-        --skip-keys webrtcvad  \
-        --skip-keys python3-sounddevice \
         --skip-keys pytest \
-        --skip-keys python3-pytest \
-        --skip-keys python3-mediapipe && \
+        --skip-keys python3-pytest && \
     rm -rf /var/lib/apt/lists/* && \
     MAKEFLAGS="-j1" colcon build \
         --parallel-workers 1 \

@@ -3,8 +3,9 @@
 #
 # This script installs the host-level prerequisites that cannot live inside Docker:
 #   1. udev rules for robot peripherals
-#   2. Current user added to the 'dialout' group
-#   3. systemd service that starts the container on boot
+#   2. Current user added to 'dialout' and 'i2c' groups
+#   3. I2C bus enabled in /boot/firmware/config.txt (for MPU6050)
+#   4. systemd service that starts the container on boot
 #
 # Run from the root of the orion_common repository:
 #   bash orion_docker/robot/setup_host.sh
@@ -37,9 +38,18 @@ echo "  → ${UDEV_DST}"
 echo "  ⚠  Review and update the rules to match your device attributes:"
 echo "     sudo nano ${UDEV_DST}"
 
-echo "Adding ${USER} to the 'dialout' group..."
+echo "Adding ${USER} to the 'dialout' and 'i2c' groups..."
 sudo usermod -aG dialout "${USER}"
-echo "  → Log out and back in for the group change to take effect."
+sudo usermod -aG i2c "${USER}"
+echo "  → Log out and back in for the group changes to take effect."
+
+echo "Enabling I2C bus (required for MPU6050)..."
+if ! grep -q "^dtparam=i2c_arm=on" /boot/firmware/config.txt 2>/dev/null; then
+    echo "dtparam=i2c_arm=on" | sudo tee -a /boot/firmware/config.txt
+    echo "  → I2C enabled — reboot required to activate."
+else
+    echo "  → I2C already enabled."
+fi
 
 if ! groups "${USER}" | grep -q docker; then
     echo "Adding ${USER} to the 'docker' group..."
