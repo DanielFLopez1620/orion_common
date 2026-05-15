@@ -38,10 +38,12 @@ echo "  → ${UDEV_DST}"
 echo "  ⚠  Review and update the rules to match your device attributes:"
 echo "     sudo nano ${UDEV_DST}"
 
-echo "Adding ${USER} to the 'dialout' and 'i2c' groups..."
+echo "Adding ${USER} to the 'dialout', 'i2c', and 'pwm' groups..."
 sudo usermod -aG dialout "${USER}"
 sudo groupadd -f i2c
 sudo usermod -aG i2c "${USER}"
+sudo groupadd -f pwm
+sudo usermod -aG pwm "${USER}"
 echo "  → Log out and back in for the group changes to take effect."
 
 echo "Enabling I2C bus (required for MPU6050)..."
@@ -51,6 +53,34 @@ if ! grep -q "^dtparam=i2c_arm=on" /boot/firmware/config.txt 2>/dev/null; then
 else
     echo "  → I2C already enabled."
 fi
+
+echo "Enabling hardware PWM on GPIO12 (required for MG996R servo)..."
+if ! grep -q "^dtoverlay=pwm" /boot/firmware/config.txt 2>/dev/null; then
+    echo "dtoverlay=pwm,gpiopin=12,func=4" | sudo tee -a /boot/firmware/config.txt
+    echo "  → dtoverlay=pwm,gpiopin=12,func=4 added — reboot required to activate."
+else
+    echo "  → Hardware PWM (dtoverlay) already configured."
+fi
+
+echo "Installing pwm-setup.service (exports PWM channel before container start)..."
+sudo tee /etc/systemd/system/pwm-setup.service > /dev/null << 'EOF'
+[Unit]
+Description=Export and unlock PWM0 for ORION servo node
+After=local-fs.target
+Before=orion_robot.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 0 > /sys/class/pwm/pwmchip0/export; chmod -R a+rw /sys/class/pwm/pwmchip0/'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable pwm-setup.service
+echo "  → /etc/systemd/system/pwm-setup.service (enabled)"
 
 if ! groups "${USER}" | grep -q docker; then
     echo "Adding ${USER} to the 'docker' group..."
@@ -65,8 +95,8 @@ echo "Installing systemd service..."
 sudo tee "${SERVICE_DST}" > /dev/null << 'EOF'
 [Unit]
 Description=ORION Robot Bringup (Docker)
-After=network-online.target docker.service
-Requires=docker.service
+After=network-online.target docker.service pwm-setup.service
+Requires=docker.service pwm-setup.service
 Wants=network-online.target
 
 [Service]

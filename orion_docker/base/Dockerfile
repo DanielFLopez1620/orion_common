@@ -7,12 +7,13 @@ ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME || true \
     && groupadd -f i2c \
     && groupadd -f gpio \
+    && groupadd -f pwm \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && apt-get update \
     && apt-get install -y --no-install-recommends sudo \
     && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
-    && usermod -aG dialout,video,audio,i2c,gpio $USERNAME \
+    && usermod -aG dialout,video,audio,i2c,gpio,pwm $USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,9 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-colcon-mixin \
     # ---- Serial / USB  (ESP32 serial bridge, Maixsense A010)
     python3-serial \
-    # ---- I2C / GPIO (MPU6050 IMU and MG996R servo on G Mov module)
+    # ---- I2C (MPU6050 IMU on G Mov module)
     python3-smbus2 \
-    python3-lgpio \
     # ---- Peripheral system libs
     # YDLIDAR OS30A requires libdc1394
     libdc1394-dev \
