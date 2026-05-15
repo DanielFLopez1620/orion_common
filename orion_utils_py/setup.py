@@ -28,6 +28,7 @@ setup(
             'emotion_try = orion_utils_py.emotion_try:main',
             'hi_human = orion_utils_py.hi_human:main',
             'mpu6050_node = orion_utils_py.mpu6050_node:main',
+            'mpu6050_calibration = orion_utils_py.mpu6050_calibration:main',
             'g_mov_servo_node = orion_utils_py.g_mov_servo_node:main',
         ],
     },

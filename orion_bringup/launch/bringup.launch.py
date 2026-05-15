@@ -6,13 +6,16 @@ and ESP32_2), LD19 LIDAR (lifecycle), depth camera driver (A010 or OS30A),
 laser filter, and ros2_controllers.
 
 Launch arguments:
-  camera      : 'os30a' | 'a010'  (default: 'os30a')
-  servo       : 'true'  | 'false' (default: 'true')
-  g_mov       : 'true'  | 'false' (default: 'false', A010 only)
-  rasp        : 'rpi4'  | 'rpi5'  (default: 'rpi5')
-  simplified  : 'true'  | 'false' (default: 'false')
-  ctl_type    : 'micro_ros' | 'serial' (default: 'micro_ros')
-  motor       : '100'   | '1000'  (default: '100', nominal RPM at 12V)
+  camera        : 'os30a' | 'a010'  (default: 'os30a')
+  servo         : 'true'  | 'false' (default: 'true')
+  g_mov         : 'true'  | 'false' (default: 'false', A010 only)
+  rasp          : 'rpi4'  | 'rpi5'  (default: 'rpi5')
+  simplified    : 'true'  | 'false' (default: 'false')
+  ctl_type      : 'micro_ros' | 'serial' (default: 'micro_ros')
+  motor         : '100'   | '1000'  (default: '100', nominal RPM at 12V)
+  calibrate_imu : 'true'  | 'false' (default: 'false', g_mov only)
+                  Force IMU re-calibration even if the calibration file exists.
+                  If the file is absent, calibration always runs first automatically.
 """
 
 # ///////////////////////////// REQUIRED LIBRARIES //////////////////////////////
@@ -24,7 +27,8 @@ import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-    OpaqueFunction)
+    OpaqueFunction, RegisterEventHandler)
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (LaunchConfiguration, Command, PathJoinSubstitution,
     PythonExpression)
@@ -62,6 +66,10 @@ ARGS = [
     DeclareLaunchArgument('motor', default_value='100',
         description="Select your  motor nominal speed (rpm) at 12V",
         choices=['1000', '100']),
+    DeclareLaunchArgument('calibrate_imu', default_value='false',
+        description="(g_mov only) Force IMU re-calibration even if a calibration file "
+                    "already exists. When the file is absent calibration always runs first.",
+        choices=['true', 'false']),
 ]
 
 def get_argument(context, arg):
@@ -187,6 +195,57 @@ def generate_robot_bringup(context):
 
     # Return configuration as a set
     return [rsp_node, controller_node]
+
+_CAL_FILE = os.path.expanduser('~/.ros/mpu6050_calibration.yaml')
+
+
+def setup_g_mov_imu(context):
+    """
+    Conditionally launch the MPU6050 IMU node, auto-calibrating when needed.
+
+    Rules (only active when g_mov:=true):
+      - Calibration file present  AND calibrate_imu:=false
+          → launch mpu6050_node directly.
+      - Calibration file absent   OR  calibrate_imu:=true
+          → launch mpu6050_calibration first (non-interactive);
+            when it exits, automatically launch mpu6050_node via OnProcessExit.
+
+    Args:
+        context: OpaqueFunction execution context.
+
+    Returns:
+        List of launch actions (Node and/or RegisterEventHandler).
+    """
+    if LaunchConfiguration('g_mov').perform(context) != 'true':
+        return []
+
+    imu_node = Node(
+        package='orion_utils_py',
+        executable='mpu6050_node',
+        name='mpu6050_node',
+        output='screen',
+    )
+
+    force_cal = LaunchConfiguration('calibrate_imu').perform(context) == 'true'
+    needs_cal = force_cal or not os.path.isfile(_CAL_FILE)
+
+    if not needs_cal:
+        return [imu_node]
+
+    cal_node = Node(
+        package='orion_utils_py',
+        executable='mpu6050_calibration',
+        name='mpu6050_calibration',
+        output='screen',
+        arguments=['--yes'],
+    )
+    return [
+        cal_node,
+        RegisterEventHandler(
+            OnProcessExit(target_action=cal_node, on_exit=[imu_node])
+        ),
+    ]
+
 
 def setup_lidar(context):
     """
@@ -327,22 +386,17 @@ def generate_launch_description():
     ld.add_action(OpaqueFunction(function=setup_lidar))
 
     # G Mov module nodes — only when g_mov:=true
-    g_mov_condition = IfCondition(
-        PythonExpression(["'", LaunchConfiguration('g_mov'), "' == 'true'"])
-    )
-    ld.add_action(Node(
-        package='orion_utils_py',
-        executable='mpu6050_node',
-        name='mpu6050_node',
-        output='screen',
-        condition=g_mov_condition
-    ))
+    # IMU: OpaqueFunction handles calibrate_imu logic and file-existence check.
+    ld.add_action(OpaqueFunction(function=setup_g_mov_imu))
+
     ld.add_action(Node(
         package='orion_utils_py',
         executable='g_mov_servo_node',
         name='g_mov_servo_node',
         output='screen',
-        condition=g_mov_condition
+        condition=IfCondition(
+            PythonExpression(["'", LaunchConfiguration('g_mov'), "' == 'true'"])
+        ),
     ))
 
     return ld

@@ -71,19 +71,21 @@ Wants=network-online.target
 
 [Service]
 # Remove any previous container instance before starting
-ExecStartPre=-/usr/bin/docker stop orion_robot_container
-ExecStartPre=-/usr/bin/docker rm   orion_robot_container
+ExecStartPre=-/usr/bin/docker stop orion_robot
+ExecStartPre=-/usr/bin/docker rm   orion_robot
 
 # --- Edit the launch arguments to match your hardware ---
 # camera options : a010 | os30a | astra_s
 # ctl_type       : micro_ros | serial
 ExecStart=/usr/bin/docker run \
     --rm \
+    --name orion_robot \
     --privileged \
     --network host \
+    -v /dev:/dev \
     -e ROS_DOMAIN_ID=0 \
     orion_robot:latest \
-    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro_ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 rasp:=rpi4 ctl_type:=micro_ros
 
 Restart=on-failure
 StandardOutput=journal
