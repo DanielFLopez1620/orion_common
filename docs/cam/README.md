@@ -418,3 +418,54 @@ To isolate whether the issue is the module or the RPi's CSI port: test the same 
 | ROS 2 | Jazzy |
 | camera_ros | built from source (github.com/christianrauch/camera_ros) |
 | GCC | 13.3.0 |
+
+---
+
+## Integration with ORION bringup
+
+The picam is part of the **G Mov** module — it is enabled by launching the
+bringup with `g_mov:=true`. The URDF link is `g_mov_picam` (defined in
+`orion_description/urdf/include/orion_g_mov.urdf.xacro`).
+
+### Host setup
+
+Build camera_ros into a dedicated workspace at `~/picam_ws` (so it can be
+bind-mounted into the Docker container without conflicting with the host's
+main ROS 2 workspace):
+
+```bash
+mkdir -p ~/picam_ws/src && cd ~/picam_ws
+git clone https://github.com/christianrauch/camera_ros.git src/camera_ros
+source /opt/ros/jazzy/setup.bash
+colcon build --packages-select camera_ros \
+  --cmake-args -DCMAKE_PREFIX_PATH="/usr/local"
+```
+
+Then run `setup_host.sh` (or re-run it) — it will:
+
+- Append `camera_auto_detect=0` and `dtoverlay=ov5647` to `/boot/firmware/config.txt`
+- Install the `dma_heap` udev rule
+- Update `orion_robot.service` to bind-mount `/usr/local` and `~/picam_ws`
+  into the container, and set `LIBCAMERA_IPA_MODULE_PATH` / `LIBCAMERA_IPA_PROXY_PATH`
+
+### Launch
+
+Edit `/etc/systemd/system/orion_robot.service` to add `g_mov:=true` to the
+launch line, then reload and restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart orion_robot.service
+```
+
+The container's `entrypoint.sh` sources `~/picam_ws/install/setup.bash`
+automatically when the bind-mount is present. The `bringup.launch.py` launches
+`camera_ros camera_node` under the `/g_mov` namespace at YUYV 320×240 @ 10 fps
+when `g_mov:=true`.
+
+### Published topics (when active)
+
+```text
+/g_mov/image_raw         sensor_msgs/Image
+/g_mov/camera_info       sensor_msgs/CameraInfo
+```

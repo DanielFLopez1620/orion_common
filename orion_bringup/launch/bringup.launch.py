@@ -48,23 +48,23 @@ ARGS = [
     DeclareLaunchArgument('camera', default_value='os30a',
         description="Choose a cam for the robot (os30a, a010). astra_s pending driver support.",
         choices=['os30a', 'a010']),
-    DeclareLaunchArgument('servo',default_value='true',
+    DeclareLaunchArgument('servo', default_value='true',
         description="Boolean to include or not the servos",
         choices=['true', 'false']),
-    DeclareLaunchArgument('g_mov',default_value='false',
+    DeclareLaunchArgument('g_mov', default_value='false',
         description="When using camera a010, whether to include or not G Mov",
         choices=['true', 'false']),
     DeclareLaunchArgument('rasp', default_value='rpi5',
         description="Select 4 for Raspberry Pi 4B, or 5 for Raspberry Pi 5",
         choices=['rpi4', 'rpi5']),
     DeclareLaunchArgument('simplified', default_value='false',
-        description="To ignore no-functional components in the URDF description",
+        description="To ignore non-functional components in the URDF description",
         choices=['true', 'false']),
     DeclareLaunchArgument('ctl_type', default_value='micro_ros',
         description="Select controller communication option: micro_ros or serial",
         choices=['micro_ros', 'serial']),
     DeclareLaunchArgument('motor', default_value='100',
-        description="Select your  motor nominal speed (rpm) at 12V",
+        description="Select your motor nominal speed (rpm) at 12V",
         choices=['1000', '100']),
     DeclareLaunchArgument('calibrate_imu', default_value='false',
         description="(g_mov only) Force IMU re-calibration even if a calibration file "
@@ -394,6 +394,28 @@ def generate_launch_description():
         executable='g_mov_servo_node',
         name='g_mov_servo_node',
         output='screen',
+        condition=IfCondition(
+            PythonExpression(["'", LaunchConfiguration('g_mov'), "' == 'true'"])
+        ),
+    ))
+
+    # G Mov picam — camera_ros bridge for the OV5647 (Pi Camera v1.3).
+    # Built and installed on the host (see docs/cam/README.md); the container
+    # mounts /usr/local + the host's picam_ws install at runtime.
+    # FrameDurationLimits is in microseconds: [100000, 100000] locks ~10 fps.
+    ld.add_action(Node(
+        package='camera_ros',
+        executable='camera_node',
+        name='g_mov_picam',
+        namespace='g_mov',
+        output='screen',
+        parameters=[{
+            'format': 'YUYV',
+            'width': 320,
+            'height': 240,
+            'FrameDurationLimits': [100000, 100000],
+            'frame_id': 'g_mov_picam',
+        }],
         condition=IfCondition(
             PythonExpression(["'", LaunchConfiguration('g_mov'), "' == 'true'"])
         ),
