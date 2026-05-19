@@ -20,7 +20,7 @@ repositories:
   ldrobot_lidar_ros2:
     type: git
     url: https://github.com/Myzhar/ldrobot-lidar-ros2.git
-    version: jazzy
+    version: main
 
   # depth_orbbec_astra intentionally excluded:
   # compilation fails on RPi4 (OOM with single thread, >1h build time)

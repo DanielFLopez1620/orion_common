@@ -21,6 +21,7 @@ RUN /bin/bash -c " \
     cd /home/${USERNAME}/ws && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
     vcs import src < /tmp/robot_repos.yaml && \
+    git -C src/ldrobot_lidar_ros2 submodule update --init --recursive && \
     apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -y \

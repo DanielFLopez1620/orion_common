@@ -322,7 +322,7 @@ export LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera'
   info "Building camera_ros from source (will link against RPi fork of libcamera)..."
 
   # Use the real user's home, not root's (in case script is run with sudo)
-  WS="$REAL_HOME/ros2_ws"
+  WS="$REAL_HOME/picam_ws"
   mkdir -p "$WS/src"
   cd "$WS"
 
@@ -347,7 +347,7 @@ export LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera'
       --cmake-args -DCMAKE_PREFIX_PATH='/usr/local'
   "
 
-  if ! grep -q "ros2_ws/install/setup.bash" "$BASHRC"; then
+  if ! grep -q "picam_ws/install/setup.bash" "$BASHRC"; then
     echo "source $WS/install/setup.bash" >> "$BASHRC"
     success "Workspace sourced in $BASHRC"
   fi
@@ -363,7 +363,7 @@ verify_ros2() {
 
   REAL_USER="${SUDO_USER:-$USER}"
   REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
-  source "$REAL_HOME/ros2_ws/install/setup.bash" 2>/dev/null || true
+  source "$REAL_HOME/picam_ws/install/setup.bash" 2>/dev/null || true
 
   echo ""
   info "→ Checking camera_ros package:"

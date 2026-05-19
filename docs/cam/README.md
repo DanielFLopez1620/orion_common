@@ -288,7 +288,7 @@ The apt package links against the ROS libcamera (incompatible). It must be built
 
 ```bash
 # Create workspace
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws
+mkdir -p ~/picam_ws/src && cd ~/picam_ws
 
 # Clone camera_ros
 git clone https://github.com/christianrauch/camera_ros.git src/camera_ros
@@ -299,13 +299,13 @@ colcon build --packages-select camera_ros \
   --cmake-args -DCMAKE_PREFIX_PATH="/usr/local"
 
 # Source the workspace
-source ~/ros2_ws/install/setup.bash
+source ~/picam_ws/install/setup.bash
 ```
 
 Add to `.bashrc`:
 
 ```bash
-echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
+echo 'source ~/picam_ws/install/setup.bash' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -354,7 +354,7 @@ ros2 run camera_ros camera_node --ros-args \
 ```bash
 # In another terminal
 source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
+source ~/picam_ws/install/setup.bash
 
 ros2 topic list
 # Should show: /image_raw  /camera_info
