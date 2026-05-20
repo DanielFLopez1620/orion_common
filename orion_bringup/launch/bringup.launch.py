@@ -235,7 +235,6 @@ def setup_g_mov_imu(context):
     cal_node = Node(
         package='orion_utils_py',
         executable='mpu6050_calibration',
-        name='mpu6050_calibration',
         output='screen',
         arguments=['--yes'],
     )

@@ -144,9 +144,12 @@ bash orion_docker/robot/setup_host.sh
 This script:
 
 - Installs udev rules for all robot peripherals (`/etc/udev/rules.d/99-orion.rules`)
-- Adds the current user to the `dialout`, `i2c`, and `docker` groups
-- Enables the I2C bus in `/boot/firmware/config.txt` (required for the MPU6050 IMU)
-- Installs and enables the `orion_robot.service` systemd unit
+- Adds the current user to the `dialout`, `i2c`, `pwm`, `video`, and `docker` groups
+- Enables I2C, hardware PWM, and the OV5647 camera overlay in `/boot/firmware/config.txt`
+- Installs the `dma_heap` udev rule required for libcamera access as a non-root user
+- Checks that the host libcamera (RPi fork) and `~/picam_ws` are present (needed for `g_mov:=true`)
+- Installs the `pwm-setup.service` systemd unit (exports PWM channel before container start)
+- Installs and enables the `orion_robot.service` systemd unit with `--ulimit rtprio=99` and `--ulimit memlock=-1` for real-time scheduling
 
 > **Important:** After running the script, edit the udev rules to match the actual
 > serial/ID_PATH attributes of **your** specific devices:
@@ -205,9 +208,27 @@ To run manually (e.g. to test or override launch arguments):
 
 ```bash
 docker run --rm --privileged --network host \
+    --ulimit rtprio=99 --ulimit memlock=-1 \
+    -v /dev:/dev \
     -e ROS_DOMAIN_ID=0 \
     orion_robot:latest \
-    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro-ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro_ros
+```
+
+When launching with `g_mov:=true`, add the libcamera host mounts and environment variables so the container can access the RPi libcamera fork and the `camera_ros` workspace built on the host (see `docs/cam/README.md`):
+
+```bash
+docker run --rm --privileged --network host \
+    --ulimit rtprio=99 --ulimit memlock=-1 \
+    -v /dev:/dev \
+    -v /usr/local:/usr/local:ro \
+    -v ~/picam_ws:/home/orion_user/picam_ws:ro \
+    -e ROS_DOMAIN_ID=0 \
+    -e LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu \
+    -e LIBCAMERA_IPA_MODULE_PATH=/usr/local/lib/aarch64-linux-gnu/libcamera \
+    -e LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera \
+    orion_robot:latest \
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 g_mov:=true ctl_type:=micro_ros
 ```
 
 ### Packages included
@@ -217,6 +238,7 @@ docker run --rm --privileged --network host \
 | `orion_common` (description, control, bringup) | `main` branch |
 | `depth_maixsense_a010` | `main` branch |
 | `depth_ydlidar_os30a` | `main` branch |
+| `ldrobot_lidar_ros2` (LD19 lidar driver) | `main` branch |
 
 `depth_orbbec_astra` is intentionally excluded — compilation runs out of memory on RPi4.
 

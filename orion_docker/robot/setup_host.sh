@@ -156,6 +156,7 @@ ExecStart=/usr/bin/docker run \\
     --name orion_robot \\
     --privileged \\
     --ulimit rtprio=99 \\
+    --ulimit memlock=-1 \\
     --network host \\
     -v /dev:/dev \\
     -v /usr/local:/usr/local:ro \\
