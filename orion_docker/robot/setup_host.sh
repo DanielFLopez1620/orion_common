@@ -155,6 +155,7 @@ ExecStart=/usr/bin/docker run \\
     --rm \\
     --name orion_robot \\
     --privileged \\
+    --ulimit rtprio=99 \\
     --network host \\
     -v /dev:/dev \\
     -v /usr/local:/usr/local:ro \\
@@ -164,7 +165,7 @@ ExecStart=/usr/bin/docker run \\
     -e LIBCAMERA_IPA_MODULE_PATH=/usr/local/lib/aarch64-linux-gnu/libcamera \\
     -e LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera \\
     orion_robot:latest \\
-    ros2 launch orion_bringup bringup.launch.py camera:=a010 rasp:=rpi4 ctl_type:=micro_ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 rasp:=rpi4 g_mov:=true ctl_type:=micro_ros
 
 Restart=on-failure
 StandardOutput=journal

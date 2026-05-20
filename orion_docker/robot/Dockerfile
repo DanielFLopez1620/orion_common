@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-v4l2-camera \
     ros-${ROS_DISTRO}-joy \
     ros-${ROS_DISTRO}-teleop-twist-joy \
+    libudev-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /bin/bash -c " \
@@ -31,6 +32,8 @@ RUN /bin/bash -c " \
     MAKEFLAGS="-j1" colcon build \
         --parallel-workers 1 \
         --cmake-args -DCMAKE_BUILD_TYPE=Release && \
+    find build/ldlidar_component -name "libldlidar.so" \
+        -exec cp {} install/ldlidar_component/lib/ \; && \
     rm -rf src build log && \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws \
     "
