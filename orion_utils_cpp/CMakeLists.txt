@@ -33,6 +33,9 @@ ament_target_dependencies(introducing_orion rclcpp std_msgs geometry_msgs sensor
 add_executable(hi_human src/hi_human.cpp)
 ament_target_dependencies(hi_human rclcpp std_msgs geometry_msgs sensor_msgs nav_msgs)
 
+add_executable(touch_interaction src/touch_interaction.cpp)
+ament_target_dependencies(touch_interaction rclcpp std_msgs)
+
 install(TARGETS
     laser_filter
     emotion_try
@@ -41,6 +44,7 @@ install(TARGETS
     demo_theater
     introducing_orion
     hi_human
+    touch_interaction
     DESTINATION lib/${PROJECT_NAME}
 )
 
