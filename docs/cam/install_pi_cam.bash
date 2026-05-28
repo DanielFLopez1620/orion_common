@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# setup_rpicam_ubuntu2404.sh
+# install_pi_cam.bassh
 # RPi Camera v1.3 (OV5647) — Ubuntu Server 24.04 — Raspberry Pi 4
 # For use with camera_ros in ROS 2 Jazzy
 #
@@ -36,7 +36,7 @@ check_environment() {
   fi
 
   if ! grep -q "24.04" /etc/os-release 2>/dev/null; then
-    warn "This script was tested on Ubuntu 24.04. Continue at your own risk."
+    warn "This script was tested on Ubuntu 24.04 for RPi. Continue at your own risk."
     read -rp "Continue anyway? [y/N]: " confirm
     [[ "$confirm" =~ ^[yY]$ ]] || exit 0
   fi
@@ -115,7 +115,7 @@ install_dependencies() {
   success "Dependencies installed"
 }
 
-# ─── Swap helpers ─────────────────────────────────────────────────────────────
+# Swap helper in case of few resources
 _ensure_swap() {
   # libcamera/rpicam-apps compilation requires ~1.5 GB RAM.
   # If free memory is low, create a temporary swap file to prevent OOM kills.
@@ -138,6 +138,7 @@ _ensure_swap() {
   fi
 }
 
+# Delete swap after usage (if used)
 _cleanup_swap() {
   if [[ "${SWAP_CREATED:-0}" -eq 1 ]]; then
     sudo swapoff /swapfile
@@ -146,6 +147,7 @@ _cleanup_swap() {
   fi
 }
 
+# Ensure libcamera is registered
 _register_libcamera() {
   echo "/usr/local/lib/aarch64-linux-gnu" | sudo tee /etc/ld.so.conf.d/rpicam.conf > /dev/null
   sudo ldconfig
@@ -179,6 +181,7 @@ build_libcamera() {
   meson setup build
   ninja -C build -j2
   sudo ninja -C build install
+
   _cleanup_swap
 
   _register_libcamera
@@ -207,10 +210,12 @@ build_rpicam_apps() {
   cd ~/rpicam-apps
 
   _ensure_swap
+
   meson setup build --buildtype=release -Denable_libav=disabled
   ninja -C build -j2
   sudo ninja -C build install
   sudo ldconfig
+
   _cleanup_swap
 
   success "rpicam-apps built and installed"
@@ -321,7 +326,6 @@ export LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera'
   # 8.4 — Build camera_ros from source
   info "Building camera_ros from source (will link against RPi fork of libcamera)..."
 
-  # Use the real user's home, not root's (in case script is run with sudo)
   WS="$REAL_HOME/picam_ws"
   mkdir -p "$WS/src"
   cd "$WS"
@@ -372,17 +376,19 @@ verify_ros2() {
   echo ""
   success "━━━ Setup complete ━━━"
 
+  # Log usage
   echo ""
   echo -e "${CYAN}Recommended launch command for OV5647:${NC}"
   echo ""
   echo "  ros2 run camera_ros camera_node --ros-args \\"
-  echo "    -p format:=XRGB8888 \\"
+  echo "    -p format:=YUYV \\"
   echo "    -p width:=640 \\"
   echo "    -p height:=480"
   echo ""
   echo -e "${CYAN}OV5647 available resolutions:${NC}"
+  echo "  320x240   @ >60.0 fps  → constrained env"
   echo "  640x480   @ 58.92 fps  → real-time HRI"
-  echo "  1296x972  @ 43.25 fps  → quality/performance balance ✅"
+  echo "  1296x972  @ 43.25 fps  → quality/performance balance"
   echo "  1920x1080 @ 30.62 fps  → recording / mapping"
   echo "  2592x1944 @ 15.63 fps  → maximum resolution"
   echo ""

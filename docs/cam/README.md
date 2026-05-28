@@ -1,7 +1,6 @@
 # RPi Camera v1.3 (OV5647) on Ubuntu Server 24.04 — Raspberry Pi 4
-### For use with `camera_ros` in ROS 2 Jazzy
 
----
+> For use with `camera_ros` in ROS 2 Jazzy
 
 ## Background
 
@@ -30,7 +29,7 @@ The **RPi Camera Module v1.3** uses the **OV5647** sensor. Getting it to work on
 
 Connect the camera to the **CSI port** on the RPi 4. The ribbon cable must be inserted with the metal contacts facing the HDMI ports. Gently pull the black clip, insert the cable straight, and press the clip back until it clicks.
 
-> ⚠️ **Maximum recommended ribbon length:** up to 50 cm for reliable operation. Longer cables may work but are prone to CSI signal failures (sensor responds over I2C but frames time out). For mobile robots, consider Arducam CSI-to-HDMI extenders that support up to 10 m.
+> ⚠️ **Maximum recommended ribbon length:** up to 50 cm for reliable operation. Longer cables may work but are prone to CSI signal failures (sensor responds over I2C but frames time out).
 
 ---
 
@@ -325,7 +324,7 @@ The OV5647 natively outputs `NV21` (YUV420 semi-planar), which **is not compatib
 
 ```bash
 ros2 run camera_ros camera_node --ros-args \
-  -p format:=XRGB8888 \
+  -p format:=YUYV \
   -p width:=640 \
   -p height:=480
 ```
@@ -334,10 +333,13 @@ ros2 run camera_ros camera_node --ros-args \
 
 | Resolution | FPS | Recommended use |
 |---|---|---|
+| 320x240 | >60.0 fps | For constrained environments |
 | 640x480 | 58.92 fps | Real-time HRI, person detection |
-| 1296x972 | 43.25 fps | Quality/performance balance ✅ |
+| 1296x972 | 43.25 fps | Quality/performance balance |
 | 1920x1080 | 30.62 fps | Recording, mapping |
 | 2592x1944 | 15.63 fps | Maximum resolution, low framerate |
+
+> Note: Keep in mind that this frame rates and resolutions refer to on platform system. If you intend to explore the usage of the image with ROS 2 topics, consider evaluating your environment and constraints so it matches your requirements. 
 
 ### Available pixel formats
 
