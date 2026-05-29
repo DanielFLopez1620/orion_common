@@ -102,7 +102,7 @@ diff::ControlPID pid_right(
 fwd::ServoMotor servo_left(max_servo_pos, min_servo_pos, fwd::HARDWARE::SERVO_LEFT);
 fwd::ServoMotor servo_right(max_servo_pos, min_servo_pos, fwd::HARDWARE::SERVO_RIGHT);
 
-// ---- SETUP ----
+
 void setup()
 {
     safe_startup_pins();
@@ -177,7 +177,7 @@ void setup()
     safe_startup();
 }
 
-// ---- LOOP ----
+
 void loop()
 {
     if (received_motor_cmd && (millis() - last_cmd_time > cmd_timeout_ms)) {
@@ -210,8 +210,6 @@ void safe_startup() {
     delay(500);
 }
 
-// ---- FUNCTION DEFINITIONS -----
-
 /*
  * Initializes all motor/servo pins as outputs and sets them to LOW.
  * Ensures safe startup without accidental motor movement.
@@ -238,14 +236,14 @@ void safe_startup_pins()
 }
 
 
-/**
- * ISR for left encoder pulse (attached to ML_ENCA, single-channel quadrature) 
+/*
+ * ISR for left encoder pulse (attached to ML_ENCA, single-channel quadrature).
  */
 void IRAM_ATTR read_left_enc() { enc_left.readEnc(); }
 
 /*
- * ISR for right encoder pulse (attached to MR_ENCA, single-channel quadrature) 
-*/
+ * ISR for right encoder pulse (attached to MR_ENCA, single-channel quadrature).
+ */
 void IRAM_ATTR read_right_enc() { enc_right.readEnc(); }
 
 /*
@@ -268,6 +266,7 @@ void adjust_motors_speed()
 
 /*
  * Sets motor speed setpoints and enables/disables PID controllers.
+ *
  * @param left_speed target encoder count change per cycle (0 to stop)
  * @param right_speed target encoder count change per cycle (0 to stop)
  */

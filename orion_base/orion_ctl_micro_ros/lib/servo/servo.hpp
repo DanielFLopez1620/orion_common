@@ -30,6 +30,7 @@ namespace fwd
     public:
         /*
          * Constructor that sets servo motion limits and PWM pin.
+         *
          * @param max_pos Upper position limit in degrees (0-180 typical)
          * @param min_pos Lower position limit in degrees (0-180 typical)
          * @param pwm_pin GPIO pin for servo PWM signal
@@ -52,18 +53,21 @@ namespace fwd
 
         /*
          * Reads current servo position.
+         *
          * @return Current position in degrees (0-180)
          */
         float getPositionDeg();
 
         /*
          * Sets servo position from radians, converts to degrees.
-         * @param radians Target position in radians (~[-π/2, π/2] for centered servo)
+         *
+         * @param radians Target position in radians (~[-pi/2, pi/2] for centered servo)
          */
         void setPositionRad(const float& radians);
 
         /*
          * Reads current servo position in radians.
+         *
          * @return Current position in radians
          */
         float getPositionRad();
@@ -76,12 +80,14 @@ namespace fwd
 
         /*
          * Sets interpolation target (objective) for approximatePositionDeg.
+         *
          * @param degrees Target position in degrees
          */
         void setObjectiveDeg(float degrees);
 
         /*
          * Sets interpolation target from radians.
+         *
          * @param radians Target position in radians
          */
         void setObjectiveRad(float radians);

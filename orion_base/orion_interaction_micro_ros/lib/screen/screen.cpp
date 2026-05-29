@@ -74,6 +74,7 @@ void Screen::displayEmotion(int emotion)
                 Y2_INI + Y_SIZE,
                 COLOR_ORANGE);
             break;
+
         // ------------------- Inexpressive
         case 1:
             tft.clear();
@@ -90,6 +91,7 @@ void Screen::displayEmotion(int emotion)
                 COLOR_YELLOW
             );
             break;
+
         // ------------------- Fear
         case 2:
             tft.clear();
@@ -104,6 +106,7 @@ void Screen::displayEmotion(int emotion)
                 Y_SIZE/3,
                 COLOR_BLUE);
             break;
+
         // ------------------- Happy
         case 3:
             tft.clear();
@@ -144,6 +147,7 @@ void Screen::displayEmotion(int emotion)
                 COLOR_BLACK
             );
             break;
+
         // ------------------- Neutral
         case 4:
             tft.clear();
@@ -160,6 +164,7 @@ void Screen::displayEmotion(int emotion)
                 COLOR_YELLOW
             );
             break;
+
         // ------------------- Surprise
         case 5:
             tft.clear();
@@ -176,6 +181,7 @@ void Screen::displayEmotion(int emotion)
                 COLOR_YELLOW
             );
             break;
+
         // ------------------- Sad
         case 6:
             tft.clear();
@@ -205,6 +211,7 @@ void Screen::displayEmotion(int emotion)
                 Y2_INI + Y_SIZE,
                 COLOR_LIGHTBLUE);
             break;
+
         // ------------------- Default
         default:
             tft.clear();

@@ -151,10 +151,10 @@ With this, you can do the next:
 - You can command the screen by publishing to the emotion topic, as this will display a face according to this:
 
     ~~~bash
-    ros2 topic pub /emotion/int std_msgs/msg/Int64 "data: 2"
+    ros2 topic pub /emotion/int std_msgs/msg/Int32 "data: 2"
     ~~~
 
-    For now there are seven emotions which are: Angry (0), Disgust (1), Fear(2), Happy (3), Neutral (4), Sad (5), Surprise (6).
+    For now there are seven emotions which are: Angry (0), Disgust (1), Fear (2), Happy (3), Neutral (4), Sad (5), Surprise (6).
 
 ## Additional notes
 
@@ -168,4 +168,4 @@ With this, you can do the next:
 
 - [talker_c | riot-ros2 @ Github](https://github.com/astralien3000/riot-ros2/blob/3d0779b920996f4e701830b8248573cd0e23204d/examples/talker_c/main.c#L32)
 
-- [micro_ros_platfomio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)
+- [micro_ros_platformio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)

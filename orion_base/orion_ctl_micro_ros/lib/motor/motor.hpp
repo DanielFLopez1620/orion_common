@@ -25,6 +25,7 @@ namespace diff
     public:
         /*
          * Constructor that sets up GPIO pins for motor control.
+         *
          * @param enable GPIO pin for PWM speed control
          * @param forward GPIO pin for forward direction
          * @param backward GPIO pin for backward direction
@@ -47,6 +48,7 @@ namespace diff
 
         /*
          * Sets motor speed and direction via PWM.
+         *
          * @param speed PWM value: negative=forward, positive=backward, 0=stop
          *        Range: [-255, 255] (0-255 mapped to PWM duty cycle)
          */

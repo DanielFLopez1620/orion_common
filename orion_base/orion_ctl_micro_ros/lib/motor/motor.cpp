@@ -1,14 +1,8 @@
-// //////////////////////// Include Libraries //////////////////////////////
-// -------------------- Arduino / ESP32 Dependencies -----------------------
-#include <Arduino.h> // Library for Arduino-like code
+#include <Arduino.h>
+#include <cmath>
 
-// ---------------------- STD Libraries ------------------------------------
-#include <cmath> // Standard library for math (Symbols, constants and oper.)
+#include "motor.hpp"
 
-// ---------------------- Custom dependencies ------------------------------
-#include "motor.hpp" // Custom header for a motor class
-
-// /////////////////////// CLASS DEFINITIONS ///////////////////////////////
 namespace diff
 {
     void MotorDriver::safeInit()
@@ -21,24 +15,20 @@ namespace diff
 
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
-
     }
 
     void MotorDriver::begin()
     {
         this->safeInit();
         this->stop();
-
     }
 
     void MotorDriver::setSpeed(int speed)
     {
         int abs_speed = abs(speed);
 
-        // Write velocity
         analogWrite(this->enable_pin_, abs_speed);
 
-        // Check sign to determinate direction of movement
         if(speed < 0)
         {
             // Move forward
@@ -66,7 +56,6 @@ namespace diff
         analogWrite(this->enable_pin_, 0);
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
-
     }
 
 } // namespace diff

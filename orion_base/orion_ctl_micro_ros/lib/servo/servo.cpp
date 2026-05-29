@@ -1,11 +1,6 @@
-// //////////////////////// Include Libraries /////////////////////////////
-// ---------------------- STD Libraries ------------------------------------
-#include <cmath> // Standard library for math (Symbols, constants and oper.)
-
-// ---------------------- Custom dependencies -----------------------------
+#include <cmath>
 #include "servo.hpp"
 
-// //////////////////////// CLASS DEFINITIONS /////////////////////////////
 namespace fwd
 {
     void ServoMotor::begin()
@@ -70,4 +65,5 @@ namespace fwd
     {
         this->setObjectiveDeg(radians * 180 / M_PI);
     }
+
 } // namespace fwd

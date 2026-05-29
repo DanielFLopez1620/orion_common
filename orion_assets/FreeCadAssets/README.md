@@ -1,8 +1,10 @@
 # FreeCAD Assets
 
+![orion_in_freecad](/docs/readmes/orion_freecad_assembly.png)
+
 In this directory you can explore, modify and export all the components used while designing the ORION robot.
 
-It was made using **FreeCAD 1.0.0**, so if you work with previous versions please consider to update it.
+It was made originally using **FreeCAD 1.0.0**, but later migrated to **FreeCAD 1.1.1**. So if you work with later versions please consider to update the pieces first.
 
 ## Known issues
 
@@ -12,4 +14,10 @@ The CAD files of the bases/levels of the robot have high complexity, so they mak
 
 ### Assemblies
 
-There aren't ORION assemblies in FreeCAD due to high payload when building the robot assembly with Assembly2, Assembly3 and Assembly4. In order to test your modifications, it is recommended to use partial assemblies.
+The assemblies were made using the A2Plus Workbench, which may break in case of updating any reference of the pieces.
+
+Currently there are two assemblies:
+
+1. [orion_assembly.FCStd](/orion_assets/FreeCadAssets/assembly_orion.FCStd): A base assembly for minimal visualization of the robot appearance.
+
+2. [orion_assembly_full.FCStd](/orion_assets/FreeCadAssets/assembly_orion_full.FCStd): A full robot assembly showcasing the components position.

@@ -1,6 +1,8 @@
 /*
  * @file hardware.hpp
- * @brief GPIO pin definitions for ORION motor and encoder connections.
+ * @brief GPIO pin definitions for ORION motor and encoder connections
+ *
+ * Pinout considering ESP32 Dev-Kit V1 (30 pins)
  *
  * Defines pinout for:
  * - Motor drivers (forward, backward, enable)

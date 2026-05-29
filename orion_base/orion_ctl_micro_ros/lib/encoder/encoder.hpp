@@ -27,6 +27,7 @@ namespace diff
     public:
         /*
          * Constructor that sets up encoder GPIO pins.
+         *
          * @param enc_a GPIO pin for channel A (edge-triggered)
          * @param enc_b GPIO pin for channel B (direction indicator)
          */
@@ -42,6 +43,7 @@ namespace diff
 
         /*
          * Reads current encoder count with interrupt masking (atomic).
+         *
          * @return Cumulative encoder ticks (can be negative)
          */
         int read();

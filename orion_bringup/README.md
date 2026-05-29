@@ -22,6 +22,13 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 - [🚀 Launch files](#-launch-files)
 - [🚀 Setup of bringup on Startup](#-setup-of-bringup-on-startup)
 - [⚠️ Troubleshooting](#️-troubleshooting)
+  - [Astra S compilation](#astra-s-compilation)
+  - [Startup service not loading](#startup-service-not-loading)
+  - [Robot is not moving](#robot-is-not-moving)
+  - [Pi Camera not publishing](#pi-camera-ov5647-not-publishing-with-g_movtrue)
+  - [LiDAR not loading](#lidar-not-loading-libldlidarsо-cannot-open-shared-object-file)
+  - [CycloneDDS type hash warnings](#cyclonedds-type-hash-warnings)
+  - [Controller RT scheduling warning](#controller-manager-real-time-scheduling-warning)
 
 ---
 
@@ -99,14 +106,17 @@ The [bringup.launch.py](/orion_bringup/launch/bringup.launch.py) file will take 
 # Basic usage:
 # ros2 launch orion_bringup bringup.launch.py
 # Additional arguments:
-#   camera : Can be 'astra_s', 'a010' or 'os30a'.
+#   camera : Can be 'a010' or 'os30a'.
 #   g_mov : Boolean (true/false) to use g_mov module when using 'a010' depth cam.
+#           When true, also launches the OV5647 Pi Camera (camera_ros) and the
+#           MPU6050 IMU node. Requires host-level setup — see docs/cam/README.md.
 #   rasp : Whether to use 'rpi4' or 'rpi5', this will imply a change in the sound hardware.
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   ros2_control : Boolean (true/false) to indicate usage of ros2_controllers
 #   simplified : Boolean (true/false) to indicate if use the simplified URDF model
-#   ctl_type: Control type can be 'micro-ros' or 'serial'.
+#   ctl_type: Control type can be 'micro_ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
+#   calibrate_imu : Boolean (true/false, g_mov only) force IMU re-calibration.
 ros2 launch orion_bringup bringup.launch.py camera:=a010
 ~~~
 
@@ -306,3 +316,74 @@ This may occur for the next reasons:
 This may be caused if the µ-ROS nodes didn't activate on time or the connection with the agent wasn't possible. For this, just reboot the ESP32 by taking out the respective walls.
 
 For more information check [orion_base](/orion_base/README.md)
+
+### Pi Camera (OV5647) not publishing with `g_mov:=true`
+
+The Pi Camera is launched only when `g_mov:=true` and requires host-level setup that cannot live inside the Docker container. If `/g_mov/image_raw` is not published, verify the following:
+
+1. **Boot config** — `/boot/firmware/config.txt` must contain:
+
+    ~~~text
+    camera_auto_detect=0
+    dtoverlay=ov5647
+    ~~~
+
+    These lines are added automatically by `orion_docker/robot/setup_host.sh`. Reboot after editing.
+
+2. **libcamera (RPi fork)** — the apt version is incompatible. The RPi fork must be built from source and installed to `/usr/local`. See `docs/cam/README.md` Steps 2–5.
+
+3. **camera_ros workspace** — must be built on the host at `~/picam_ws` against the RPi fork:
+
+    ~~~bash
+    ls ~/picam_ws/install/setup.bash
+    ~~~
+
+    If the file is missing, follow `docs/cam/README.md` Step 8.
+
+4. **dma_heap permissions** — the user must belong to the `video` group and the rule `/etc/udev/rules.d/99-dma-heap.rules` must exist. Both are configured by `setup_host.sh`. Verify with:
+
+    ~~~bash
+    groups $USER | grep video
+    cat /etc/udev/rules.d/99-dma-heap.rules
+    ~~~
+
+### LiDAR not loading (`libldlidar.so: cannot open shared object file`)
+
+If the log shows:
+
+~~~text
+Failed to load library: dlopen error: libldlidar.so: cannot open shared object file
+~~~
+
+and the `lifecycle_manager` keeps printing `Waiting for service ldlidar_node/get_state`, the SDK shared library is missing from the container's install directory. This happens because the upstream `ldrobot-lidar-ros2` package moved its SDK to a git submodule in May 2026 and does not install `libldlidar.so` as part of its CMake install targets.
+
+The fix is already applied in the robot Dockerfile: the submodule is initialized after `vcs import`, and `libldlidar.so` is copied to the install directory before the build artifacts are removed. Rebuild the container image to apply the fix:
+
+~~~bash
+docker build -t orion_robot:latest -f orion_docker/robot/Dockerfile .
+~~~
+
+### CycloneDDS type hash warnings
+
+Warnings like the following are **expected and harmless**:
+
+~~~text
+[WARN] [rmw_cyclonedds_cpp]: Failed to parse type hash for topic 'rt/diff_ctl_motor_cmd' ... from USER_DATA '(null)'.
+~~~
+
+They appear because micro-ROS (ESP32) does not embed the RIHS01 type hash in the DDS `USER_DATA` QoS field, which CycloneDDS in Jazzy expects for type-safe discovery. Communication is not affected — topics are published and received correctly. The same warnings appear on any PC running RViz2 on the same ROS domain, as it sees the same ESP32-originated topics on the network.
+
+### Controller manager real-time scheduling warning
+
+If the log shows:
+
+~~~text
+[WARN] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1>(Operation not permitted).
+~~~
+
+This means the `ros2_control_node` cannot use SCHED_FIFO real-time scheduling. When running inside Docker as a non-root user, this requires the `--ulimit rtprio=99` and `--ulimit memlock=-1` flags on the `docker run` command. Both are included in the service generated by `setup_host.sh`. Re-run `setup_host.sh` and restart the service if you see this warning after updating the Docker setup:
+
+~~~bash
+sudo systemctl daemon-reload
+sudo systemctl restart orion_robot.service
+~~~

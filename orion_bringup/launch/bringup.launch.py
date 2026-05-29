@@ -398,9 +398,19 @@ def generate_launch_description():
         ),
     ))
 
+    # Touch sensor interaction — only when servo arms are active.
+    ld.add_action(Node(
+        package='orion_utils_py',
+        executable='touch_interaction',
+        name='touch_interaction_node',
+        output='screen',
+        condition=IfCondition(
+            PythonExpression(["'", LaunchConfiguration('servo'), "' == 'true'"])
+        ),
+    ))
+
     # G Mov picam — camera_ros bridge for the OV5647 (Pi Camera v1.3).
-    # Built and installed on the host (see docs/cam/README.md); the container
-    # mounts /usr/local + the host's picam_ws install at runtime.
+    # Built and installed on the host (see docs/cam/README.md)
     # FrameDurationLimits is in microseconds: [100000, 100000] locks ~10 fps.
     ld.add_action(Node(
         package='camera_ros',

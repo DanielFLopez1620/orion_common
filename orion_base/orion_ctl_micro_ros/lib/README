@@ -1,6 +1,6 @@
 # ORION CTL µ-ROS Libraries
 
-Welcome to the libraries for the ORION actuators
+Welcome to the libraries for the ORION actuators and control with µ-ROS adaptation.
 
 ## Content
 
@@ -23,52 +23,31 @@ Review the port connection or exchange the ports in the [Hardware Constants File
 
 Ensure you have properly followed the instructions to compile µ-ROS code with PlatformIO. Check [micro_ros_platformio](https://github.com/micro-ROS/micro_ros_platformio)
 
-## PlatformIO Library Structure
+## Library Structure
 
-This directory is intended for project specific (private) libraries.
-PlatformIO will compile them to static libraries and link into the executable file.
+Each library lives in its own subdirectory and is compiled by PlatformIO as a
+static library linked into the firmware image.
 
-The source code of each library should be placed in a separate directory
-("lib/your_library_name/[Code]").
-
-For example, see the structure of the following example libraries `Foo` and `Bar`:
-
-|--lib
-|  |
-|  |--Bar
-|  |  |--docs
-|  |  |--examples
-|  |  |--src
-|  |     |- Bar.c
-|  |     |- Bar.h
-|  |  |- library.json (optional. for custom build options, etc) More info on [LibraryManager](https://docs.platformio.org/page/librarymanager/config.html)
-|  |
-|  |--Foo
-|  |  |- Foo.c
-|  |  |- Foo.h
-|  |
-|  |- README --> THIS FILE
-|
-|- platformio.ini
-|--src
-   |- main.c
-
-Example contents of `src/main.c` using Foo and Bar:
-
-```C
-#include <Foo.h>
-#include <Bar.h>
-
-int main (void)
-{
-  ...
-}
-
+```plaintext
+lib/
+├── constants/
+│   └── constants.hpp       ← PID gains, PWM limits, control rate
+├── encoder/
+│   ├── encoder.hpp
+│   └── encoder.cpp         ← Quadrature decoder (speed + direction)
+├── hardware/
+│   └── hardware.hpp        ← GPIO pin definitions (motors, encoders, servos)
+├── motor/
+│   ├── motor.hpp
+│   └── motor.cpp           ← L298N DC motor driver (direction + PWM speed)
+├── pid/
+│   ├── pid.hpp
+│   └── pid.cpp             ← Discrete PID controller for wheel velocity
+├── servo/
+│   ├── servo.hpp
+│   └── servo.cpp           ← MG996R servo (position in radians / degrees)
+└── README                  ← this file
 ```
 
-The PlatformIO Library Dependency Finder will find automatically dependent
-libraries by scanning project source files.
-
-More information about PlatformIO Library Dependency Finder:
-
-- [LibraryManager](https://docs.platformio.org/page/librarymanager/config.html)
+The firmware entry point (`src/main.cpp`) includes these headers directly;
+PlatformIO's Library Dependency Finder resolves them automatically.

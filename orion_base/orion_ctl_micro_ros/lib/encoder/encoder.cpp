@@ -1,11 +1,7 @@
-// //////////////////////// Include Libraries //////////////////////////////
-// -------------------- Arduino / ESP32 Dependencies -----------------------
-#include "Arduino.h"   // Library oriented to use Arduino-like definitions
+#include "Arduino.h"
 
-// -------------------- Custom dependencies --------------------------------
-#include "encoder.hpp" // Encoder header
+#include "encoder.hpp"
 
-// ////////////////////// CLASS DEFINITIONS ////////////////////////////////
 namespace diff
 {
     void EncoderDriver::begin()

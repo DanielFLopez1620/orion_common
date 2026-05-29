@@ -18,53 +18,38 @@
  *   - /emotion/int (Int32): emotion index [0-6] to display on screen
  */
 
-// ////////////////////// DEPENDENCIES AND LIBRARIES //////////////////////////
-// ---------------------- Required Arduino Libraries --------------------------
 #include <Arduino.h>
 #include <SPI.h>
 #include <TFT_22_ILI9225.h>
 
-// ---------------------- Platformio Libraries --------------------------------
 #include <micro_ros_platformio.h>
 
-// ---------------------- ROS Client Library for C Libs -----------------------
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-// ------------------------ Required messages ---------------------------------
 #include <std_msgs/msg/bool.h>
 #include <std_msgs/msg/int32.h>
 
-// ----------------------- Custom requirements --------------------------------
 #include "screen.hpp"
 
 // Set to 1 to use bitmap emotion sprites; set to 0 for geometric fallback
-// (useful for debugging without the full bitmap array flashed)
 #define USE_BITMAP_DISPLAY 1
 
-// //////////////////////// GLOBAL DEFINITIONS ////////////////////////////////
-
-// --------------------------- Definitions ------------------------------------
-
-// Define touch sensor pins
+                            // Define touch sensor pins
 #define TS_UR_PIN 4         // Upper right
 #define TS_UL_PIN 34        // Upper left
 #define TS_LR_PIN 2         // Lower right
 #define TS_LL_PIN 35        // Lower left
 
-// ------------------------- ROS 2 related definitions ------------------------
-// Define publishers
 rcl_publisher_t ts_ur_publisher;
 rcl_publisher_t ts_ul_publisher;
 rcl_publisher_t ts_lr_publisher;
 rcl_publisher_t ts_ll_publisher;
 rcl_publisher_t heartbeat_publisher;
 
-// Define susbscribers
 rcl_subscription_t emotion_subscriber;
 
-// Define messages
 std_msgs__msg__Bool ts_ur_msg;
 std_msgs__msg__Bool ts_ul_msg;
 std_msgs__msg__Bool ts_lr_msg;
@@ -72,55 +57,41 @@ std_msgs__msg__Bool ts_ll_msg;
 std_msgs__msg__Int32 emotion_msg;
 std_msgs__msg__Bool heartbeat_msg;
 
-// Define executor
 rclc_executor_t executor;
 
-// Define supporter
 rclc_support_t support;
 
-// Define memory allocator
 rcl_allocator_t allocator;
 
-// Define node
 rcl_node_t node;
 
-// Define timer
 rcl_timer_t timer;
 
-// Time tools
 unsigned long last_ping_time = 0;
 const unsigned long ping_interval_ms = 1000;
 
-// Helpers
 int previous_emotion = 0;
 
-// Screen
 Screen screen;
 
-// Define a ROS 2 Checker
+// ---- Function prototypes
+
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
-
-// Define a soft ROS 2 Checker
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
-
-// ///////////////////////////// FUNTION PROTOTYPES ///////////////////////////
-
 void error_loop();
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time);
 void emotion_callback(const void *msgin);
 
-// ///////////////////// SINGLE SET UP FUNCTION ///////////////////////////////
-void setup() 
+// ---- Main workflow
+
+void setup()
 {
-	// Configure serial transport
 	Serial.begin(115200);
 	set_microros_serial_transports(Serial);
 	delay(2000);
 
-	// Initialize allocator
 	allocator = rcl_get_default_allocator();
 
-    // Retry agent connection
     unsigned long start = millis();
     rcl_ret_t ret;
     do {
@@ -131,29 +102,27 @@ void setup()
         }
     } while (ret != RCL_RET_OK && (millis() - start < 120000));
 
-	// Create node
 	RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_touch_node", "", 
 		&support));
 
-	// Create publishers
 	RCCHECK(rclc_publisher_init_default(
 		&ts_ur_publisher,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
 		"interaction/touch_ur"));
-    
+
     RCCHECK(rclc_publisher_init_default(
 		&ts_ul_publisher,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
 		"interaction/touch_ul"));
-    
+
     RCCHECK(rclc_publisher_init_default(
 		&ts_lr_publisher,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
 		"interaction/touch_lr"));
-    
+
     RCCHECK(rclc_publisher_init_default(
 		&ts_ll_publisher,
 		&node,
@@ -166,14 +135,12 @@ void setup()
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
         "interaction/heartbeat"));
 
-    // Create subscriber
     RCCHECK(rclc_subscription_init_default(
 		&emotion_subscriber,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
 		"/emotion/int"));
 
-	// Create timer,
 	const unsigned int timer_timeout = 250;
 	RCCHECK(rclc_timer_init_default2(
 		&timer,
@@ -182,10 +149,8 @@ void setup()
 		timer_callback,
         true));
 
-	// Initialize executor
 	RCCHECK(rclc_executor_init(&executor, &support.context, 2, &allocator));
 
-    // Add timer and subscriber to the executor
 	RCCHECK(rclc_executor_add_timer(&executor, &timer));
     RCCHECK(rclc_executor_add_subscription(
         &executor,
@@ -194,19 +159,16 @@ void setup()
         &emotion_callback,
         ON_NEW_DATA));
 
-
-    // Configure pins
     pinMode(TS_LL_PIN, INPUT);
-    pinMode(TS_LR_PIN,INPUT);
-    pinMode(TS_UL_PIN,INPUT);
-    pinMode(TS_UR_PIN,INPUT);
+    pinMode(TS_LR_PIN, INPUT);
+    pinMode(TS_UL_PIN, INPUT);
+    pinMode(TS_UR_PIN, INPUT);
 
-    // Initialize screen
     screen.initialize();
     screen.drawEmotion(3);
+
 } // void setup()
 
-// /////////////////////////// LOOP IMPLEMENTATION ///////////////////////////
 void loop()
 {
     // Delay required to avoid over-heating ESP32
@@ -217,7 +179,7 @@ void loop()
 
 } // void loop()
 
-// ///////////////////////// FUNCTION DEFINITIONS ////////////////////////////
+// --- Function definitions
 
 /*
  * Halts execution printing an error message on serial.
@@ -234,6 +196,7 @@ void error_loop()
 
 /*
  * Timer callback: reads touch sensors, publishes their states and heartbeat.
+ *
  * @param timer Pointer to the timer object
  * @param last_call_time Timestamp of previous callback invocation
  */
@@ -267,6 +230,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 /*
  * Callback for emotion commands from /emotion/int.
  * Displays the corresponding emotion on screen only if it changed.
+ *
  * @param msgin Pointer to Int32 message with emotion index [0-6]
  */
 void emotion_callback(const void *msgin)

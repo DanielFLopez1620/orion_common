@@ -35,10 +35,11 @@ namespace diff
 
         /*
          * Constructor that sets PID gains and PWM limits.
-         * @param kp Proportional gain (typical: 0.5-2.0)
-         * @param kd Derivative gain (typical: 0.1-0.5)
-         * @param ki Integral gain (typical: 0.01-0.1)
-         * @param ko Output gain divisor (typical: 1.0-10.0, scales output)
+         *
+         * @param kp Proportional gain
+         * @param kd Derivative gain
+         * @param ki Integral gain
+         * @param ko Output gain divisor
          * @param pwm_max Maximum PWM output (0-255)
          * @param pwm_min Minimum PWM output (0-255)
          */
@@ -51,6 +52,7 @@ namespace diff
          * Computes PID control output based on encoder feedback.
          * Dead-zone compensation and clamping applied automatically.
          * Only computes if controller is enabled.
+         *
          * @param enc_count Current encoder count from motor
          * @param computed_output Reference to PWM output [-255, 255]
          */
@@ -68,24 +70,28 @@ namespace diff
 
         /*
          * Checks if PID controller is currently enabled.
+         *
          * @return True if enabled, false otherwise
          */
         bool enabled();
 
         /*
          * Resets integrator and state variables to initial condition.
+         *
          * @param enc_count Current encoder reading (used as baseline)
          */
         void reset(int enc_count);
 
         /*
          * Sets target encoder delta per control cycle.
+         *
          * @param setpoint Target encoder count change (ticks/cycle)
          */
         void setSetpoint(float setpoint);
 
         /*
          * Updates PID tuning gains at runtime.
+         *
          * @param kp Proportional gain
          * @param kd Derivative gain
          * @param ki Integral gain
