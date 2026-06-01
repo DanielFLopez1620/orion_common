@@ -1,11 +1,11 @@
 <library path="orion_control">
 
-    <class 
+    <class
         name="orion_control/DiffDriveOrion"
         type="orion_control::DiffDriveOrion"
         base_class_type="hardware_interface::SystemInterface">
         <description>
-            Hardware interface implementation ORION mobile base.
+            Hardware interface implementation for the ORION mobile base.
         </description>
     </class>
 
@@ -14,7 +14,7 @@
         type="orion_control::ForwardOrion"
         base_class_type="hardware_interface::SystemInterface">
         <description>
-            ForwardDrive hardware interface for Orion robot
+            ForwardOrion hardware interface for the ORION robot.
         </description>
     </class>
 

@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file touch_interaction.cpp
  * @brief Touch-sensor interaction node for ORION robot.

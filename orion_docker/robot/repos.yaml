@@ -8,7 +8,7 @@ repositories:
   # Sensor driver forks (Jazzy ports)
   depth_maixsense_a010:
     type: git
-    url: https://github.com/Tesis-ORION/depth_maixsense_a010.git
+    url: https://github.com/DanielFLopez1620/depth_maixsense_a010.git
     version: main
 
   depth_ydlidar_os30a:

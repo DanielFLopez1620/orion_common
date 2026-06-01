@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """Launch the Robot State Publisher for ORION with configurable hardware options."""
 
-# ///////////////////////////// REQUIRED LIBRARIES //////////////////////////////
-# .............................. Python libraries ...............................
 import os
 
 import xacro
 
-# ............................ Launch dependencies .............................
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-# //////////////////////////// GLOBAL DEFINITIONS //////////////////////////////
 ARGS = [
     DeclareLaunchArgument('camera', default_value='os30a',
         description="Choose a cam for the robot (os30a, astra_s, a010)",
@@ -47,8 +43,6 @@ ARGS = [
         description="Visual color for structural panels",
         choices=['gold', 'mdf', 'transparent', 'pla']),
 ]
-
-# /////////////////////////// FUNCTIONS DEFINITIONS ////////////////////////////
 
 
 def get_argument(context, arg):
@@ -109,7 +103,6 @@ def generate_robot_description(context):
     return [rsp_node]
 
 
-# /////////////////////////// LAUNCH DEFINITIONS //////////////////////////////
 def generate_launch_description():
     """Return the LaunchDescription for the ORION Robot State Publisher."""
     ld = LaunchDescription(ARGS)

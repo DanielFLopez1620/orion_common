@@ -48,6 +48,7 @@ namespace orion_control
         /*
          * Reads servo and topic params from URDF, allocates shared pose/command
          * message ptrs, and attaches the bridge node to the controller executor.
+         *
          * @return ERROR if parent init or executor lock fails, otherwise SUCCESS.
          */
         hardware_interface::CallbackReturn on_init(
@@ -55,6 +56,7 @@ namespace orion_control
 
         /*
          * Lifecycle configure transition — currently a no-op beyond logging.
+         *
          * @return SUCCESS unconditionally.
          */
         hardware_interface::CallbackReturn on_configure(
@@ -62,6 +64,7 @@ namespace orion_control
 
         /*
          * Exports the servo position feedback state interface.
+         *
          * @return Vector containing the single HW_IF_POSITION state interface.
          */
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
@@ -74,6 +77,7 @@ namespace orion_control
 
         /*
          * Verifies the bridge node is initialized before allowing activation.
+         *
          * @return ERROR if bridge node is null, otherwise SUCCESS.
          */
         hardware_interface::CallbackReturn on_activate(
@@ -82,6 +86,7 @@ namespace orion_control
         /*
          * Holds servo at its current position on deactivation — no zero command
          * is sent to avoid moving the arm to an unsafe pose.
+         *
          * @return SUCCESS unconditionally.
          */
         hardware_interface::CallbackReturn on_deactivate(
@@ -90,6 +95,7 @@ namespace orion_control
         /*
          * Copies servo position feedback from the shared ptr into the state variable.
          * Position is in radians.
+         *
          * @return OK on success.
          */
         hardware_interface::return_type read(
@@ -98,6 +104,7 @@ namespace orion_control
         /*
          * Copies the position command into the shared ptr for the bridge to publish.
          * Position is in radians.
+         *
          * @return OK on success.
          */
         hardware_interface::return_type write(

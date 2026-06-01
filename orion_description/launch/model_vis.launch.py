@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Launch the ORION model visualization with RViz and joint_state_publisher_gui."""
 
-# ///////////////////////////// REQUIRED LIBRARIES //////////////////////////////
-# .............................. Python libraries ...............................
 import os
 
-# ............................ Launch dependencies .............................
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -13,7 +10,6 @@ from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
-# //////////////////////////// GLOBAL DEFINITIONS //////////////////////////////
 ARGS = [
     DeclareLaunchArgument('camera', default_value='os30a',
         description="Choose a cam for the robot (os30a, astra_s, a010)",
@@ -40,8 +36,6 @@ ARGS = [
         description="Visual color for structural panels",
         choices=['gold', 'mdf', 'transparent', 'pla']),
 ]
-
-# //////////////////////////// LAUNCH DEFINITION //////////////////////////////
 
 
 def generate_launch_description():

@@ -564,7 +564,7 @@
 
     <!-- ...................... Screen ................................. -->
     <link name="screen">
-    <visual>
+    <visual name="screen">
         <origin xyz="0 0 0" rpy="${pi_4} 0 ${pi_2}"/>
         <geometry>
         <mesh filename="package://orion_description/meshes/screen_il9225.stl"

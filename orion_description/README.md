@@ -30,7 +30,7 @@ Make sure you have followed the [installation process](/README.md) and have sour
 
 ### Model visualization
 
-You can visualize the */robot_description* of the robot with the [model_vis.launch.py](/orion_description/launch/model_vis.launch.py), which provide a visualization window with RViz and the usage of the **robot_state_publisher_gui**.
+You can visualize the */robot_description* of the robot with the [model_vis.launch.py](/orion_description/launch/model_vis.launch.py), which provide a visualization window with RViz and the usage of the **joint_state_publisher_gui**.
 
 ~~~bash
 # Basic usage:
@@ -64,7 +64,7 @@ To launch the */robot_description* of the robot with the [rsp.launch.py](/orion_
 #   rasp : Whether to use 'rpi4' or 'rpi5', this will imply a change in the sound hardware.
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   simplified : Boolean (true/false) to indicate the usage of the simplified URDF model (non-functional parts omitted).
-#   ctl_type: Control type can be 'micro-ros' or 'serial'.
+#   ctl_type: Control type can be 'micro_ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
 #   color : Visual color for structural panels ('gold', 'mdf', 'transparent', 'pla').
 #

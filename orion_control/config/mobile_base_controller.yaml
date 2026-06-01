@@ -1,6 +1,7 @@
 # mobile_base_controller.yaml
 # diff_drive_controller params for the ORION mobile base.
 # Wheel geometry, odometry, and velocity/acceleration limits for 100 RPM motors.
+
 mobile_base_controller:
   ros__parameters:
     type: diff_drive_controller/DiffDriveController
@@ -12,8 +13,6 @@ mobile_base_controller:
     # Wheel properties
     wheel_separation: 0.183
     wheel_radius: 0.033675
-
-    # Additional wheel properties
     wheel_separation_multiplier: 1.0
     left_wheel_radius_multiplier: 1.0
     right_wheel_radius_multiplier: 1.0

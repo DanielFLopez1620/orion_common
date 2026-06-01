@@ -86,7 +86,7 @@ To create a custom encoder count and motor params do the next:
 
     ~~~Python
     DeclareLaunchArgument('motor', default_value='100',
-        description="Select your  motor nominal speed (rpm) at 12V",
+        description="Select your motor nominal speed (rpm) at 12V",
         choices=['1000', '100', '<add_yours>']),
     ~~~
 
@@ -135,4 +135,4 @@ To create a custom encoder count and motor params do the next:
     </hardware>
     ~~~
 
-5. You may additioally change your max and min PWM for the real robot, for more information, check on [orion_base](/orion_base/README.md)
+5. You may additionally change your max and min PWM for the real robot, for more information, check on [orion_base](/orion_base/README.md)

@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file hi_human.cpp
  * @brief Execute a greeting sequence for ORION demos with motion and arm gestures.

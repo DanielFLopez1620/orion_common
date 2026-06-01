@@ -4,11 +4,10 @@
      arguments (camera, servo, rasp, motor, ctl_type, color, etc.) and includes
      the modular xacro files for materials, macros, base, arms, cameras,
      and ros2_control tags. -->
+
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orion">
 
-    <!-- Configurable arguments. Defaults allow standalone xacro processing
-         (e.g. `xacro orion.urdf.xacro`) without requiring every value to be
-         passed from a launch file. -->
+    <!-- Configurable arguments -->
     <xacro:arg name="camera" default="os30a"/>
     <xacro:arg name="servo" default="true"/>
     <xacro:arg name="g_mov" default="false"/>
@@ -33,7 +32,7 @@
     <!-- Visual color for structural panels: 'mdf', 'transparent', 'pla', 'gold' -->
     <xacro:property name="color" default="$(arg color)"/>
 
-    <!-- Include other files -->
+    <!-- Include other files for robot description -->
     <xacro:include filename="$(find orion_description)/urdf/include/orion_materials.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_macros.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_g_mov.urdf.xacro"/>

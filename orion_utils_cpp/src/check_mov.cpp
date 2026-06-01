@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file check_mov.cpp
  * @brief Measure cmd_vel-to-odometry latency for ORION mobile base diagnostics.

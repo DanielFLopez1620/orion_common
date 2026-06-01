@@ -12,17 +12,13 @@ namespace orion_control
             return hardware_interface::CallbackReturn::ERROR;
         }
 
-        // Loading info from URDF
         auto info_ = params.hardware_info;
 
         RCLCPP_INFO(this->logger_, "Fwd:: Begin [on_init]...");
 
-        // Shared ptrs as the resources will be used by the hardware interface
-        // and the bridge node
         this->servo_pose_ = std::make_shared<std_msgs::msg::Float32>();
         this->servo_cmd_ = std::make_shared<std_msgs::msg::Float32>();
 
-        // Get params of topics from URDF
         const std::string servo_sub_topic =
             info_.hardware_parameters.at("feedback_topic");
         const std::string servo_pub_topic =
@@ -155,6 +151,6 @@ namespace orion_control
 
 } // orion_control
 
-// ADDING PLUGIN FOR FORWARD CONTROLLER
+
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(orion_control::ForwardOrion, hardware_interface::SystemInterface)

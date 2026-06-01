@@ -24,6 +24,7 @@ namespace orion_control
 
         /*
          * Initializes the servo with its URDF joint name.
+         *
          * @param joint_name Name of the revolute joint in the URDF.
          */
         void Setup(const std::string& joint_name);

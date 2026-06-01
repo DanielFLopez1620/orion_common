@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file introducing_orion.cpp
  * @brief Execute an introductory gesture sequence for ORION demos.

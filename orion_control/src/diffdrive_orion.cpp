@@ -11,18 +11,14 @@ namespace orion_control
             return hardware_interface::CallbackReturn::ERROR;
         }
 
-        // Loading info coming from URDF
         auto info_ = params.hardware_info;
 
-        // Created shared ptrs as the resources will be used by the hardware interface and the
-        // bridge nodes.
         this->left_enc_ = std::make_shared<std_msgs::msg::Int64>();
         this->right_enc_ = std::make_shared<std_msgs::msg::Int64>();
         this->cmd_speed_ = std::make_shared<std_msgs::msg::Int64MultiArray>();
 
         RCLCPP_INFO(this->logger_, "Diff: Begin [on_init]...");
 
-        // Get data of the wheels from URDF
         this->config_.left_wheel_name =
             info_.hardware_parameters.at("left_wheel_name");
         this->config_.right_wheel_name =
@@ -42,7 +38,6 @@ namespace orion_control
         this->config_.right_enc_topic =
             read_param("right_enc_topic", this->config_.right_enc_topic);
 
-        // Set up wheels
         this->left_wheel_.Setup(
             this->config_.left_wheel_name, this->config_.enc_tics_per_rev);
         this->right_wheel_.Setup(
@@ -177,19 +172,15 @@ namespace orion_control
     {
         RCLCPP_DEBUG(this->logger_, "Diff: Begin [read]...");
 
-        // Change of time
         const double d_t = period.seconds();
 
-        // Read encoder
         this->left_wheel_.enc_ = this->left_enc_->data;
         this->right_wheel_.enc_ = this->right_enc_->data;
 
-        // Update left wheel
         const double left_pos_prev = this->left_wheel_.pos_;
         this->left_wheel_.pos_ = this->left_wheel_.Angle();
         this->left_wheel_.vel_ = (this->left_wheel_.pos_ - left_pos_prev) / d_t;
 
-        // Update right wheel
         const double right_pos_prev = this->right_wheel_.pos_;
         this->right_wheel_.pos_ = this->right_wheel_.Angle();
         this->right_wheel_.vel_ = (this->right_wheel_.pos_ - right_pos_prev) / d_t;
@@ -204,13 +195,11 @@ namespace orion_control
     {
         RCLCPP_DEBUG(this->logger_, "Diff: Begin [write]...");
 
-        // Obtain command
         const int left_cmd =
             static_cast<int>(this->left_wheel_.cmd_ / this->left_wheel_.rads_per_tick_);
         const int right_cmd =
             static_cast<int>(this->right_wheel_.cmd_ / this->right_wheel_.rads_per_tick_);
 
-        // Populate message
         this->cmd_speed_->data = {left_cmd, right_cmd};
 
         RCLCPP_DEBUG(this->logger_, "Diff: End [write]...");
@@ -219,6 +208,6 @@ namespace orion_control
 
 } // orion_control
 
-// ADDING PLUGIN FOR DIFFERENTIAL CONTROLLER
+
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(orion_control::DiffDriveOrion, hardware_interface::SystemInterface)

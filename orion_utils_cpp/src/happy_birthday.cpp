@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file happy_birthday.cpp
  * @brief Execute a birthday greeting sequence with arm oscillation and TTS for ORION.

@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file laser_filter.cpp
  * @brief Filter LIDAR scan ranges to remove robot self-obstruction areas.

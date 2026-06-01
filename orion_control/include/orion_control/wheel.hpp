@@ -25,6 +25,7 @@ namespace orion_control
         /*
          * Initializes the wheel with its URDF joint name and encoder resolution.
          * Computes rads_per_tick_ = 2π / ticks_per_rev.
+         *
          * @param joint_name Name of the continuous joint in the URDF.
          * @param ticks_per_rev Encoder pulses per full wheel revolution.
          */
@@ -32,6 +33,7 @@ namespace orion_control
 
         /*
          * Returns the current wheel angle derived from the encoder count.
+         *
          * @return Cumulative wheel angle in radians (enc_ * rads_per_tick_).
          */
         double Angle();

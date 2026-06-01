@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file emotion_try.cpp
  * @brief Test emotion expressions and arm motion across all ORION emotion indices.

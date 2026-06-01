@@ -1,7 +1,3 @@
-// Copyright 2025 DanielFLopez1620
-//
-// Licensed under the BSD-3-Clause License.
-
 /*
  * @file demo_theater.cpp
  * @brief Execute a scripted theater performance sequence for ORION demos.

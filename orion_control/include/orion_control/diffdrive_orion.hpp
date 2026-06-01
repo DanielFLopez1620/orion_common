@@ -51,6 +51,7 @@ namespace orion_control
          * Reads wheel and topic params from URDF, allocates shared encoder/command
          * message ptrs, sets up Wheel objects, and attaches the bridge node to the
          * controller executor.
+         *
          * @return ERROR if parent init or executor lock fails, otherwise SUCCESS.
          */
         hardware_interface::CallbackReturn on_init(
@@ -58,6 +59,7 @@ namespace orion_control
 
         /*
          * Lifecycle configure transition — currently a no-op beyond logging.
+         *
          * @return SUCCESS unconditionally.
          */
         hardware_interface::CallbackReturn on_configure(
@@ -65,18 +67,21 @@ namespace orion_control
 
         /*
          * Exports velocity and position state interfaces for both wheels.
+         *
          * @return Vector of [left_vel, left_pos, right_vel, right_pos] interfaces.
          */
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
         /*
          * Exports velocity command interfaces for both wheels.
+         *
          * @return Vector of [left_cmd_vel, right_cmd_vel] interfaces.
          */
         std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
         /*
          * Verifies the bridge node is initialized before allowing activation.
+         *
          * @return ERROR if bridge node is null, otherwise SUCCESS.
          */
         hardware_interface::CallbackReturn on_activate(
@@ -84,6 +89,7 @@ namespace orion_control
 
         /*
          * Sends zero velocity to both wheels before releasing control.
+         *
          * @return SUCCESS unconditionally.
          */
         hardware_interface::CallbackReturn on_deactivate(
@@ -92,7 +98,9 @@ namespace orion_control
         /*
          * Reads encoder counts from shared ptrs and computes wheel velocity and
          * cumulative position for each wheel.
+         *
          * @param period Duration since last read call (used for velocity estimate).
+         *
          * @return OK on success.
          */
         hardware_interface::return_type read(
@@ -101,6 +109,7 @@ namespace orion_control
         /*
          * Converts rad/s velocity commands to encoder tick rate and publishes
          * them as an Int64MultiArray to the motor command topic.
+         *
          * @return OK on success.
          */
         hardware_interface::return_type write(

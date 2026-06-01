@@ -7,7 +7,6 @@ ARG USER_UID=1001
 # Switch to root for system-level installations
 USER root
 
-# ── 1. Dev-only packages ──────────────────────────────────────────────────────
 # Does NOT repeat what orion_base already installs.
 # ALL known workspace dependencies are baked in here so that post_create.sh
 # only needs to clone repos — not run heavy apt installs at container start.
@@ -48,14 +47,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ── 2. libdc1394 ABI compatibility symlink ───────────────────────────────────
 # depth_ydlidar_os30a ships a prebuilt eYs3D lib compiled against libdc1394.so.22
 # (Ubuntu 20/22.04 soname). Ubuntu 24.04 Noble ships libdc1394.so.25 — same API,
 # renamed soname. The symlink makes the linker find the old name at build time.
 RUN ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
           /usr/lib/x86_64-linux-gnu/libdc1394.so.22
 
-# ── 3. orion_chat pip dependencies ───────────────────────────────────────────
 # These packages are not in the rosdep database for Ubuntu Noble. Installing
 # them here (at image build time) avoids failures in post_create.sh.
 # --break-system-packages is required on Ubuntu 24.04 (PEP 668 enforced).
@@ -73,9 +70,6 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     pytest \
     jiwer
 
-# ── 4. Workspace setup ────────────────────────────────────────────────────────
-# orion_common is bind-mounted by devcontainer at runtime — no clone needed.
-# Other repos are handled by post_create.sh via vcs import.
 RUN mkdir -p /home/${USERNAME}/ws/src \
     && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws
 
