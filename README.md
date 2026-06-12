@@ -2,7 +2,7 @@
 
 ## 🌟 Overview
 
-![orion_welcome](https://github.com/DanielFLopez1620/orion_common/blob/main/docs/readmes/orion_hi.gif)
+![orion_welcome](/docs/readmes/orion_hi_updated.gif)
 
 This repository contains essential packages for the **O**pen-source **R**obot for **I**nteraction **O**bjectives and **N**avigation, also known as **ORION Project**, a ROS 2-based differential mobile robot designed for **Human-Robot Interaction (HRI)** applications.
 
@@ -16,9 +16,9 @@ This repository contains essential packages for the **O**pen-source **R**obot fo
 
 The source code is released under a [BSD 3-Clause license](/LICENSE).
 
-**Originally developed by**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
+**Forked and maintained by:** [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620)
 
-**Forked by:** [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620)
+**Originally developed by**: [Daniel Felipe López Escobar](https://github.com/DanielFLopez1620), [Miguel Ángel Gonzalez Rodriguez](https://github.com/miguelgonrod), and [Alejandro Bermúdez Fajardo](https://github.com/alexoberco).
 
 The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **Jazzy** distribution.
 

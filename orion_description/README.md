@@ -78,7 +78,7 @@ ros2 launch orion_description rsp.launch.py
 > frame is published as `g_mov_imu`; sensor driver wiring is handled in a
 > separate package.
 
-![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/rps.gif)
+![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/orion_rsp_publisher.gif)
 
 ---
 
