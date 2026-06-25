@@ -151,6 +151,17 @@ This script:
 - Installs the `pwm-setup.service` systemd unit (exports PWM channel before container start)
 - Installs and enables the `orion_robot.service` systemd unit with `--ulimit rtprio=99` and `--ulimit memlock=-1` for real-time scheduling
 
+> **Pi Camera / G-Mov prerequisite:** building `camera_ros` on the host (required
+> for `g_mov:=true`) depends on the RPi libcamera fork **and** a working ROS 2
+> installation on the host. Make sure both are present before running
+> `setup_host.sh`. You also need `colcon`:
+>
+> ```bash
+> sudo apt install python3-colcon-common-extensions -y
+> ```
+>
+> Follow `docs/cam/README.md` for the full libcamera + `camera_ros` build steps.
+
 > **Important:** After running the script, edit the udev rules to match the actual
 > serial/ID_PATH attributes of **your** specific devices:
 >
@@ -205,6 +216,9 @@ journalctl -u orion_robot.service -f
 ```
 
 To run manually (e.g. to test or override launch arguments):
+
+> **`-v /dev:/dev` is always required** — without it the container cannot see any
+> peripheral (ESP32s, LIDAR, cameras). This applies even when `g_mov:=false`.
 
 ```bash
 docker run --rm --privileged --network host \

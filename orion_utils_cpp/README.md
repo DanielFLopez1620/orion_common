@@ -80,3 +80,13 @@ Node oriented to filter the scan ranges in the four corners of the robot based o
 ~~~bash
 ros2 run orion_utils_cpp laser_filter
 ~~~
+
+### touch_interaction
+
+C++ equivalent of `orion_utils_py`'s `touch_interaction`. Reacts to the four capacitive touch sensors with the same emotion/arm/TTS behaviors, using `std::atomic<bool>` for the busy flag and detached `std::thread` for non-blocking action sequences.
+
+~~~bash
+ros2 run orion_utils_cpp touch_interaction
+~~~
+
+> The Python variant (`orion_utils_py`) is the one launched by `orion_bringup`. This node is the C++ mirror for development or testing contexts.

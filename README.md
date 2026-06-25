@@ -66,8 +66,6 @@ These components provide extended capabilities for sensors, simulation, percepti
 
 - 🎥 **[`depth_maixsense_a010`](https://github.com/DanielFLopez1620/depth_maixsense_a010)** 🟢 Packages for the [Maixsense A010 Depth Camera](https://wiki.sipeed.com/hardware/en/maixsense/maixsense-a010/maixsense-a010.html) to work on ROS 2 Jazzy.
 
-- 😊 **[`emotion_detector`](https://github.com/Tesis-ORION/emotion_detector)** 🧠 Emotion recognition pipeline based on computer vision and facial analysis.
-
 ---
 
 ## 📥 Installation
@@ -75,6 +73,13 @@ These components provide extended capabilities for sensors, simulation, percepti
 Let's prepare us to use the robot, this installation is required for both your PC and the robot's Raspberry Pi. However, there would be additional steps you will need to follow on the robot, more info on [orion_bringup](/orion_bringup/README.md)
 
 For now, follow these steps to install and build the project on ROS 2 Jazzy:
+
+0. Make sure you have `colcon` installed:
+
+    ~~~bash
+    sudo apt update
+    sudo apt install python3-colcon-common-extensions -y
+    ~~~
 
 1. Create your workspace:
 
@@ -91,13 +96,18 @@ For now, follow these steps to install and build the project on ROS 2 Jazzy:
     git clone https://github.com/DanielFLopez1620/orion_common.git
     ~~~
 
-3. Install the drivers packages for the cameras.
+3. Install the drivers packages for the cameras and the LD19 LIDAR.
 
     ~~~bash
     cd ~/ros2_ws/src
     git clone https://github.com/DanielFLopez1620/depth_maixsense_a010.git
     git clone https://github.com/Tesis-ORION/Depth_ydlidar_os30a.git
     git clone https://github.com/Tesis-ORION/depth_orbbec_astra.git
+
+    # LD19 LIDAR driver — use main branch only (no per-distro branches exist).
+    # The SDK is a git submodule, so --recurse-submodules is required.
+    git clone --branch main --recurse-submodules \
+        https://github.com/Myzhar/ldrobot-lidar-ros2.git
     ~~~
 
 4. Implement the additional installs recommended on the cameras READMEs, for more info check [Maixsense A010](https://github.com/DanielFLopez1620/depth_maixsense_a010), [YDLidar OS30A](https://github.com/Tesis-ORION/Depth_ydlidar_os30a) and [ORBBEC ASTRA S](https://github.com/Tesis-ORION/depth_orbbec_astra) packages.

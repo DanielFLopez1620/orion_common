@@ -156,10 +156,6 @@ With this, you can do the next:
 
     For now there are seven emotions which are: Angry (0), Disgust (1), Fear (2), Happy (3), Neutral (4), Sad (5), Surprise (6).
 
-## Additional notes
-
-- The emotion topic is related with the [emotion_detector](https://github.com/Tesis-ORION/emotion_detector) package, check it for more information.
-
 ## Additional resources
 
 - [FreeRTOS | µ-ROS](https://micro.ros.org/docs/tutorials/core/first_application_rtos/freertos/)

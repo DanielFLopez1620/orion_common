@@ -71,6 +71,23 @@ You can run it with:
 ros2 run orion_utils_py laser_filter
 ~~~
 
+### touch_interaction
+
+Node that reacts to capacitive touch sensor events from ORION's four sensors (`touch_ur`, `touch_ul`, `touch_lr`, `touch_ll`) by triggering emotion, arm, and TTS responses. Uses rising-edge detection so actions fire once per touch, not on hold. A busy flag prevents overlapping sequences.
+
+| Sensor topic | Behavior | Emotion |
+|---|---|---|
+| `/interaction/touch_ur` | Tickle: both arms flail x2 | Happy (4) |
+| `/interaction/touch_ul` | Greet: left arm wave x2 | Excited (1) |
+| `/interaction/touch_lr` | Think: right arm rises slowly | Thoughtful (2) |
+| `/interaction/touch_ll` | Sad: both arms droop | Sad (6) |
+
+~~~bash
+ros2 run orion_utils_py touch_interaction
+~~~
+
+> The node is launched automatically by `orion_bringup` when `servo:=true`.
+
 ## ⚠️ Troubleshooting
 
 ### Ranges do not filter the columns of the robot
