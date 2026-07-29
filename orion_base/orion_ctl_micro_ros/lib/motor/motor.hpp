@@ -1,27 +1,34 @@
+/*
+ * @file motor.hpp
+ * @brief DC motor driver abstraction for L298N-style H-bridge modules.
+ *
+ * Controls motor speed (PWM via enable pin) and direction (forward/backward
+ * GPIO pins) for the ORION differential drive base.
+ */
+
 #ifndef MOTOR_HPP
 #define MOTOR_HPP
 
 namespace diff
 {
-    /**
-     * Class oriented to the control and movement of a DC motor based on
-     * the forward, backward and PWM pins of the selected driver.
+    /*
+     * DC motor driver abstraction for L298N-style motor drivers.
+     * Controls speed (PWM) and direction via GPIO pins.
      */
     class MotorDriver
     {
     private:
-        unsigned int enable_pin_{0};  // Port related with speed
-        unsigned int forw_pin_{0};    // Forward pin
-        unsigned int back_pin_{0};    // Backward pin
+        unsigned int enable_pin_{0};  // PWM pin for speed control
+        unsigned int forw_pin_{0};    // Direction pin (forward control)
+        unsigned int back_pin_{0};    // Direction pin (backward control)
 
     public:
-        /**
-         * User defined constructor that set up the pins of the driver where
-         * the motor is connected.
+        /*
+         * Constructor that sets up GPIO pins for motor control.
          *
-         * @param enable PWM Pin
-         * @param forward Forward Pin
-         * @param backward Backward Pin
+         * @param enable GPIO pin for PWM speed control
+         * @param forward GPIO pin for forward direction
+         * @param backward GPIO pin for backward direction
          */
         MotorDriver(
             const unsigned int& enable,
@@ -33,11 +40,30 @@ namespace diff
             back_pin_{backward}
         {}
 
-        // Method prototypes
+        /*
+         * Initializes pins and brings motor to safe idle state.
+         * Call once during setup.
+         */
         void begin();
-        void set_speed(int speed);
+
+        /*
+         * Sets motor speed and direction via PWM.
+         *
+         * @param speed PWM value: negative=forward, positive=backward, 0=stop
+         *        Range: [-255, 255] (0-255 mapped to PWM duty cycle)
+         */
+        void setSpeed(int speed);
+
+        /*
+         * Stops motor immediately by clearing PWM and direction pins.
+         */
         void stop();
-        void safe_init();
+
+        /*
+         * Safely initializes all motor pins to OUTPUT and LOW state.
+         * Prevents accidental motor startup during initialization.
+         */
+        void safeInit();
 
     }; // class MotorDriver
 

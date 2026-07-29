@@ -1,7 +1,6 @@
 # RPi Camera v1.3 (OV5647) on Ubuntu Server 24.04 — Raspberry Pi 4
-### For use with `camera_ros` in ROS 2 Jazzy
 
----
+> For use with `camera_ros` in ROS 2 Jazzy
 
 ## Background
 
@@ -30,7 +29,7 @@ The **RPi Camera Module v1.3** uses the **OV5647** sensor. Getting it to work on
 
 Connect the camera to the **CSI port** on the RPi 4. The ribbon cable must be inserted with the metal contacts facing the HDMI ports. Gently pull the black clip, insert the cable straight, and press the clip back until it clicks.
 
-> ⚠️ **Maximum recommended ribbon length:** up to 50 cm for reliable operation. Longer cables may work but are prone to CSI signal failures (sensor responds over I2C but frames time out). For mobile robots, consider Arducam CSI-to-HDMI extenders that support up to 10 m.
+> ⚠️ **Maximum recommended ribbon length:** up to 50 cm for reliable operation. Longer cables may work but are prone to CSI signal failures (sensor responds over I2C but frames time out).
 
 ---
 
@@ -288,7 +287,7 @@ The apt package links against the ROS libcamera (incompatible). It must be built
 
 ```bash
 # Create workspace
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws
+mkdir -p ~/picam_ws/src && cd ~/picam_ws
 
 # Clone camera_ros
 git clone https://github.com/christianrauch/camera_ros.git src/camera_ros
@@ -299,13 +298,13 @@ colcon build --packages-select camera_ros \
   --cmake-args -DCMAKE_PREFIX_PATH="/usr/local"
 
 # Source the workspace
-source ~/ros2_ws/install/setup.bash
+source ~/picam_ws/install/setup.bash
 ```
 
 Add to `.bashrc`:
 
 ```bash
-echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
+echo 'source ~/picam_ws/install/setup.bash' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -325,7 +324,7 @@ The OV5647 natively outputs `NV21` (YUV420 semi-planar), which **is not compatib
 
 ```bash
 ros2 run camera_ros camera_node --ros-args \
-  -p format:=XRGB8888 \
+  -p format:=YUYV \
   -p width:=640 \
   -p height:=480
 ```
@@ -334,10 +333,13 @@ ros2 run camera_ros camera_node --ros-args \
 
 | Resolution | FPS | Recommended use |
 |---|---|---|
+| 320x240 | >60.0 fps | For constrained environments |
 | 640x480 | 58.92 fps | Real-time HRI, person detection |
-| 1296x972 | 43.25 fps | Quality/performance balance ✅ |
+| 1296x972 | 43.25 fps | Quality/performance balance |
 | 1920x1080 | 30.62 fps | Recording, mapping |
 | 2592x1944 | 15.63 fps | Maximum resolution, low framerate |
+
+> Note: Keep in mind that this frame rates and resolutions refer to on platform system. If you intend to explore the usage of the image with ROS 2 topics, consider evaluating your environment and constraints so it matches your requirements. 
 
 ### Available pixel formats
 
@@ -354,7 +356,7 @@ ros2 run camera_ros camera_node --ros-args \
 ```bash
 # In another terminal
 source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
+source ~/picam_ws/install/setup.bash
 
 ros2 topic list
 # Should show: /image_raw  /camera_info
@@ -418,3 +420,54 @@ To isolate whether the issue is the module or the RPi's CSI port: test the same 
 | ROS 2 | Jazzy |
 | camera_ros | built from source (github.com/christianrauch/camera_ros) |
 | GCC | 13.3.0 |
+
+---
+
+## Integration with ORION bringup
+
+The picam is part of the **G Mov** module — it is enabled by launching the
+bringup with `g_mov:=true`. The URDF link is `g_mov_picam` (defined in
+`orion_description/urdf/include/orion_g_mov.urdf.xacro`).
+
+### Host setup
+
+Build camera_ros into a dedicated workspace at `~/picam_ws` (so it can be
+bind-mounted into the Docker container without conflicting with the host's
+main ROS 2 workspace):
+
+```bash
+mkdir -p ~/picam_ws/src && cd ~/picam_ws
+git clone https://github.com/christianrauch/camera_ros.git src/camera_ros
+source /opt/ros/jazzy/setup.bash
+colcon build --packages-select camera_ros \
+  --cmake-args -DCMAKE_PREFIX_PATH="/usr/local"
+```
+
+Then run `setup_host.sh` (or re-run it) — it will:
+
+- Append `camera_auto_detect=0` and `dtoverlay=ov5647` to `/boot/firmware/config.txt`
+- Install the `dma_heap` udev rule
+- Update `orion_robot.service` to bind-mount `/usr/local` and `~/picam_ws`
+  into the container, and set `LIBCAMERA_IPA_MODULE_PATH` / `LIBCAMERA_IPA_PROXY_PATH`
+
+### Launch
+
+Edit `/etc/systemd/system/orion_robot.service` to add `g_mov:=true` to the
+launch line, then reload and restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart orion_robot.service
+```
+
+The container's `entrypoint.sh` sources `~/picam_ws/install/setup.bash`
+automatically when the bind-mount is present. The `bringup.launch.py` launches
+`camera_ros camera_node` under the `/g_mov` namespace at YUYV 320×240 @ 10 fps
+when `g_mov:=true`.
+
+### Published topics (when active)
+
+```text
+/g_mov/image_raw         sensor_msgs/Image
+/g_mov/camera_info       sensor_msgs/CameraInfo
+```

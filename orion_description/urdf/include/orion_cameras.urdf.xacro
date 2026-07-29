@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
+<!-- @file orion_cameras.urdf.xacro
+     @brief Camera link definitions for ORION: Astra S, OS30A, and MaixSense A010. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- Mounting level for cameras: level 2, side 1 (third platform from base) -->
     <xacro:property name="level_cam" value="base_l2_s1"/>
 
     <!--  //////////////////////// ASTRA_S CAM ///////////////////////////// -->
@@ -171,11 +174,12 @@
             <child link="maixsense"/>
             <origin xyz="0 0 -0.0205" rpy="0 0 0"/>
         </joint>
-        <!-- ......................... Usage of GMov ...................................  -->
+        <!-- ......................... Usage of G Mov ...................................  -->
+        <!-- G Mov module macros are defined in orion_g_mov.urdf.xacro and
+             included at the top level of orion.urdf.xacro. -->
         <xacro:if value="${g_mov}">
-            <xacro:include filename="$(find g_mov_description)/urdf/g_mov_macros.urdf.xacro"/>
-            <xacro:g_mov_assem parent="${level_cam}" spacer="m3x10" offset="${0.033/2}" 
-                x="0.013825" y="0.035" z="0.0025" joint_prefix="g_mov"/>
+            <xacro:g_mov_assem parent="${level_cam}" spacer="m3x10" offset="${0.033/2}"
+                x="0.013825" y="0.035" z="0.0025"/>
         </xacro:if>
         <!-- ......................... Camera sensors links ............................ -->
         <xacro:camera_sensor x="0.011" y="0" z="0.0025" R="${-pi_2}" P="0" Y="${-pi_2}"

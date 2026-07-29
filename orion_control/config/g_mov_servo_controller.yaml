@@ -1,3 +1,7 @@
+# g_mov_servo_controller.yaml
+# forward_command_controller params for the G Mov pan/tilt servo.
+# Controls g_mov_servo_conn_joint position at 20 Hz.
+
 g_mov_servo_controller:
   ros__parameters:
     type: forward_command_controller/ForwardCommandController

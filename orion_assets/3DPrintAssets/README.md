@@ -8,9 +8,9 @@ To build your ORION robot, you can print the pieces in materials like PLA, ABS, 
 
 The .stl extension files were provided as they are the most common ones that are asked when going to a workshop to print the pieces. If your require other formats, please refer to **[FreeCAdAssets](/orion_assets/FreeCadAssets/README.md)**, search the pieces you need and convert them to the desired format.
 
-### Required pieces to build ORION 1.3.x to 1.6.x
+## Required pieces to build ORION 1.3.x to 1.6.x
 
-#### Mandatory 3D printed components
+### Mandatory 3D printed components
 
 The supports and mounts require to be 3D printed because of their form, so you will require the next elements:
 
@@ -34,7 +34,7 @@ The recommended values/properties for 3D printing this parts are:
 - **Nozzle width:** 0.4 mm (Except for custom spacer which should be 0.2 mm)
 - Accomodate speed and temperature according your material selection.
 
-#### Components based on your selection
+### Components based on your selection
 
 You can 3D print the next components too. However, there is an option to cut them as it can be faster and easier due to their planar form. If you want to cut them, check [3DPrintAssets](/orion_assets/LasserAssets/README.md), otherwise, you can print the next elements:
 
@@ -62,7 +62,7 @@ The recommended values/properties for 3D printing this parts are:
 - **Nozzle width:** 0.4 mm
 - Accomodate speed and temperature according your material selection.
 
-#### Optional 3D prints
+### Optional 3D prints
 
 You can 3D print the ORION toys, which are cuboids for Computer Vision applications:
 

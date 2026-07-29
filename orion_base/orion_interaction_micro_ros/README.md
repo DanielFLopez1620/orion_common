@@ -4,6 +4,17 @@
 
 Code oriented to implement the TFT ILI9225 Screen and four capacitive touch sensors with a µ-ROS application, in order to use these elements for HRI behaviors with the ORION robot.
 
+---
+
+## Code Structure
+
+- **`src/main.cpp`** — Main application: micro-ROS initialization, touch sensor reading, emotion display callbacks, and heartbeat publishing.
+- **`lib/screen/screen.hpp`** — Screen driver abstraction: pin definitions, class declaration for TFT ILI9225.
+- **`lib/screen/screen.cpp`** — Screen driver implementation: bitmap and geometric emotion rendering.
+- **`lib/screen/emotions.hpp`** — Bitmap arrays and color definitions for each emotion.
+
+---
+
 Let's get an overview on the connections:
 
 - **Screen:** TFT ILI9225
@@ -25,14 +36,14 @@ Let's get an overview on the connections:
   - **Lower Left:** GPIO35
   - Connect all of the touch sensors to 5V and GND.
 
-For more information about the connections, check the [ORION Wiki](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
+For more information about the connections, check the [ORION Wiki](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
 
 ## Uploading and running application
 
-1. Prepare thw **Platformio** workspace: Install dependencies, build and upload
+1. Prepare the **Platformio** workspace: Install dependencies, build and upload
 
     ~~~bash
-    cd /path/to/orion_ctl_micro_ros
+    cd /path/to/orion_interaction_micro_ros
     pio lib install
     pio run
     pio run --target upload
@@ -88,14 +99,14 @@ For more information about the connections, check the [ORION Wiki](https://githu
 8. Give the proper permissions to the device.
 
     ~~~bash
-    sudo chmod 777 /dev/ttyESP32_1
-    sudo chmod 666 /dev/ttyUSB0 # Or the proper device
+    sudo chmod 777 /dev/ttyESP32_2
+    sudo chmod 666 /dev/ttyUSB1 # Or the proper device
     ~~~
 
 9. You are ready to experiment with the application.
 
     ~~~bash
-    ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyESP32_1
+    ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyESP32_2
     ~~~
 
 ## Topics
@@ -113,7 +124,8 @@ So you should watch the next topics:
 /interaction/touch_ul (std_msgs/msg/Bool)
 /interaction/touch_lr (std_msgs/msg/Bool)
 /interaction/touch_ll (std_msgs/msg/Bool)
-/emotion/int (std_msgs/msg/Bool)
+/interaction/heartbeat (std_msgs/msg/Bool)
+/emotion/int (std_msgs/msg/Int32)
 ~~~
 
 With this, you can do the next:
@@ -139,14 +151,10 @@ With this, you can do the next:
 - You can command the screen by publishing to the emotion topic, as this will display a face according to this:
 
     ~~~bash
-    ros2 topic pub /emotion/int std_msgs/msg/Int64 "data: 2"
+    ros2 topic pub /emotion/int std_msgs/msg/Int32 "data: 2"
     ~~~
 
-    For now there are seven emotions which are: Angry (0), Disgust (1), Fear(2), Happy (3), Neutral (4), Sad (5), Surprise (6).
-
-## Additional notes
-
-- The emotion topic is related with the [emotion_detector](https://github.com/Tesis-ORION/emotion_detector) package, check it for more information.
+    For now there are seven emotions which are: Angry (0), Disgust (1), Fear (2), Happy (3), Neutral (4), Sad (5), Surprise (6).
 
 ## Additional resources
 
@@ -156,4 +164,4 @@ With this, you can do the next:
 
 - [talker_c | riot-ros2 @ Github](https://github.com/astralien3000/riot-ros2/blob/3d0779b920996f4e701830b8248573cd0e23204d/examples/talker_c/main.c#L32)
 
-- [micro_ros_platfomio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)
+- [micro_ros_platformio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)

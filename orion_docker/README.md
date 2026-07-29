@@ -39,7 +39,7 @@ orion_dev   orion_robot
 The base image must be built before `orion_dev` or `orion_robot`.
 
 ```bash
-git clone https://github.com/Tesis-ORION/orion_common.git
+git clone https://github.com/DanielFLopez1620/orion_common.git
 cd orion_common
 
 docker build -t orion_base:latest orion_docker/base/
@@ -83,7 +83,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 docker build -t orion_dev:latest orion_docker/dev/
 ```
 
-> First build takes ~10 minutes — installs Nav2, SLAM Toolbox, Cartographer, simulation stack, and orion_chat Python dependencies.
+> First build takes ~10 minutes — installs Nav2, SLAM Toolbox, Cartographer, and the simulation stack.
 
 ### Open in VS Code
 
@@ -95,7 +95,7 @@ Ctrl + Shift + P → Dev Containers: Reopen in Container
 
 VS Code will start the container and automatically run `orion_docker/dev/post_create.sh`, which:
 
-- Clones the external repositories (`orion_gz`, `orion_tools`, `orion_chat`, sensor drivers) into `ws/src/`
+- Clones the external repositories (`orion_gz`, `orion_tools`, sensor drivers) into `ws/src/`
 - Runs `rosdep install` for any remaining dependencies
 
 > **Important:** Open the `orion_common` root directory in VS Code — not a subdirectory.
@@ -135,7 +135,7 @@ Unlike `orion_dev`, the robot image **compiles the workspace inside the image** 
 Before building or running the container, prepare the host with:
 
 ```bash
-git clone https://github.com/Tesis-ORION/orion_common.git
+git clone https://github.com/DanielFLopez1620/orion_common.git
 cd orion_common
 
 bash orion_docker/robot/setup_host.sh
@@ -144,8 +144,23 @@ bash orion_docker/robot/setup_host.sh
 This script:
 
 - Installs udev rules for all robot peripherals (`/etc/udev/rules.d/99-orion.rules`)
-- Adds the current user to the `dialout` and `docker` groups
-- Installs and enables the `orion_robot.service` systemd unit
+- Adds the current user to the `dialout`, `i2c`, `pwm`, `video`, and `docker` groups
+- Enables I2C, hardware PWM, and the OV5647 camera overlay in `/boot/firmware/config.txt`
+- Installs the `dma_heap` udev rule required for libcamera access as a non-root user
+- Checks that the host libcamera (RPi fork) and `~/picam_ws` are present (needed for `g_mov:=true`)
+- Installs the `pwm-setup.service` systemd unit (exports PWM channel before container start)
+- Installs and enables the `orion_robot.service` systemd unit with `--ulimit rtprio=99` and `--ulimit memlock=-1` for real-time scheduling
+
+> **Pi Camera / G-Mov prerequisite:** building `camera_ros` on the host (required
+> for `g_mov:=true`) depends on the RPi libcamera fork **and** a working ROS 2
+> installation on the host. Make sure both are present before running
+> `setup_host.sh`. You also need `colcon`:
+>
+> ```bash
+> sudo apt install python3-colcon-common-extensions -y
+> ```
+>
+> Follow `docs/cam/README.md` for the full libcamera + `camera_ros` build steps.
 
 > **Important:** After running the script, edit the udev rules to match the actual
 > serial/ID_PATH attributes of **your** specific devices:
@@ -161,8 +176,9 @@ This script:
 Before building, verify that all peripheral device symlinks exist on the host — the workspace build does not require them, but it confirms udev rules are correctly applied:
 
 ```bash
-# Validate udev rules for ESP32s, LIDAR and your camera
+# Validate udev rules for ESP32s, LIDAR, camera, and I2C bus
 ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19 /dev/ttyA010
+ls -la /dev/i2c-1
 ```
 
 ```bash
@@ -183,6 +199,7 @@ docker build -t orion_robot:latest orion_docker/robot/
 >
 > ```bash
 > ls -la /dev/ttyESP32_1 /dev/ttyESP32_2 /dev/ttyLD19
+> ls -la /dev/i2c-1   # MPU6050 — must exist if using g_mov
 > ```
 
 The systemd service starts the container automatically on boot. To control it manually:
@@ -200,11 +217,32 @@ journalctl -u orion_robot.service -f
 
 To run manually (e.g. to test or override launch arguments):
 
+> **`-v /dev:/dev` is always required** — without it the container cannot see any
+> peripheral (ESP32s, LIDAR, cameras). This applies even when `g_mov:=false`.
+
 ```bash
 docker run --rm --privileged --network host \
+    --ulimit rtprio=99 --ulimit memlock=-1 \
+    -v /dev:/dev \
     -e ROS_DOMAIN_ID=0 \
     orion_robot:latest \
-    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro-ros
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 ctl_type:=micro_ros
+```
+
+When launching with `g_mov:=true`, add the libcamera host mounts and environment variables so the container can access the RPi libcamera fork and the `camera_ros` workspace built on the host (see `docs/cam/README.md`):
+
+```bash
+docker run --rm --privileged --network host \
+    --ulimit rtprio=99 --ulimit memlock=-1 \
+    -v /dev:/dev \
+    -v /usr/local:/usr/local:ro \
+    -v ~/picam_ws:/home/orion_user/picam_ws:ro \
+    -e ROS_DOMAIN_ID=0 \
+    -e LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu \
+    -e LIBCAMERA_IPA_MODULE_PATH=/usr/local/lib/aarch64-linux-gnu/libcamera \
+    -e LIBCAMERA_IPA_PROXY_PATH=/usr/local/libexec/libcamera \
+    orion_robot:latest \
+    ros2 launch orion_bringup bringup.launch.py camera:=a010 g_mov:=true ctl_type:=micro_ros
 ```
 
 ### Packages included
@@ -212,10 +250,9 @@ docker run --rm --privileged --network host \
 | Package | Source |
 | --- | --- |
 | `orion_common` (description, control, bringup) | `main` branch |
-| `orion_chat` | `teatro` branch |
-| `g_mov` | `main` branch |
 | `depth_maixsense_a010` | `main` branch |
 | `depth_ydlidar_os30a` | `main` branch |
+| `ldrobot_lidar_ros2` (LD19 lidar driver) | `main` branch |
 
 `depth_orbbec_astra` is intentionally excluded — compilation runs out of memory on RPi4.
 
@@ -243,13 +280,6 @@ orion_docker/
 ---
 
 ## Dependency notes
-
-### orion_chat
-
-`orion_chat` declares pip-only dependency keys (`sounddevice`, `webrtcvad`, `pytest`) that are not in the rosdep database for Ubuntu 24.04 Noble. Both Dockerfiles handle this:
-
-- **`orion_dev`**: pip packages are pre-installed at image build time; `post_create.sh` skips them via `--skip-keys` and runs `orion_chat`'s own `install_apt.sh` and `requirements.txt`.
-- **`orion_robot`**: `rosdep install` skips the same keys via `--skip-keys` during the workspace build step inside the image.
 
 ### depth_ydlidar_os30a (eYs3D / libdc1394)
 
@@ -290,10 +320,6 @@ sudo chown -R $USER:$USER /path/to/orion_common
 ### **`failed to discover GPU vendor from CDI`**
 
 The `--gpus all` flag requires NVIDIA Container Toolkit with CDI configured. Remove or comment out `"--gpus", "all"` in `devcontainer.json` to run without GPU passthrough.
-
-### **`Cannot locate rosdep definition for [orion_chat]`**
-
-This means `orion_chat` is not present in `ws/src/` when rosdep runs. Verify that `vcs import` completed successfully in `post_create.sh` and that the `teatro` branch of `orion_chat` was cloned.
 
 ### **`libdc1394.so.22: not found` when building depth_ydlidar_os30a**
 

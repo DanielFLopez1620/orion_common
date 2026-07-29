@@ -1,4 +1,14 @@
 #!/bin/bash
+# startup_robot.sh — ORION robot bringup startup script.
+#
+# Waits for internet connectivity, required USB devices, and then sources
+# the ROS 2 environment before launching the bringup.
+#
+# Configurable variables:
+#   CAMERA_TYPE : depth camera to use ('a010', 'astra_s', 'os30a')
+#   G_MOV       : enable G-Mov module with A010 camera ('true', 'false')
+#
+# Usage: called by startup_robot.service (systemd) on boot.
 set -e
 
 G_MOV="true"        # Options: true, false

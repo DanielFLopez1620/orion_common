@@ -1,21 +1,11 @@
-// //////////////////////// Include Libraries //////////////////////////////
-// -------------------- Arduino / ESP32 Dependencies -----------------------
-#include <Arduino.h> // Library for Arduino-like code
+#include <Arduino.h>
+#include <cmath>
 
-// ---------------------- STD Libraries ------------------------------------
-#include <cmath> // Standard library for math (Symbols, constants and oper.)
+#include "motor.hpp"
 
-// ---------------------- Custom dependencies ------------------------------
-#include "motor.hpp" // Custom header for a motor class
-
-// /////////////////////// CLASS DEFINITIONS ///////////////////////////////
 namespace diff
 {
-    /**
-     * Method to start safely the motors and prevent unexpected movement
-     * when initializing board.
-     */
-    void MotorDriver::safe_init()
+    void MotorDriver::safeInit()
     {
         pinMode(this->enable_pin_, OUTPUT);
         analogWrite(this->enable_pin_, 0);
@@ -25,34 +15,20 @@ namespace diff
 
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
+    }
 
-    } // void MotorDriver::safe_init()
-
-    /**
-     * Initialize motor object in a secure way.
-     */
     void MotorDriver::begin()
     {
-        this->safe_init();
+        this->safeInit();
         this->stop();
+    }
 
-    } // void MotorDriver::begin()
-
-    /**
-     * Set the PWM for the motor velocity, it will clamp it according the max
-     * and min PWM allowed. Also, based on the sign, it will determinate
-     * the motor direction.
-     *
-     * @param speed PWM integer value for controlling the motor
-     */
-    void MotorDriver::set_speed(int speed)
+    void MotorDriver::setSpeed(int speed)
     {
         int abs_speed = abs(speed);
 
-        // Write velocity
         analogWrite(this->enable_pin_, abs_speed);
 
-        // Check sign to determinate direction of movement
         if(speed < 0)
         {
             // Move forward
@@ -73,17 +49,13 @@ namespace diff
             analogWrite(this->enable_pin_, 0);
         }
 
-    } // void MotorDriver::set_speed()
+    }
 
-    /**
-     * Method oriented to hard-force the stop of the motors.
-     */
     void MotorDriver::stop()
     {
         analogWrite(this->enable_pin_, 0);
         digitalWrite(this->forw_pin_, LOW);
         digitalWrite(this->back_pin_, LOW);
-
-    } // void MotorDriver::stop()
+    }
 
 } // namespace diff

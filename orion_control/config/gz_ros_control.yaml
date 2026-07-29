@@ -1,3 +1,7 @@
+# gz_ros_control.yaml
+# ros2_control controller manager params for Gazebo Harmonic simulation.
+# Mirror of control_manager.yaml with use_sim_time enabled.
+
 /controller_manager:
   ros__parameters:
     update_rate: 20 # Hz

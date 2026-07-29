@@ -31,8 +31,8 @@ You can find the next codes:
 
 - [diffdrive_orion](/orion_control/src/diffdrive_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Diff Drive Controller*. It is focused on the implementation for the read/write methods based on the topics of [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the DC motors, which are based on a PID controller (for each motor) by using the double encoder count to determinate speed and direction, while also doing the control loop.
 
-- [forward_orion](/orion_control/src/forward_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Forward Command Controller*. It is focused to the read/write methods on the topics - - - [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the servo motors, where it has a write/read position (default) and a option to use an incremental move (can be cahnged in the commented notes of the servo callback).
-- [wheel](/orion_control/src/wheel.cpp): Wheel object implementation to consideringduring the DiffDrive Controller, mainly focused on wheel params like encoder counts per revolution and methods for this conversion.
+- [forward_orion](/orion_control/src/forward_orion.cpp): Implementation of the hardware interface for a **ros2_control** *Forward Command Controller*. It is focused on the read/write methods on the topics from [orion_ctl_µ_ros](/orion_base/orion_ctl_micro_ros/README.md) for the servo motors, where it has write/read position (default) and an option to use incremental moves (can be changed in the commented notes of the servo callback).
+- [wheel](/orion_control/src/wheel.cpp): Wheel object used during the DiffDrive Controller, mainly focused on wheel params like encoder counts per revolution and methods for this conversion.
 
 ---
 
@@ -58,7 +58,7 @@ In this packages you can find the configuration for the controllers of the robot
 - **[joint_state_broadcaster.yaml](/orion_control/config/joint_state_broadcaster.yaml):** Aims to configure the Joint Broadcaster that considers the changes of all the joints defined with **ros2_control.**
 - **[mobile_base_controller.yaml](/orion_control/config/mobile_base_controller.yaml):** Add a Diff Drive Controller with its parameters for the ORION mobile base.
 - **[simple_left_arm_controller.yaml](/orion_control/config/simple_left_arm_controller.yaml):** Set up the parameters for the Forward Command Controller of the left arm.
-- **[simple_right_arm_controller.yaml](/orion_control/config/simple_right_arm_controller.yaml):** Set up the parameters for the Forward Command Controller of the left arm.
+- **[simple_right_arm_controller.yaml](/orion_control/config/simple_right_arm_controller.yaml):** Set up the parameters for the Forward Command Controller of the right arm.
 
 If you add more controllers to the robot, do not forget to add them to the **config** dir of the package.
 
@@ -70,23 +70,23 @@ If you add more controllers to the robot, do not forget to add them to the **con
 
 You can also confirm this by moving the wheel of your robot manually and you note a little deviation over time, for example, 20° over 20 laps.
 
-This may be cause by a small difference on ther wheel size and the wheel separation. To fix this, you can measure your robot and change the params of [mobile_base_controller.yaml](/orion_control/config/mobile_base_controller.yaml).
+This may be caused by a small difference in the wheel size and wheel separation. To fix this, you can measure your robot and change the params of [mobile_base_controller.yaml](/orion_control/config/mobile_base_controller.yaml).
 
 Additionally you can check the encoder count of your robot, for more information check on [orion_base](/orion_base/README.md) and the next point on this section.
 
-### Big deviation over small periods of time with odoemtry
+### Big deviation over small periods of time with odometry
 
 You can also confirm by spinning the wheel of your robot and if the wheel spin too much or too little based on the movement, it may be a problem of the encoder count and wheel definition in your URDF.
 
-To solve this, go to [orion_urdf.xacro](/orion_description/launch/rsp.launch.py) and change the **motor** params. If you are using a JGA with a reductor for an output of 1000 rpm approx at 12V, use **1000**; if you are using a JGP with a output of 100 rpm approx at 12V use **100**; and if you aren't using neither of these ones, you will require to create one custom.
+To solve this, go to [orion.urdf.xacro](/orion_description/urdf/orion.urdf.xacro) and change the **motor** params. If you are using a JGA with a reductor for an output of 1000 rpm approx at 12V, use **1000**; if you are using a JGP with a output of 100 rpm approx at 12V use **100**; and if you aren't using either of these, you will need to create a custom one.
 
 To create a custom encoder count and motor params do the next:
 
-1. Go to [orion_urdf.xacro](/orion_description/launch/rsp.launch.py )and search for the motor launch param / config, edit the choices to allow your motor nominal speed at 12V.
+1. Go to [orion.urdf.xacro](/orion_description/urdf/orion.urdf.xacro) and search for the motor launch param / config, edit the choices to allow your motor nominal speed at 12V.
 
     ~~~Python
     DeclareLaunchArgument('motor', default_value='100',
-        description="Select your  motor nominal speed (rpm) at 12V",
+        description="Select your motor nominal speed (rpm) at 12V",
         choices=['1000', '100', '<add_yours>']),
     ~~~
 
@@ -135,4 +135,4 @@ To create a custom encoder count and motor params do the next:
     </hardware>
     ~~~
 
-5. You may additioally change your max and min PWM for the real robot, for more information, check on [orion_base](/orion_base/README.md)
+5. You may additionally change your max and min PWM for the real robot, for more information, check on [orion_base](/orion_base/README.md)

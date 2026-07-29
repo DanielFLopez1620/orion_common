@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-v4l2-camera \
     ros-${ROS_DISTRO}-joy \
     ros-${ROS_DISTRO}-teleop-twist-joy \
+    libudev-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /bin/bash -c " \
@@ -21,19 +22,18 @@ RUN /bin/bash -c " \
     cd /home/${USERNAME}/ws && \
     source /opt/ros/${ROS_DISTRO}/setup.bash && \
     vcs import src < /tmp/robot_repos.yaml && \
+    git -C src/ldrobot_lidar_ros2 submodule update --init --recursive && \
     apt-get update && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -y \
-        --skip-keys sounddevice \
-        --skip-keys webrtcvad  \
-        --skip-keys python3-sounddevice \
         --skip-keys pytest \
-        --skip-keys python3-pytest \
-        --skip-keys python3-mediapipe && \
+        --skip-keys python3-pytest && \
     rm -rf /var/lib/apt/lists/* && \
     MAKEFLAGS="-j1" colcon build \
         --parallel-workers 1 \
         --cmake-args -DCMAKE_BUILD_TYPE=Release && \
+    find build/ldlidar_component -name "libldlidar.so" \
+        -exec cp {} install/ldlidar_component/lib/ \; && \
     rm -rf src build log && \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws \
     "

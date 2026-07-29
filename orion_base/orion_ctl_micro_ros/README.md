@@ -2,9 +2,27 @@
 
 ## Purpose
 
-Code using two JGA25-371 DC Motors in order to subscribe to a twist topic in order to move. It considers the usage of the L298N driver and the lecture of the two encoder channel of both motors, which aims to connect with a Differentil Controller with ros2_control by using topics. It also connects two servo motors ready for a forward command controller in ros2_control by implementing ROS 2 topics.
+Code using two JGA25-371 DC Motors to subscribe to a twist topic and drive movement. It considers the usage of the L298N driver and the reading of the two encoder channels of both motors, which aims to connect with a Differential Controller with ros2_control by using topics. It also connects two servo motors (MG996-R) ready for a forward command controller in ros2_control by implementing ROS 2 topics.
 
 This is aimed to mount a code capable for a integration with multiple hardware interfaces of ros2_control (a [DiffDriveController](/orion_control/src/diffdrive_orion.cpp) and two [ForwardCommandControllers](/orion_control/src/forward_orion.cpp)).
+
+---
+
+## Code Structure
+
+The project is organized as follows:
+
+- **`src/main.cpp`** — Main application logic: micro-ROS initialization, callbacks, control loops, and hardware setup.
+- **`lib/hardware/hardware.hpp`** — GPIO pin definitions for motors, encoders, and servos. Update here if pinout changes.
+- **`lib/motor/`** — DC motor driver abstraction (`MotorDriver` class): speed control and direction.
+- **`lib/encoder/`** — Encoder reading and pulse counting for odometry feedback.
+- **`lib/pid/`** — PID controller implementation for speed control loop.
+- **`lib/servo/`** — Servo motor control for the two arm servos (position-based).
+- **`lib/constants/constants.hpp`** — PID tuning constants, PWM limits, and control rates.
+
+---
+
+## Hardware Connections
 
 NOTE: The motors are connected in a special way in the L298 driver, as OUT1 (+) and OUT2 (-) are for the right motor, and OUT3 (+) and OUT4(-) are for the left motor. Check the **hardware** file on the **lib** directory for more about connections.
 
@@ -24,17 +42,17 @@ A brief note on them is shown below:
   - **Motor Enable (ENB):** GPIO16
 - **Servo Right:**
   - **PWM Pin:** GPIO23
-- **Servo Right:**
+- **Servo Left:**
   - **PWM Pin:** GPIO25
 - Connect the servos to 5V and GND.
 - Ensure that the L298N doesn't use the 12V to power on, as you will use the 5V from the ESP32 to power it on.
 - The battery stack should provide between 9.6 V to 12.6 V, although this, make sure to connect this output to the DC motors supply at the L298N.
 
-For more information about the connections, check the [ORION Wiki](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
+For more information about the connections, check the [ORION Wiki](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics)
 
 ## Uploading and running application
 
-1. Prepare thw **Platformio** workspace: Install dependencies, build and upload
+1. Prepare the **Platformio** workspace: Install dependencies, build and upload
 
     ~~~bash
     cd /path/to/orion_ctl_micro_ros
@@ -94,7 +112,7 @@ For more information about the connections, check the [ORION Wiki](https://githu
 
     ~~~bash
     sudo chmod 777 /dev/ttyESP32_1
-    sudo chmod 666 /dev/ttyUSB0 # Or the proper device
+    sudo chmod 666 /dev/ttyUSB0 # Or the proper device (again, remember to set up udev rules)
     ~~~
 
 9. You are ready to experiment with the application.
@@ -115,7 +133,7 @@ So you should watch the next topics:
 
 ~~~bash
 /diff_ctl_left_enc (std_msgs/msg/Int64)
-diff_ctl_motor_cmd (std_msgs/msg/Int64MultiArray)
+/diff_ctl_motor_cmd (std_msgs/msg/Int64MultiArray)
 /diff_ctl_right_enc (std_msgs/msg/Int64)
 /fwd_servo_left_cmd (std_msgs/msg/Float32)
 /fwd_servo_left_feedback (std_msgs/msg/Float32)
@@ -135,9 +153,9 @@ With this, you can do the next
     ros2 topic echo /diff_ctl_right_enc
     ~~~
 
-    Start moving the motors manually and check the increment/decrement of both, based on the front (positive) and back (negative) directions. If they are inverted check connections or review ports on code ([harwdare.hpp](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp))
+    Start moving the motors manually and check the increment/decrement of both, based on the front (positive) and back (negative) directions. If they are inverted check connections or review ports on code ([hardware.hpp](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp))
 
-- You can command the motors by using a muti array topic as shown below:
+- You can command the motors by using a multi-array topic as shown below:
 
     ~~~bash
     ros2 topic pub /diff_ctl_motor_cmd std_msgs/msg/Int64MultiArray "layout:
@@ -146,7 +164,7 @@ With this, you can do the next
     data: [0,0]" --once
     ~~~
 
-    The data in the message should refer to the encoder count change in position you require to do in a time lapse, this may vary depending of your motor as a 1000 rpm motor may have less encoder counts than a 100 rpm motor due to the reductor configuration.
+    The data in the message should refer to the encoder count change in position you require to do in a time lapse, this may vary depending on your motor as a 1000 rpm motor may have less encoder counts than a 100 rpm motor due to the reductor configuration.
 
 - You can write a servo position by using:
 
@@ -169,7 +187,7 @@ With this, you can do the next
 
 - Do not run the agent while the bringup is active, as you may cause to interrupt it.
 
-- Avoid to publish to the DC motors and servo motors topics when using the proper ros2_controllers as you may affect other nodes processes.
+- Avoid publishing to the DC motors and servo motors topics when using the proper ros2_controllers as you may affect other nodes processes.
 
 ## Additional resources
 
@@ -179,4 +197,4 @@ With this, you can do the next
 
 - [talker_c | riot-ros2 @ Github](https://github.com/astralien3000/riot-ros2/blob/3d0779b920996f4e701830b8248573cd0e23204d/examples/talker_c/main.c#L32)
 
-- [micro_ros_platfomio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)
+- [micro_ros_platformio | micro-ROS @ Github](https://github.com/micro-ROS/micro_ros_platformio)

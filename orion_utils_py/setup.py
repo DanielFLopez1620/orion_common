@@ -4,7 +4,7 @@ package_name = 'orion_utils_py'
 
 setup(
     name=package_name,
-    version='1.8.2',
+    version='1.8.3',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='dan1620',
     maintainer_email='dfelipe.lopez@gmail.com',
-    description='Common python utilities and emos',
+    description='Common Python utilities and demos',
     license='BSD-3-Clause',
     tests_require=['pytest'],
     entry_points={
@@ -27,6 +27,10 @@ setup(
             'demo_theater = orion_utils_py.demo_theater:main',
             'emotion_try = orion_utils_py.emotion_try:main',
             'hi_human = orion_utils_py.hi_human:main',
+            'mpu6050_node = orion_utils_py.mpu6050_node:main',
+            'mpu6050_calibration = orion_utils_py.mpu6050_calibration:main',
+            'g_mov_servo_node = orion_utils_py.g_mov_servo_node:main',
+            'touch_interaction = orion_utils_py.touch_interaction:main',
         ],
     },
 )

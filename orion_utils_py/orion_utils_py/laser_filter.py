@@ -1,68 +1,53 @@
 #!/usr/bin/env python3
+"""Filter LIDAR scan ranges to remove robot self-obstruction areas."""
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 
-# ----------------------- CLASS DEFINITIONS -----------------------------------
 
 class LaserFilterNode(Node):
+    """Filter angle-based scan ranges from a LIDAR topic.
+
+    Subscribes to '/ldlidar_node/scan', sets ranges within configurable
+    angle intervals to NaN, and publishes the result to '/scan_filtered'.
     """
-    Class oriented to create a node that can filter pairs of ranges of lassers
-    that come from a /scan topic of a LIDAR.
 
-    Attributes
-    ---
-    filter_ranges : Float
-        Array with the ranges to filter
-
-    scan_sub : rclpy subscriber
-        Subscriber of LaserScan messages
-
-    scan_pub : rclpy publisher
-        Publisher of LaserScan messages    
-
-    Methods
-    ---
-    scan_callback :
-        When a /scan message is received, filter the range recieved.
-
-    """
     def __init__(self):
-        """
-        User defined constructor that initialize the laser_filter_node, prepare
-        the params and start the subscriber (unfiltered) and publisher (filtered)
-        """
+        """Initialize the laser filter node with parameters and pub/sub."""
         super().__init__('laser_filter_node')
 
         # Declare parameter as a flat list
         self.declare_parameter('filter_ranges', [
-            0.5585054, 0.9250245,
-            2.2165685, 2.6878075,
-            3.7000975, 4.1364305,
-            5.393067, 5.7421335
+            0.5566728, 0.9268571,
+            2.2142123, 2.6901637,
+            3.6900000, 4.1386122,
+            5.3913217, 5.7438788
         ])
 
-        # Convert arrays to ranges
-        filter_ranges_flat = self.get_parameter('filter_ranges').get_parameter_value().double_array_value
-        self.filter_ranges = [(filter_ranges_flat[i], filter_ranges_flat[i+1]) for i in range(0, len(filter_ranges_flat), 2)]
+        # Convert flat list to (lower, upper) pairs
+        filter_ranges_flat = (
+            self.get_parameter('filter_ranges')
+            .get_parameter_value().double_array_value
+        )
+        self.filter_ranges = [
+            (filter_ranges_flat[i], filter_ranges_flat[i + 1])
+            for i in range(0, len(filter_ranges_flat), 2)
+        ]
 
-        # Suscription that will receive unfiltered scans
-        self.scan_sub = self.create_subscription(LaserScan, '/ldlidar_node/scan', self.scan_callback, 10)
+        # Subscription that will receive unfiltered scans
+        self.scan_sub = self.create_subscription(
+            LaserScan, '/ldlidar_node/scan', self.scan_callback, 10)
 
         # Publisher for filtered scans
         self.scan_pub = self.create_publisher(LaserScan, '/scan_filtered', 10)
 
     def scan_callback(self, msg):
-        """
-        Subscriber callback that receives Laser Scan meessages, filter the
-        desired ranges and then proceed to send a filtered LaserScan mesage
+        """Receive a LaserScan, zero out filtered angle ranges, and republish.
 
-        Params
-        ---
-        msg : sensor_msgs.msg.LaserScan
-            Unfiltered message received
+        Args:
+            msg: sensor_msgs.msg.LaserScan unfiltered message received.
         """
-
         # Copy list
         filtered_ranges = list(msg.ranges)
 
@@ -72,13 +57,13 @@ class LaserFilterNode(Node):
 
         # Filter based on the ranges
         for i in range(len(filtered_ranges)):
-            angle = angle_min + i * angle_increment 
+            angle = angle_min + i * angle_increment
 
             for lower, upper in self.filter_ranges:
                 if lower <= angle <= upper:
                     filtered_ranges[i] = float('nan')
 
-        # Create filtered messsage
+        # Create filtered message
         filtered_msg = LaserScan()
         filtered_msg.header = msg.header
         filtered_msg.angle_min = msg.angle_min
@@ -94,26 +79,20 @@ class LaserFilterNode(Node):
         # Publish
         self.scan_pub.publish(filtered_msg)
 
-# -------------------------- MAIN IMPLEMENTATION ------------------------------
 
 def main(args=None):
-    """
-    Create a Laser Filter node and spin until shutdown or Keyboard interrupt
-    """
-
-    # Intiialize node
+    """Create a LaserFilterNode and spin until shutdown."""
     rclpy.init(args=args)
     node = LaserFilterNode()
 
     try:
-        # Spin under exception management
         rclpy.spin(node)
     except KeyboardInterrupt:
-        # If Ctrl+C is called, interrupt
-        node.get_logger().info("KeyboardInterrupt received. Shutting down...")
+        node.get_logger().info('KeyboardInterrupt received. Shutting down...')
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

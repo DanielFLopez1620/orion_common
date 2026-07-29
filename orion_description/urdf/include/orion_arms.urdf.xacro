@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
+<!-- @file orion_arms.urdf.xacro
+     @brief Simple arm link definitions attached to the servo connectors. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<!-- This xacro file aims for adding the arms to the robot-->
     <xacro:if value="${servo}">
         <xacro:macro name="simple_arm" params="x y z parent side">
-            <!-- Link Spacer -->
+            <!-- Arm link -->
             <link name="simple_arm_${side}">
             <visual>
                 <origin xyz="0 0 0" rpy="${-pi_2} 0 0"/>
@@ -11,18 +12,7 @@
                 <mesh filename="package://orion_description/meshes/simple_arm.stl"
                     scale="0.001 0.001 0.001"/>
                 </geometry>
-                <xacro:if value="${color == 'mdf'}">
-                    <material name="MDF"/>
-                </xacro:if>
-                <xacro:if value="${color == 'transparent'}">
-                    <material name="TransparentBlack"/>
-                </xacro:if>
-                <xacro:if value="${color == 'pla'}">
-                    <material name="PLAWhite"/>
-                </xacro:if>
-                <xacro:if value="${color == 'gold'}">
-                    <material name="Gold"/>
-                </xacro:if>
+                <xacro:apply_color_material/>
             </visual>
             <collision>
                 <origin xyz="0 0 0" rpy="${-pi_2} 0 0"/>
@@ -33,25 +23,20 @@
             </collision>
             <inertial>
                 <origin xyz="0.0 0.0 0.0" rpy="${-pi_2} 0.0 0.0"/>
-                <mass value="1"/>
+                <mass value="0.020"/>
                 <inertia ixx="8.550666163126637e-09" ixy="0" ixz="0"
                         iyy="8.960721799390997e-09" iyz="0"
                         izz="4.443388969597693e-09"/>
             </inertial>
             </link>
-            <!-- Joint Spacer -->
+            <!-- Arm joint -->
             <joint name="simple_arm_${side}_joint" type="fixed">
                 <parent link="${parent}"/>
                 <child link="simple_arm_${side}"/>
                 <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
             </joint>
-            <!-- Gazebo Spacer -->
-            <xacro:if value="${gazebo}">
-                <gazebo reference="simple_arm_${side}">
-                    <mu1>0.0005</mu1>
-                    <mu2>0.0005</mu2>
-                </gazebo>
-            </xacro:if>
+            <xacro:gazebo_friction link="simple_arm_${side}"
+                mu1="0.0005" mu2="0.0005"/>
         </xacro:macro>
 
         <xacro:simple_arm x="0" y="0" z="0.0045" parent="servo_conn_1" side="1"/>

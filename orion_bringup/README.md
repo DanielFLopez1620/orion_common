@@ -1,8 +1,8 @@
-# 🤖 ORION Commons
+# 🤖 ORION Bringup
 
 ## 🌟 Overview
 
-This repository contains teh bringup and start up of the ORION robot. Before using this package, do not forget to upload the codes on the two ESP32 on [orion_base](/orion_base/README.md)
+This repository contains the bringup and startup of the ORION robot. Before using this package, do not forget to upload the codes on the two ESP32 on [orion_base](/orion_base/README.md)
 
 ---
 
@@ -19,9 +19,16 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 ## 📚 Table of Contents
 
 - [📝 Udev rules set up](#-udev-rules-set-up)
-- [🚀 Launch files](#-udev-rules-set-up)
+- [🚀 Launch files](#-launch-files)
 - [🚀 Setup of bringup on Startup](#-setup-of-bringup-on-startup)
 - [⚠️ Troubleshooting](#️-troubleshooting)
+  - [Astra S compilation](#astra-s-compilation)
+  - [Startup service not loading](#startup-service-not-loading)
+  - [Robot is not moving](#robot-is-not-moving)
+  - [Pi Camera not publishing](#pi-camera-ov5647-not-publishing-with-g_movtrue)
+  - [LiDAR not loading](#lidar-not-loading-libldlidarso-cannot-open-shared-object-file)
+  - [CycloneDDS type hash warnings](#cyclonedds-type-hash-warnings)
+  - [Controller RT scheduling warning](#controller-manager-real-time-scheduling-warning)
 
 ---
 
@@ -66,10 +73,18 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{seria
 A demo file you can use to replicate your rules is [example_udev.rules](/orion_bringup/example_udev.rules):
 
 ~~~rules
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", SYMLINK+="ttyLD19"
-SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.1:1.0", SYMLINK+="ttyESP32_1"
-SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.3:1.0", SYMLINK+="ttyESP32_2"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", ATTRS{serial}=="202206 DB225C", SYMLINK+="ttyA010"
+# LD19 LIDAR (youyeetoo LD19) — match by vendor/product/serial
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", MODE:="0666", SYMLINK+="ttyLD19"
+
+# ESP32 boards — use ID_PATH to distinguish two boards from the same batch
+SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.1:1.0", MODE:="0666", SYMLINK+="ttyESP32_1"
+SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.3:1.0", MODE:="0666", SYMLINK+="ttyESP32_2"
+
+# MaixSense A010 — exposes two interfaces; bind by kernel name + interface number
+SUBSYSTEM=="tty", KERNELS=="1-1.2:1.0", ATTRS{bInterfaceNumber}=="00", MODE:="0666", SYMLINK+="ttyA010"
+SUBSYSTEM=="tty", KERNELS=="1-1.2:1.1", ATTRS{bInterfaceNumber}=="01", MODE:="0666", SYMLINK+="ttyA010_debug"
+
+# Orbbec Astra S (USB device)
 SUBSYSTEM=="usb", ATTR{idProduct}=="0402", ATTR{idVendor}=="2bc5", MODE:="0666", OWNER:="root", GROUP:="video", SYMLINK+="astra_s"
 ~~~
 
@@ -81,7 +96,7 @@ SUBSYSTEM=="usb", ATTR{idProduct}=="0402", ATTR{idVendor}=="2bc5", MODE:="0666",
 
 - **MaixSense A010:** when connecting this device, you may notice it gives two USB devices, one for the device itself and another one for debugging, keep this in mind when using the rules as you may get a duplicated device.
 
-- **OS30A:** As a note, you  do not need a rules for the OS30A, as it is configured to use its serial in the launch files for the camera.
+- **OS30A:** As a note, you do not need rules for the OS30A, as it is configured to use its serial in the launch files for the camera.
 
 - **ESP32:** As there are two ESP32 and there is a high probability you bought the two ESP32 from the same batch, they may end with the same attributes. That is the reason, you should prefer a environmental attribute like the **ID_PATH** to distinguish both devices.
 
@@ -99,28 +114,81 @@ The [bringup.launch.py](/orion_bringup/launch/bringup.launch.py) file will take 
 # Basic usage:
 # ros2 launch orion_bringup bringup.launch.py
 # Additional arguments:
-#   camera : Can be 'astra_s', 'a010' or 'os30a'.
+#   camera : Can be 'a010' or 'os30a'.
 #   g_mov : Boolean (true/false) to use g_mov module when using 'a010' depth cam.
+#           When true, also launches the OV5647 Pi Camera (camera_ros) and the
+#           MPU6050 IMU node. Requires host-level setup — see docs/cam/README.md.
 #   rasp : Whether to use 'rpi4' or 'rpi5', this will imply a change in the sound hardware.
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   ros2_control : Boolean (true/false) to indicate usage of ros2_controllers
 #   simplified : Boolean (true/false) to indicate if use the simplified URDF model
-#   ctl_type: Control type can be 'micro-ros' or 'serial'.
+#   ctl_type: Control type can be 'micro_ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
+#   calibrate_imu : Boolean (true/false, g_mov only) force IMU re-calibration.
 ros2 launch orion_bringup bringup.launch.py camera:=a010
 ~~~
 
 ## 🚀 Setup of bringup on Startup
 
-You can enable the robots bringup launch in order to start as the Raspberry Pi is being initialized, for this case, we will use services and actions for **systemd**.
+You can enable the robot's bringup launch in order to start as the Raspberry Pi is being initialized, for this case, we will use services and actions for **systemd**.
 
 ### 📋 Prerequisites
 
 1. **Ubuntu/Linux-based OS** installed on the Raspberry Pi (tested with Ubuntu 24.04).
-2. **ROS2 Jazzy** installed and sourced correctly.
-3. ROS2 workspace (e.g., `ros2_ws`) built and sourced.
-4. Devices are connected this includes the two ESP32, your selected camera (OS30A, A010, ASTRA_S), the LIDAR LD19, speakers and microphone.
-5. You have set up the **udev** rules.
+
+2. **ROS2 Jazzy** installed and sourced correctly. A minimal install (`ros-jazzy-ros-base`) is often missing several packages that ORION requires. Install them explicitly:
+
+    ~~~bash
+    sudo apt install -y \
+        ros-jazzy-ros2-control \
+        ros-jazzy-ros2-controllers \
+        ros-jazzy-controller-manager \
+        ros-jazzy-joint-state-broadcaster \
+        ros-jazzy-diff-drive-controller \
+        ros-jazzy-forward-command-controller \
+        python3-colcon-common-extensions
+    ~~~
+
+3. **micro-ROS agent** installed. The agent bridges the ESP32 µ-ROS nodes to ROS 2. Install it from the pre-built binary:
+
+    ~~~bash
+    sudo snap install micro-ros-agent
+    ~~~
+
+    Or build it from source if the snap is unavailable on your architecture:
+
+    ~~~bash
+    mkdir -p ~/microros_ws/src && cd ~/microros_ws
+    git clone -b jazzy https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+    source /opt/ros/jazzy/setup.bash
+    colcon build --packages-select micro_ros_setup
+    source install/setup.bash
+    ros2 run micro_ros_setup create_agent_ws.sh
+    ros2 run micro_ros_setup build_agent.sh
+    ~~~
+
+4. **Hardware PWM enabled** (required for arm servos via MG996R). Add the overlay and export the PWM channel:
+
+    ~~~bash
+    # Add to /boot/firmware/config.txt (once, then reboot)
+    echo "dtoverlay=pwm,gpiopin=12,func=4" | sudo tee -a /boot/firmware/config.txt
+    sudo reboot
+    ~~~
+
+    After reboot, export the PWM channel so the servo node can access it without root:
+
+    ~~~bash
+    echo 0 | sudo tee /sys/class/pwm/pwmchip0/export
+    sudo chmod -R a+rw /sys/class/pwm/pwmchip0/
+    ~~~
+
+    > ⚠️ The `chmod` must be re-applied after every boot. Add it to `/etc/rc.local` or a systemd `ExecStartPre` if you want it persistent. For Docker, `setup_host.sh` installs `pwm-setup.service` which handles this automatically.
+
+5. ROS2 workspace (e.g., `ros2_ws`) built and sourced.
+
+6. Devices are connected: both ESP32s, your selected camera (OS30A, A010, ASTRA_S), the LIDAR LD19, speakers, and microphone.
+
+7. You have set up the **udev** rules.
 
 ### 📁 File Structure
 
@@ -174,25 +242,36 @@ Ensure you have the following elements:
     ros2 launch orion_bringup bringup.launch.py camera:=$CAMERA_TYPE g_mov:=$G_MOV
     ~~~
 
-3. Add the service [startup_robot.service](/orion_bringup/startup_robot.service) to the systemd directory:
+3. Install the PWM setup service [pwm-setup.service](/orion_bringup/pwm-setup.service). This exports the hardware PWM channel and sets permissions so the servo node can access it without root:
+
+    ~~~bash
+    sudo cp orion_bringup/pwm-setup.service /etc/systemd/system/pwm-setup.service
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now pwm-setup.service
+    ~~~
+
+    > This must run before `startup_robot.service`. The dependency is declared in `startup_robot.service` via `Requires=pwm-setup.service`.
+
+4. Add the service [startup_robot.service](/orion_bringup/startup_robot.service) to the systemd directory:
 
     ~~~bash
     sudo nano /etc/systemd/system/startup_robot.service
     ~~~
 
-    The content to consider is shown below, do not add comments to this file and do not forget to change the paths depending on your user.
+    Copy the content from [startup_robot.service](/orion_bringup/startup_robot.service) and **change `User`, `Environment HOME`, and `WorkingDirectory`** to match your actual username:
 
     ~~~service
     [Unit]
     Description=Startup ROS2 Bringup Service
-    After=network-online.target
+    After=network-online.target pwm-setup.service
     Wants=network-online.target
+    Requires=pwm-setup.service
 
     [Service]
     ExecStart=/usr/local/bin/startup_robot.sh
-    User=orion
-    Environment=HOME=/home/orion
-    WorkingDirectory=/home/orion
+    User=YOUR_USERNAME
+    Environment=HOME=/home/YOUR_USERNAME
+    WorkingDirectory=/home/YOUR_USERNAME
     Restart=on-failure
     StandardOutput=journal
     StandardError=journal
@@ -211,17 +290,18 @@ Ensure you have the following elements:
 
     Do not forget to update the script if your user, camera type, or device names change.
 
-2. Reload **systemd** and Enable the startup robot service
+2. Reload **systemd** and enable both services:
 
     ~~~bash
-    sudo systemctl daemon-reexec
     sudo systemctl daemon-reload
+    sudo systemctl enable pwm-setup.service
     sudo systemctl enable startup_robot.service
     ~~~
 
-    To start it immediately without rebooting:
+    To start immediately without rebooting:
 
     ~~~bash
+    sudo systemctl start pwm-setup.service
     sudo systemctl start startup_robot.service
     ~~~
 
@@ -306,3 +386,74 @@ This may occur for the next reasons:
 This may be caused if the µ-ROS nodes didn't activate on time or the connection with the agent wasn't possible. For this, just reboot the ESP32 by taking out the respective walls.
 
 For more information check [orion_base](/orion_base/README.md)
+
+### Pi Camera (OV5647) not publishing with `g_mov:=true`
+
+The Pi Camera is launched only when `g_mov:=true` and requires host-level setup that cannot live inside the Docker container. If `/g_mov/image_raw` is not published, verify the following:
+
+1. **Boot config** — `/boot/firmware/config.txt` must contain:
+
+    ~~~text
+    camera_auto_detect=0
+    dtoverlay=ov5647
+    ~~~
+
+    These lines are added automatically by `orion_docker/robot/setup_host.sh`. Reboot after editing.
+
+2. **libcamera (RPi fork)** — the apt version is incompatible. The RPi fork must be built from source and installed to `/usr/local`. See `docs/cam/README.md` Steps 2–5.
+
+3. **camera_ros workspace** — must be built on the host at `~/picam_ws` against the RPi fork:
+
+    ~~~bash
+    ls ~/picam_ws/install/setup.bash
+    ~~~
+
+    If the file is missing, follow `docs/cam/README.md` Step 8.
+
+4. **dma_heap permissions** — the user must belong to the `video` group and the rule `/etc/udev/rules.d/99-dma-heap.rules` must exist. Both are configured by `setup_host.sh`. Verify with:
+
+    ~~~bash
+    groups $USER | grep video
+    cat /etc/udev/rules.d/99-dma-heap.rules
+    ~~~
+
+### LiDAR not loading (`libldlidar.so: cannot open shared object file`)
+
+If the log shows:
+
+~~~text
+Failed to load library: dlopen error: libldlidar.so: cannot open shared object file
+~~~
+
+and the `lifecycle_manager` keeps printing `Waiting for service ldlidar_node/get_state`, the SDK shared library is missing from the container's install directory. This happens because the upstream `ldrobot-lidar-ros2` package moved its SDK to a git submodule in May 2026 and does not install `libldlidar.so` as part of its CMake install targets.
+
+The fix is already applied in the robot Dockerfile: the submodule is initialized after `vcs import`, and `libldlidar.so` is copied to the install directory before the build artifacts are removed. Rebuild the container image to apply the fix:
+
+~~~bash
+docker build -t orion_robot:latest -f orion_docker/robot/Dockerfile .
+~~~
+
+### CycloneDDS type hash warnings
+
+Warnings like the following are **expected and harmless**:
+
+~~~text
+[WARN] [rmw_cyclonedds_cpp]: Failed to parse type hash for topic 'rt/diff_ctl_motor_cmd' ... from USER_DATA '(null)'.
+~~~
+
+They appear because micro-ROS (ESP32) does not embed the RIHS01 type hash in the DDS `USER_DATA` QoS field, which CycloneDDS in Jazzy expects for type-safe discovery. Communication is not affected — topics are published and received correctly. The same warnings appear on any PC running RViz2 on the same ROS domain, as it sees the same ESP32-originated topics on the network.
+
+### Controller manager real-time scheduling warning
+
+If the log shows:
+
+~~~text
+[WARN] [controller_manager]: Could not enable FIFO RT scheduling policy: with error number <1>(Operation not permitted).
+~~~
+
+This means the `ros2_control_node` cannot use SCHED_FIFO real-time scheduling. When running inside Docker as a non-root user, this requires the `--ulimit rtprio=99` and `--ulimit memlock=-1` flags on the `docker run` command. Both are included in the service generated by `setup_host.sh`. Re-run `setup_host.sh` and restart the service if you see this warning after updating the Docker setup:
+
+~~~bash
+sudo systemctl daemon-reload
+sudo systemctl restart orion_robot.service
+~~~

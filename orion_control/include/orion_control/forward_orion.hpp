@@ -1,3 +1,16 @@
+/*
+ * @file forward_orion.hpp
+ * @brief ros2_control hardware interface for ORION servo arm controllers.
+ *
+ * Bridges the ros2_control ForwardCommandController to the µ-ROS topics
+ * published and subscribed by orion_ctl_micro_ros: reads servo position
+ * feedback and writes position commands via an internal ROS 2 bridge node.
+ *
+ * Publishes:  feedback_topic (Float32) — servo position feedback (radians)
+ * Subscribes: cmd_topic      (Float32) — servo position command  (radians)
+ * Topics are configured per-instance via URDF hardware parameters.
+ */
+
 #ifndef FORWARD_ORION_HPP
 #define FORWARD_ORION_HPP
 
@@ -21,37 +34,79 @@
 namespace orion_control
 {
     // Predefinition of the bridge class
-
     class OrionForwardBridgeNode;
 
-    /**
-     * Class oriented to implement the control for a forward controller, for cases like
-     * servomotors (MG996r, MG995, MG90, SG90).
+    /*
+     * ros2_control SystemInterface for ORION servo arms (MG996R, MG995, MG90, SG90).
+     * Reads position feedback and writes position commands via µ-ROS topics.
      */
     class ForwardOrion : public hardware_interface::SystemInterface
     {
     public:
         ForwardOrion() = default;
 
+        /*
+         * Reads servo and topic params from URDF, allocates shared pose/command
+         * message ptrs, and attaches the bridge node to the controller executor.
+         *
+         * @return ERROR if parent init or executor lock fails, otherwise SUCCESS.
+         */
         hardware_interface::CallbackReturn on_init(
             const hardware_interface::HardwareComponentInterfaceParams& params) override;
 
+        /*
+         * Lifecycle configure transition — currently a no-op beyond logging.
+         *
+         * @return SUCCESS unconditionally.
+         */
         hardware_interface::CallbackReturn on_configure(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Exports the servo position feedback state interface.
+         *
+         * @return Vector containing the single HW_IF_POSITION state interface.
+         */
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
+        /*
+         * Exports the servo position command interface.
+         * @return Vector containing the single HW_IF_POSITION command interface.
+         */
         std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
+        /*
+         * Verifies the bridge node is initialized before allowing activation.
+         *
+         * @return ERROR if bridge node is null, otherwise SUCCESS.
+         */
         hardware_interface::CallbackReturn on_activate(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Holds servo at its current position on deactivation — no zero command
+         * is sent to avoid moving the arm to an unsafe pose.
+         *
+         * @return SUCCESS unconditionally.
+         */
         hardware_interface::CallbackReturn on_deactivate(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Copies servo position feedback from the shared ptr into the state variable.
+         * Position is in radians.
+         *
+         * @return OK on success.
+         */
         hardware_interface::return_type read(
             const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
+        /*
+         * Copies the position command into the shared ptr for the bridge to publish.
+         * Position is in radians.
+         *
+         * @return OK on success.
+         */
         hardware_interface::return_type write(
             const rclcpp::Time&, const rclcpp::Duration& period) override;
 
@@ -63,7 +118,6 @@ namespace orion_control
 
         std::string servo_sub_topic_;
         std::string servo_pub_topic_;
-
 
         struct ServoComp
         {
@@ -78,9 +132,9 @@ namespace orion_control
 
     }; // class ForwardOrion
 
-    /**
-     * Node class oriented to implement the bridge communication between the
-     * hardware interface and the µ-ROS communication.
+    /*
+     * Internal bridge node that shuttles data between the hardware interface and
+     * the µ-ROS servo topics at 10 Hz (100 ms timer).
      */
     class OrionForwardBridgeNode : public rclcpp::Node
     {
@@ -113,9 +167,7 @@ namespace orion_control
                 });
             }
     private:
-        /**
-         * Will publish the feedback of the servo order.
-         */
+        /* Publishes the current servo command to the µ-ROS cmd topic. */
         void publish_commands()
         {
             if(rclcpp::ok() && servo_cmd_ptr_)

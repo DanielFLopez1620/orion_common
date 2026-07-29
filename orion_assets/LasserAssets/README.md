@@ -1,12 +1,12 @@
-# Lasser Assets
+# Laser Assets
 
 This directory contains the drawing files for the parts intended to be cut with Laser. They were exported by using **FreeCAD**.
 
 ## Preparations
 
-To build your ORION robot, you can cut the pieces over acrilic, MDF or similar materials with a thickness between 3 mm to 6 mm, depending on the material and the endurance you want. You require an area of material between 1 m² to 1.5 m².
+To build your ORION robot, you can cut the pieces over acrylic, MDF or similar materials with a thickness between 3 mm to 6 mm, depending on the material and the endurance you want. You require an area of material between 1 m² to 1.5 m².
 
-The .dxf extension files were provided as they are the most common ones that are asked when going to a workshop to cut pieces. If your require other formats, please refer to **[FreeCAdAssets](/orion_assets/FreeCadAssets/README.md)**, search the pieces you need and convert them to the desired format.
+The .dxf extension files were provided as they are the most common ones that are asked when going to a workshop to cut pieces. If your require other formats, please refer to **[FreeCadAssets](/orion_assets/FreeCadAssets/README.md)**, search the pieces you need and convert them to the desired format.
 
 ### Required pieces to build ORION 1.3.x to 1.6.x
 

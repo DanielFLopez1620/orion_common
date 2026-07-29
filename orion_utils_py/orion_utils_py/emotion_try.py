@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Int32, Float64MultiArray
+"""Test emotion expressions and arm motion across all ORION emotion indices."""
+
 import math
 import time
 
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float64MultiArray, Int32
+
+
 class OrionEmotionTest(Node):
+    """Cycle through ORION emotion expressions with synchronized arm sine motion."""
+
     def __init__(self):
+        """Initialize publishers, emotion counter, and 50 Hz update timer."""
         super().__init__('orion_emotion_test')
 
         # Publishers
         self.pub_emotion = self.create_publisher(Int32, '/emotion/int', 10)
-        self.pub_left_arm = self.create_publisher(Float64MultiArray, '/simple_left_arm_controller/commands', 10)
-        self.pub_right_arm = self.create_publisher(Float64MultiArray, '/simple_right_arm_controller/commands', 10)
+        self.pub_left_arm = self.create_publisher(
+            Float64MultiArray, '/simple_left_arm_controller/commands', 10)
+        self.pub_right_arm = self.create_publisher(
+            Float64MultiArray, '/simple_right_arm_controller/commands', 10)
 
         # Emotion control
         self.current_emotion = 0
@@ -22,14 +31,15 @@ class OrionEmotionTest(Node):
 
         # Arm control
         self.last_arm_time = time.time()
-        self.arm_period = 5.0  # seconds
+        self.arm_period = 5.0    # seconds
         self.arm_amplitude = 1.0  # radians
 
         # Main timer (50 Hz)
         self.timer = self.create_timer(0.02, self.update_loop)
-        self.get_logger().info("✅ OrionEmotionTest node started successfully!")
+        self.get_logger().info('OrionEmotionTest node started.')
 
     def update_loop(self):
+        """Advance emotion counter and publish synchronized arm sine motion."""
         now = time.time()
 
         # --- EMOTION CYCLING ---
@@ -38,7 +48,7 @@ class OrionEmotionTest(Node):
             msg = Int32()
             msg.data = self.current_emotion
             self.pub_emotion.publish(msg)
-            self.get_logger().info(f"[EMOTION] Changed to {self.current_emotion}")
+            self.get_logger().info(f'[EMOTION] Changed to {self.current_emotion}')
             self.last_emotion_time = now
 
         # --- ARM MOTION (sine wave) ---
@@ -54,16 +64,19 @@ class OrionEmotionTest(Node):
         self.pub_left_arm.publish(msg_left)
         self.pub_right_arm.publish(msg_right)
 
+
 def main(args=None):
+    """Spin OrionEmotionTest node until keyboard interrupt."""
     rclpy.init(args=args)
     node = OrionEmotionTest()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        node.get_logger().info("🛑 Stopping OrionEmotionTest node...")
+        node.get_logger().info('Stopping OrionEmotionTest node...')
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

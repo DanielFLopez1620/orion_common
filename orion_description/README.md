@@ -30,7 +30,7 @@ Make sure you have followed the [installation process](/README.md) and have sour
 
 ### Model visualization
 
-You can visualize the */robot_description* of the robot with the [model_vis.launch.py](/orion_description/launch/model_vis.launch.py), which provide a visualization window with RViz and the usage of the **robot_state_publisher_gui**.
+You can visualize the */robot_description* of the robot with the [model_vis.launch.py](/orion_description/launch/model_vis.launch.py), which provide a visualization window with RViz and the usage of the **joint_state_publisher_gui**.
 
 ~~~bash
 # Basic usage:
@@ -42,6 +42,8 @@ You can visualize the */robot_description* of the robot with the [model_vis.laun
 #   servo : Boolean (true/false) to indicate if use servo arms
 #   ros2_control : Boolean (true/false) to indicate usage of ros2_controllers
 #   simplified : Boolean (true/false) to indicate if use the simplified URDF model
+#   motor : Motor nominal RPM at 12V, '100' or '1000'.
+#   color : Visual color for structural panels ('gold', 'mdf', 'transparent', 'pla').
 #
 ros2 launch orion_description model_vis.launch.py camera:=os30a
 ~~~
@@ -61,14 +63,22 @@ To launch the */robot_description* of the robot with the [rsp.launch.py](/orion_
 #   g_mov : Boolean (true/false) to use g_mov module when using 'a010' depth cam.
 #   rasp : Whether to use 'rpi4' or 'rpi5', this will imply a change in the sound hardware.
 #   servo : Boolean (true/false) to indicate if use servo arms
-#   simplified : Boolean (true/false) to indicate the usage of the simplified URDF model.
-#   ctl_type: Control type can be 'micro-ros' or 'serial'.
+#   simplified : Boolean (true/false) to indicate the usage of the simplified URDF model (non-functional parts omitted).
+#   ctl_type: Control type can be 'micro_ros' or 'serial'.
 #   motor : Motor rpms to select your motor params (for now, '100' or '1000')
+#   color : Visual color for structural panels ('gold', 'mdf', 'transparent', 'pla').
 #
 ros2 launch orion_description rsp.launch.py
 ~~~
 
-![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/rps.gif)
+> **G Mov module:** the pan/tilt picam + accelerometer/IMU subsystem is
+> included via the `g_mov` argument (typically used with `camera:=a010`). Its
+> description, meshes and macros are bundled inside `orion_description` —
+> there is no external dependency on `g_mov_description`. The IMU reference
+> frame is published as `g_mov_imu`; sensor driver wiring is handled in a
+> separate package.
+
+![rsp_launch](https://github.com/Tesis-ORION/orion_common/blob/main/docs/readmes/orion_rsp_publisher.gif)
 
 ---
 

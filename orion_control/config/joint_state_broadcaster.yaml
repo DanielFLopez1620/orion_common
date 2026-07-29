@@ -1,3 +1,7 @@
+# joint_state_broadcaster.yaml
+# Publishes all ros2_control joint states to /joint_states at 20 Hz.
+# Required for robot_state_publisher and any joint-level visualization.
+
 joint_state_broadcaster:
   ros__parameters:
     type: joint_state_broadcaster/JointStateBroadcaster

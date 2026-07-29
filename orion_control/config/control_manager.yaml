@@ -1,3 +1,7 @@
+# control_manager.yaml
+# ros2_control controller manager params for the physical ORION robot.
+# Use gz_ros_control.yaml for Gazebo simulation (use_sim_time: true).
+
 /controller_manager:
   ros__parameters:
     update_rate: 20 # Hz

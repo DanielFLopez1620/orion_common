@@ -1,3 +1,18 @@
+/*
+ * @file hardware.hpp
+ * @brief GPIO pin definitions for ORION motor and encoder connections
+ *
+ * Pinout considering ESP32 Dev-Kit V1 (30 pins)
+ *
+ * Defines pinout for:
+ * - Motor drivers (forward, backward, enable)
+ * - Encoders (channel A, B for quadrature decoding)
+ * - Servo motors (PWM control pins)
+ *
+ * If encoder feedback or motor direction doesn't match hardware,
+ * exchange the corresponding pins in the constants below.
+ */
+
 #ifndef HARDWARE_HPP
 #define HARDWARE_HPP
 
@@ -5,45 +20,31 @@ namespace diff
 {
     struct HARDWARE
     {
-        // ------------------- Motor Left --------------------------
+        // =============== Motor Left ===============
 
-        // NOTE: If the feedback received doesn't match the dir,
-	    // then proceed to exchange the encoder ports.
+        // NOTE: If encoder feedback doesn't match direction,
+        // exchange ML_ENCA and ML_ENCB.
+        static const unsigned int ML_ENCA = 33;  // Encoder Channel A
+        static const unsigned int ML_ENCB = 32;  // Encoder Channel B
 
-        // Encoder Channel A
-        static const unsigned int ML_ENCA = 33;
-        // Encoder Channel B
-        static const unsigned int ML_ENCB = 32;
+        // NOTE: If motor direction is reversed,
+        // exchange ML_FORW and ML_BACW.
+        static const unsigned int ML_FORW = 21;  // Driver Forward Pin
+        static const unsigned int ML_BACW = 22;  // Driver Backward Pin
+        static const unsigned int ML_EN = 17;    // Driver Enable (PWM)
 
-	    // NOTE: If the direction of the motors is reversed,
-	    // then proceed to exchange Forward and Backward ports.
+        // =============== Motor Right ===============
 
-        // Driver Forward Pin
-        static const unsigned int ML_FORW = 21;
-        // Driver Backward Pin
-        static const unsigned int ML_BACW = 22;
-        // Driver Enable Pin
-        static const unsigned int ML_EN = 17;
+        // NOTE: If encoder feedback doesn't match direction,
+        // exchange MR_ENCA and MR_ENCB.
+        static const unsigned int MR_ENCA = 34;  // Encoder Channel A
+        static const unsigned int MR_ENCB = 35;  // Encoder Channel B
 
-        // ------------------- Motor RIGHT --------------------------
-
-        // NOTE: If the feedback received doesn't match the dir,
-        // then proceed to exchange the encoder ports.
-
-        // Encoder Channel A
-        static const unsigned int MR_ENCA = 34;
-        // Encoder Channel B
-        static const unsigned int MR_ENCB = 35;
-        // Driver Forward Pin
-
-	    // NOTE: If the direction of the motors is reversed,
-        // then proceed to exchange Forward and Backward ports.
-
-        static const unsigned int MR_FORW = 18;
-        // Driver Backward Pin
-        static const unsigned int MR_BACW = 19;
-        // Driver Enable Pin
-        static const unsigned int MR_EN = 16;
+        // NOTE: If motor direction is reversed,
+        // exchange MR_FORW and MR_BACW.
+        static const unsigned int MR_FORW = 18;  // Driver Forward Pin
+        static const unsigned int MR_BACW = 19;  // Driver Backward Pin
+        static const unsigned int MR_EN = 16;    // Driver Enable (PWM)
 
     }; // struct HARDWARE
 
@@ -53,11 +54,10 @@ namespace fwd
 {
     struct HARDWARE
     {
-        // Servo left
-        static const unsigned int SERVO_LEFT = 25;
+        // =============== Servo Motors ===============
 
-        // Servo right
-        static const unsigned int SERVO_RIGHT = 23;
+        static const unsigned int SERVO_LEFT = 25;   // Left arm servo PWM
+        static const unsigned int SERVO_RIGHT = 23;  // Right arm servo PWM
 
     }; // struct HARDWARE
 

@@ -1,3 +1,15 @@
+/*
+ * @file diffdrive_orion.hpp
+ * @brief ros2_control hardware interface for ORION differential drive base.
+ *
+ * Bridges the ros2_control DiffDriveController to the µ-ROS topics published
+ * and subscribed by orion_ctl_micro_ros: reads wheel encoder counts and writes
+ * PWM speed commands via an internal ROS 2 bridge node.
+ *
+ * Publishes:  /diff_ctl_motor_cmd (Int64MultiArray) — [left_speed, right_speed]
+ * Subscribes: /diff_ctl_left_enc, /diff_ctl_right_enc (Int64)
+ */
+
 #ifndef DIFFDRIVE_ORION_HPP
 #define DIFFDRIVE_ORION_HPP
 
@@ -24,37 +36,82 @@
 namespace orion_control
 {
     // Predefinition of the bridge node class
-
     class OrionDiffBridgeNode;
 
-    /**
-     * Class oriented to implement the control for a differential controller
-     * aiming to related the lecture of the encoders and the PWM commands.
+    /*
+     * ros2_control SystemInterface for the ORION differential drive base.
+     * Reads encoder feedback and writes motor speed commands via µ-ROS topics.
      */
     class DiffDriveOrion : public hardware_interface::SystemInterface
     {
     public:
         DiffDriveOrion() = default;
 
+        /*
+         * Reads wheel and topic params from URDF, allocates shared encoder/command
+         * message ptrs, sets up Wheel objects, and attaches the bridge node to the
+         * controller executor.
+         *
+         * @return ERROR if parent init or executor lock fails, otherwise SUCCESS.
+         */
         hardware_interface::CallbackReturn on_init(
             const hardware_interface::HardwareComponentInterfaceParams& params) override;
 
+        /*
+         * Lifecycle configure transition — currently a no-op beyond logging.
+         *
+         * @return SUCCESS unconditionally.
+         */
         hardware_interface::CallbackReturn on_configure(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Exports velocity and position state interfaces for both wheels.
+         *
+         * @return Vector of [left_vel, left_pos, right_vel, right_pos] interfaces.
+         */
         std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
+        /*
+         * Exports velocity command interfaces for both wheels.
+         *
+         * @return Vector of [left_cmd_vel, right_cmd_vel] interfaces.
+         */
         std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
+        /*
+         * Verifies the bridge node is initialized before allowing activation.
+         *
+         * @return ERROR if bridge node is null, otherwise SUCCESS.
+         */
         hardware_interface::CallbackReturn on_activate(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Sends zero velocity to both wheels before releasing control.
+         *
+         * @return SUCCESS unconditionally.
+         */
         hardware_interface::CallbackReturn on_deactivate(
             const rclcpp_lifecycle::State& prev_state) override;
 
+        /*
+         * Reads encoder counts from shared ptrs and computes wheel velocity and
+         * cumulative position for each wheel.
+         *
+         * @param period Duration since last read call (used for velocity estimate).
+         *
+         * @return OK on success.
+         */
         hardware_interface::return_type read(
             const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
+        /*
+         * Converts rad/s velocity commands to encoder tick rate and publishes
+         * them as an Int64MultiArray to the motor command topic.
+         *
+         * @return OK on success.
+         */
         hardware_interface::return_type write(
             const rclcpp::Time&, const rclcpp::Duration& period) override;
 
@@ -84,9 +141,9 @@ namespace orion_control
 
     }; // class DiffDriveOrion
 
-    /**
-     * Node class oriented to implement the bridge communication between the
-     * hardware interface and the µ-ROS communication.
+    /*
+     * Internal bridge node that shuttles data between the hardware interface and
+     * the µ-ROS encoder/command topics at 20 Hz (50 ms timer).
      */
     class OrionDiffBridgeNode : public rclcpp::Node
     {

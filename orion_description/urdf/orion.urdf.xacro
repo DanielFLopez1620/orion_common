@@ -1,5 +1,23 @@
 <?xml version="1.0"?>
+<!-- @file orion.urdf.xacro
+     @brief Top-level robot description for ORION. Declares all configurable
+     arguments (camera, servo, rasp, motor, ctl_type, color, etc.) and includes
+     the modular xacro files for materials, macros, base, arms, cameras,
+     and ros2_control tags. -->
+
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="orion">
+
+    <!-- Configurable arguments -->
+    <xacro:arg name="camera" default="os30a"/>
+    <xacro:arg name="servo" default="true"/>
+    <xacro:arg name="g_mov" default="false"/>
+    <xacro:arg name="rasp" default="rpi5"/>
+    <xacro:arg name="gazebo" default="false"/>
+    <xacro:arg name="ros2_control" default="false"/>
+    <xacro:arg name="simplified" default="false"/>
+    <xacro:arg name="motor" default="100"/>
+    <xacro:arg name="ctl_type" default="micro_ros"/>
+    <xacro:arg name="color" default="gold"/>
 
     <xacro:property name="camera" default="$(arg camera)"/>
     <xacro:property name="servo" default="$(arg servo)"/>
@@ -8,15 +26,16 @@
     <xacro:property name="gazebo" default="$(arg gazebo)"/>
     <xacro:property name="ros2_control" default="$(arg ros2_control)"/>
     <xacro:property name="simplified" default="$(arg simplified)"/>
-    <xacro:property name="motor" value="$(arg motor)"/>
+    <xacro:property name="motor" default="$(arg motor)"/>
     <xacro:property name="ctl_type" default="$(arg ctl_type)"/>
 
-    <!-- For colors consider mdf, transparent or pla -->
-    <xacro:property name="color" default="gold"/>
+    <!-- Visual color for structural panels: 'mdf', 'transparent', 'pla', 'gold' -->
+    <xacro:property name="color" default="$(arg color)"/>
 
-    <!-- Include other files -->
+    <!-- Include other files for robot description -->
     <xacro:include filename="$(find orion_description)/urdf/include/orion_materials.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_macros.urdf.xacro"/>
+    <xacro:include filename="$(find orion_description)/urdf/include/orion_g_mov.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_base.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_arms.urdf.xacro"/>
     <xacro:include filename="$(find orion_description)/urdf/include/orion_cameras.urdf.xacro"/>

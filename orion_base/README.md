@@ -2,9 +2,9 @@
 
 ## 🌟 Overview
 
-This directory contians the embedded codes for the **ESP32**s of the **ORION** robot. They were build by using [PlatformIO](https://platformio.org/) and C/C++.
+This directory contains the embedded codes for the **ESP32**s of the **ORION** robot. They were built by using [PlatformIO](https://platformio.org/) and C/C++.
 
-To check the robot electronic connections, review the [Electronics and Schmatics](https://github.com/Tesis-ORION/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics) on the Wiki.
+To check the robot electronic connections, review the [Electronics and Schematics](https://github.com/DanielFLopez1620/orion_common/wiki/Building-your-own-ORION-robot#electronics-and-schematics) on the Wiki.
 
 ---
 
@@ -26,7 +26,7 @@ The ORION Commons packages have been tested under [ROS](https://www.ros.org/) **
 
 ## ⚡ µ-ROS codes
 
-The usage of [µ-ROS](https://micro.ros.org/) allows a microcontroller, like a ESP32, to be able to work on the ROS 2 ecosystem by using a agent for the communciation, which give the opportunity to work with topics, publishers, subscriber, services, nodes, among others on embedded devices.
+The usage of [µ-ROS](https://micro.ros.org/) allows a microcontroller, like a ESP32, to be able to work on the ROS 2 ecosystem by using a agent for the communication, which give the opportunity to work with topics, publishers, subscriber, services, nodes, among others on embedded devices.
 
 For ORION, it has a two ESP32 application, shown as:
 
@@ -114,7 +114,7 @@ With this ready, let's proceed to specify the target of the installation:
     SUBSYSTEM=="tty", ENV{ID_PATH}=="platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3.3:1.0", SYMLINK+="ttyESP32_2"
     ~~~
 
-    **NOTE:** Avoid to generate rulse that may end adding the same name / symlink to multiple devices as this can mess up the robot software and the system of the RPi itself.
+    **NOTE:** Avoid generating rules that may end up adding the same name / symlink to multiple devices as this can mess up the robot software and the system of the RPi itself. As this devices can also be mixed with other serial devices and it may conflict the startup application of the robot.
 
 5. Update the udev rules.
 
@@ -153,10 +153,10 @@ Once the ESP32 naming has been done, we can proceed with the upload:
     # In case you just want the terminal
     cd /path/to/orion_ctl_micro_ros
     # or
-    cd /path/to/orion_itneraction_micro_ros
+    cd /path/to/orion_interaction_micro_ros
     ~~~
 
-3. Install the depdencies.
+3. Install the dependencies.
 
     In the case of VS Code, go to the **platformio.ini** file and save (Ctrl+S), it should start the configuration of the *PlatformIO* extension.
 
@@ -191,11 +191,9 @@ Once the ESP32 naming has been done, we can proceed with the upload:
 
     **NOTE:** You may require to pulse the **BOOT** button if the upload seems to get stuck when recognizing the device.
 
-    ![esp32_buttons](https://private-user-images.githubusercontent.com/49737722/290580785-1cb9e118-9004-4f53-9843-e682e02711fb.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDg4MTUwNDksIm5iZiI6MTc0ODgxNDc0OSwicGF0aCI6Ii80OTczNzcyMi8yOTA1ODA3ODUtMWNiOWUxMTgtOTAwNC00ZjUzLTk4NDMtZTY4MmUwMjcxMWZiLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA2MDElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNjAxVDIxNTIyOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTU5NjE3NzE1MzM2ZDhmMWFmNTVhNDQ3YmRlZDEzYTkwNGMwYTY5NmEzYmU3ZTc0OWNlNjgwZTBmOWI0ZDVhN2UmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.ixwxohKsnIo93JzucE2aICNdrre7JA__tYV4RiGf-qQ)
-
 ### Known issues
 
-- **µ-ROS agent not linking with the program:** With the implementation provided, the ESP32 waits up to 2 minutes to connect with the µ-ROS agent. Otherwise, it will continue and will require a manual restart by using the **EN** button on the ESP32 which may cause problems as you may need to dismoun some of the robot walls to access to it. You can use the following alternatives:
+- **µ-ROS agent not linking with the program:** With the implementation provided, the ESP32 waits up to 2 minutes to connect with the µ-ROS agent. Otherwise, it will continue and will require a manual restart by using the **EN** button on the ESP32 which may cause problems as you may need to dismount some of the robot walls to access to it. You can use the following alternatives:
 
   - Disconnect the ESP32 while the agent is active, when it restart it may be able to connect again.
   - Close the agent, reupload the code to the ESP32 and open the agent again.
@@ -222,13 +220,13 @@ You can check more info of the screen on [TFT 22 ILI9225 Wiki](https://github.co
 
 ### Robot moving the in the wrong direction
 
-This may be caused by the wiring of the motor according to its manufacturer or a mismatch in the cable connection. However, you do not require to dissambly the robot, you can go to the [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the values.
+This may be caused by the wiring of the motor according to its manufacturer or a mismatch in the cable connection. However, you do not require to disassemble the robot, you can go to the [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the values.
 
-For thsi purpose try to exchange the values of the **Forward** and **Backward** pins, do the test for each wheel individually to ensure the movement, you can even run the µ-ROS code and use the instructions in [orion_ctl_micro_ros](/orion_base/orion_ctl_micro_ros/README.md) to move the motors manually.
+For this purpose try to exchange the values of the **Forward** and **Backward** pins, do the test for each wheel individually to ensure the movement, you can even run the µ-ROS code and use the instructions in [orion_ctl_micro_ros](/orion_base/orion_ctl_micro_ros/README.md) to move the motors manually.
 
 ### Feedback of wheel rotation is inverse
 
-Teh encoder lecture should increase when the wheels move forward, and dicrease otherwise. If the direction is wrong when checking RViz2 while the **ros2_controllers** are active or you read the output of the encoder of each motor and it is not the expected increment/decrement, go to [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the encoder channels (A and B) pins and do a test.
+The encoder reading should increase when the wheels move forward, and decrease otherwise. If the direction is wrong when checking RViz2 while the **ros2_controllers** are active or you read the output of the encoder of each motor and it is not the expected increment/decrement, go to [hardware constants](/orion_base/orion_ctl_micro_ros/lib/hardware/hardware.hpp) and exchange the encoder channels (A and B) pins and do a test.
 
 ### Robot is going too fast
 
@@ -240,8 +238,8 @@ This is caused as the ESP32 connection wasn't updated with the proper udev rules
 
 The reasons you can consider for this are:
 
-- You changed the eSP32 and the attributes are therefore differnt.
-- You are using environmental attributes, like ID_PATH, and changed the order connecttions.
+- You changed the ESP32 and the attributes are therefore different.
+- You are using environmental attributes, like ID_PATH, and changed the order of connections.
 - The device isn't connected, so the udev rules isn't applied. Check the cable and the element in case they are damaged.
 
 ### /dev/ttyESP32_2 not uploading program

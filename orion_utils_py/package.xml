@@ -2,12 +2,13 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>orion_utils_py</name>
-  <version>0.3.0</version>
+  <version>1.8.3</version>
   <description>Simple Python Utilities for the ORION robot</description>
   <maintainer email="dfelipe.lopez@gmail.com">DanielFLopez1620</maintainer>
   <license>BSD-3-Clause</license>
 
   <depend>rclpy</depend>
+  <exec_depend>python3-smbus2</exec_depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>
