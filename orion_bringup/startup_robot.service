@@ -1,9 +1,11 @@
 [Unit]
 Description=Startup ROS2 Bringup Service
-After=network-online.target
+After=network-online.target pwm-setup.service
 Wants=network-online.target
+Requires=pwm-setup.service
 
 [Service]
+# Change User, Environment HOME, and WorkingDirectory to match your username
 ExecStart=/usr/local/bin/startup_robot.sh
 User=orion
 Environment=HOME=/home/orion

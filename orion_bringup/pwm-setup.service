@@ -1,0 +1,12 @@
+[Unit]
+Description=Export and unlock PWM0 for ORION servo node
+Before=startup_robot.service
+After=sysinit.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo 0 > /sys/class/pwm/pwmchip0/export; chmod -R a+rw /sys/class/pwm/pwmchip0/'
+
+[Install]
+WantedBy=multi-user.target

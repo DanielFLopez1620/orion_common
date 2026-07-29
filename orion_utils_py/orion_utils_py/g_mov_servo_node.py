@@ -18,11 +18,11 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
 
-_JOINT_LOWER = -math.pi / 4   # -45° (from URDF g_mov_servo_conn_joint limit)
-_JOINT_UPPER =  math.pi / 6   # +30° (from URDF g_mov_servo_conn_joint limit)
+_JOINT_LOWER = -math.pi / 4
+_JOINT_UPPER =  math.pi / 6
 
 _PWM_ROOT  = Path('/sys/class/pwm/pwmchip0')
-_PERIOD_NS = 20_000_000   # 20 ms → 50 Hz standard servo
+_PERIOD_NS = 20_000_000
 
 
 class GMovServoNode(Node):
@@ -62,7 +62,16 @@ class GMovServoNode(Node):
 
     def _setup_pwm(self, channel: int):
         if not self._pwm_dir.exists():
-            (_PWM_ROOT / 'export').write_text(str(channel))
+            try:
+                (_PWM_ROOT / 'export').write_text(str(channel))
+            except PermissionError:
+                raise PermissionError(
+                    f'Cannot export PWM channel {channel}: '
+                    f'{_PWM_ROOT}/export is not writable. '
+                    'Run as root or install pwm-setup.service first:\n'
+                    f'  echo {channel} | sudo tee {_PWM_ROOT}/export\n'
+                    f'  sudo chmod -R a+rw {_PWM_ROOT}/'
+                ) from None
             # Wait for the kernel to create the sysfs entries
             deadline = time.monotonic() + 1.0
             while not self._pwm_dir.exists():
