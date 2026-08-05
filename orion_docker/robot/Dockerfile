@@ -5,8 +5,6 @@ ARG USER_UID=1001
 
 USER root
 
-COPY repos.yaml /tmp/robot_repos.yaml
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-nav2-lifecycle-manager \
     ros-${ROS_DISTRO}-laser-filters \
@@ -14,7 +12,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-joy \
     ros-${ROS_DISTRO}-teleop-twist-joy \
     libudev-dev \
+    libgtk-3-dev \
+    libdc1394-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
+          /usr/lib/x86_64-linux-gnu/libdc1394.so.22
+
+COPY robot/repos.yaml /tmp/robot_repos.yaml
 
 RUN /bin/bash -c " \
     set -e && \
@@ -29,16 +34,16 @@ RUN /bin/bash -c " \
         --skip-keys pytest \
         --skip-keys python3-pytest && \
     rm -rf /var/lib/apt/lists/* && \
-    MAKEFLAGS="-j1" colcon build \
+    MAKEFLAGS=\"-j1\" colcon build \
         --parallel-workers 1 \
         --cmake-args -DCMAKE_BUILD_TYPE=Release && \
-    find build/ldlidar_component -name "libldlidar.so" \
+    find build/ldlidar_component -name \"libldlidar.so\" \
         -exec cp {} install/ldlidar_component/lib/ \; && \
     rm -rf src build log && \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws \
     "
 
-COPY entrypoint.sh /entrypoint.sh
+COPY robot/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER $USERNAME
