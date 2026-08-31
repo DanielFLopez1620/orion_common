@@ -10,6 +10,9 @@
 #ifndef ENCODER_HPP
 #define ENCODER_HPP
 
+// Required for the IRAM_ATTR attribute used on the ISR handler below.
+#include <Arduino.h>
+
 namespace diff
 {
     /*

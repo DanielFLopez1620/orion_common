@@ -1,11 +1,23 @@
 /**
  * @file main.cpp
- * @brief Interaction firmware for ORION robot ESP32 #2 (micro-ROS)
+ * @brief Interaction firmware for ORION robot ESP32 #2 (micro-ROS) —
+ *        Refactored Entry Point
  *
- * Implements micro-ROS communication for:
- * - Touch sensor reading (4 capacitive sensors)
- * - TFT ILI9225 screen control (emotion display)
- * - Heartbeat publishing for connectivity monitoring
+ * This firmware orchestrates:
+ * 1. Hardware initialization (touch sensors, TFT screen)
+ * 2. Control logic (sensor sampling, emotion display, heartbeat timing)
+ * 3. Micro-ROS communication (publishers, subscriber, callbacks)
+ *
+ * Architecture:
+ * - lib/control/: Pure control logic (no ROS)
+ * - lib/micro_ros_bridge/: All micro-ROS plumbing (encapsulated, no control logic)
+ * - lib/touch + lib/screen: Low-level hardware abstractions
+ * - main.cpp (this file): Orchestration — connects everything together
+ *
+ * The main loop is simple:
+ *   1. Update control logic (sample touch sensors)
+ *   2. Publish feedback (touch states, heartbeat)
+ *   3. Process ROS messages (spin executor)
  *
  * Publishes:
  *   - /interaction/touch_ur (Bool): upper-right touch sensor state
@@ -15,235 +27,72 @@
  *   - /interaction/heartbeat (Bool): periodic connectivity heartbeat
  *
  * Subscribes to:
- *   - /emotion/int (Int32): emotion index [0-6] to display on screen
+ *   - /emotion/int (Int32): emotion index [0-7] to display on screen
  */
 
 #include <Arduino.h>
-#include <SPI.h>
-#include <TFT_22_ILI9225.h>
 
-#include <micro_ros_platformio.h>
+// Control logic (NO micro-ROS dependencies)
+#include "interaction_controller.hpp"
 
-#include <rcl/rcl.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
+// Micro-ROS bridge (encapsulates all ROS infrastructure)
+#include "interaction_ros.hpp"
 
-#include <std_msgs/msg/bool.h>
-#include <std_msgs/msg/int32.h>
+// ============================================================================
+// Global Control Objects
+// ============================================================================
 
-#include "screen.hpp"
+InteractionController interaction_ctrl;
 
-// Set to 1 to use bitmap emotion sprites; set to 0 for geometric fallback
-#define USE_BITMAP_DISPLAY 1
+// ============================================================================
+// Callbacks: Bridge between ROS and Control Logic
+// ============================================================================
 
-                            // Define touch sensor pins
-#define TS_UR_PIN 4         // Upper right
-#define TS_UL_PIN 34        // Upper left
-#define TS_LR_PIN 2         // Lower right
-#define TS_LL_PIN 35        // Lower left
+/**
+ * Called by interaction_ros when /emotion/int is received.
+ * Delegates to the interaction controller.
+ */
+void on_emotion_cmd(int emotion_id) {
+    interaction_ctrl.setEmotion(emotion_id);
+}
 
-rcl_publisher_t ts_ur_publisher;
-rcl_publisher_t ts_ul_publisher;
-rcl_publisher_t ts_lr_publisher;
-rcl_publisher_t ts_ll_publisher;
-rcl_publisher_t heartbeat_publisher;
+// ============================================================================
+// Arduino Lifecycle Hooks
+// ============================================================================
 
-rcl_subscription_t emotion_subscriber;
+void setup() {
+    // 1. Initialize hardware (touch sensors, screen)
+    interaction_ctrl.initialize();
 
-std_msgs__msg__Bool ts_ur_msg;
-std_msgs__msg__Bool ts_ul_msg;
-std_msgs__msg__Bool ts_lr_msg;
-std_msgs__msg__Bool ts_ll_msg;
-std_msgs__msg__Int32 emotion_msg;
-std_msgs__msg__Bool heartbeat_msg;
+    // 2. Initialize micro-ROS (node, publishers, subscriber)
+    interaction_micro_ros_init();
 
-rclc_executor_t executor;
+    // 3. Register ROS callbacks (connect ROS topics to control logic)
+    interaction_micro_ros_set_emotion_cmd_callback(on_emotion_cmd);
 
-rclc_support_t support;
+    // 4. Safe startup (display default emotion)
+    interaction_ctrl.safeStartup();
+}
 
-rcl_allocator_t allocator;
+void loop() {
+    // 1. Update control logic (sample touch sensors)
+    interaction_ctrl.update();
 
-rcl_node_t node;
+    // 2. Publish touch states to ROS
+    interaction_micro_ros_publish_touch(
+        interaction_ctrl.getTouchUR(),
+        interaction_ctrl.getTouchUL(),
+        interaction_ctrl.getTouchLR(),
+        interaction_ctrl.getTouchLL());
 
-rcl_timer_t timer;
+    // 3. Publish heartbeat if due
+    if (interaction_ctrl.shouldPublishHeartbeat()) {
+        interaction_micro_ros_publish_heartbeat();
+    }
 
-unsigned long last_ping_time = 0;
-const unsigned long ping_interval_ms = 1000;
+    // 4. Process ROS messages (execute subscriptions and timers)
+    interaction_micro_ros_spin(100);
 
-int previous_emotion = 0;
-
-Screen screen;
-
-// ---- Function prototypes
-
-#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
-#define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
-void error_loop();
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time);
-void emotion_callback(const void *msgin);
-
-// ---- Main workflow
-
-void setup()
-{
-	Serial.begin(115200);
-	set_microros_serial_transports(Serial);
-	delay(2000);
-
-	allocator = rcl_get_default_allocator();
-
-    unsigned long start = millis();
-    rcl_ret_t ret;
-    do {
-        ret = rclc_support_init(&support, 0, NULL, &allocator);
-        if (ret != RCL_RET_OK) 
-        {
-            delay(500);
-        }
-    } while (ret != RCL_RET_OK && (millis() - start < 120000));
-
-	RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_touch_node", "", 
-		&support));
-
-	RCCHECK(rclc_publisher_init_default(
-		&ts_ur_publisher,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-		"interaction/touch_ur"));
-
-    RCCHECK(rclc_publisher_init_default(
-		&ts_ul_publisher,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-		"interaction/touch_ul"));
-
-    RCCHECK(rclc_publisher_init_default(
-		&ts_lr_publisher,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-		"interaction/touch_lr"));
-
-    RCCHECK(rclc_publisher_init_default(
-		&ts_ll_publisher,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-		"interaction/touch_ll"));
-
-    RCCHECK(rclc_publisher_init_default(
-        &heartbeat_publisher,
-        &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
-        "interaction/heartbeat"));
-
-    RCCHECK(rclc_subscription_init_default(
-		&emotion_subscriber,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-		"/emotion/int"));
-
-	const unsigned int timer_timeout = 250;
-	RCCHECK(rclc_timer_init_default2(
-		&timer,
-		&support,
-		RCL_MS_TO_NS(timer_timeout),
-		timer_callback,
-        true));
-
-	RCCHECK(rclc_executor_init(&executor, &support.context, 2, &allocator));
-
-	RCCHECK(rclc_executor_add_timer(&executor, &timer));
-    RCCHECK(rclc_executor_add_subscription(
-        &executor,
-        &emotion_subscriber,
-        &emotion_msg,
-        &emotion_callback,
-        ON_NEW_DATA));
-
-    pinMode(TS_LL_PIN, INPUT);
-    pinMode(TS_LR_PIN, INPUT);
-    pinMode(TS_UL_PIN, INPUT);
-    pinMode(TS_UR_PIN, INPUT);
-
-    screen.initialize();
-    screen.drawEmotion(3);
-
-} // void setup()
-
-void loop()
-{
     // Delay required to avoid over-heating ESP32
-	delay(100);
-
-	// Spin
-	RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
-
-} // void loop()
-
-// --- Function definitions
-
-/*
- * Halts execution printing an error message on serial.
- * Called when micro-ROS initialization fails.
- */
-void error_loop()
-{
-    while(1)
-    {
-        Serial.println("[ERROR] micro-ROS init failed — halted.");
-        delay(400);
-    }
-}
-
-/*
- * Timer callback: reads touch sensors, publishes their states and heartbeat.
- *
- * @param timer Pointer to the timer object
- * @param last_call_time Timestamp of previous callback invocation
- */
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
-{
-	RCLC_UNUSED(last_call_time);
-	if (timer != NULL)
-	{
-		// Check state button when timer is called
-        ts_ur_msg.data = digitalRead(TS_UR_PIN);
-        ts_ul_msg.data = digitalRead(TS_UL_PIN);
-        ts_lr_msg.data = digitalRead(TS_LR_PIN);
-        ts_ll_msg.data = digitalRead(TS_LL_PIN);
-
-        // Publish states
-		RCSOFTCHECK(rcl_publish(&ts_ur_publisher, &ts_ur_msg, NULL));
-        RCSOFTCHECK(rcl_publish(&ts_ul_publisher, &ts_ul_msg, NULL));
-        RCSOFTCHECK(rcl_publish(&ts_lr_publisher, &ts_lr_msg, NULL));
-        RCSOFTCHECK(rcl_publish(&ts_ll_publisher, &ts_ll_msg, NULL));
-
-        // Publish heartbeat at ping_interval_ms rate
-        if (millis() - last_ping_time >= ping_interval_ms)
-        {
-            heartbeat_msg.data = true;
-            RCSOFTCHECK(rcl_publish(&heartbeat_publisher, &heartbeat_msg, NULL));
-            last_ping_time = millis();
-        }
-	}
-}
-
-/*
- * Callback for emotion commands from /emotion/int.
- * Displays the corresponding emotion on screen only if it changed.
- *
- * @param msgin Pointer to Int32 message with emotion index [0-6]
- */
-void emotion_callback(const void *msgin)
-{
-    const std_msgs__msg__Int32 * emotion = (const std_msgs__msg__Int32 *) msgin;
-    int value = emotion->data;
-    if(previous_emotion != value)
-    {
-#if USE_BITMAP_DISPLAY
-        screen.drawEmotion(value);
-#else
-        screen.displayEmotion(value);
-#endif
-        previous_emotion = value;
-    }
+    delay(100);
 }

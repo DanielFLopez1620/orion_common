@@ -22,10 +22,10 @@ void ServoController::setRightPosition(float radians) {
     servo_right.setPositionRad(radians + ANGLE_OFFSET);
 }
 
-float ServoController::getLeftPosition() const {
+float ServoController::getLeftPosition() {
     return servo_left.getPositionRad() - ANGLE_OFFSET;
 }
 
-float ServoController::getRightPosition() const {
+float ServoController::getRightPosition() {
     return servo_right.getPositionRad() - ANGLE_OFFSET;
 }

@@ -141,8 +141,6 @@ namespace {
 
 
 void orion_micro_ros_init() {
-    using namespace std;  // Silence "warning: unused result"
-
     Serial.begin(115200);
     set_microros_serial_transports(Serial);
 

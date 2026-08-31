@@ -14,10 +14,10 @@
 #define DIFFERENTIAL_DRIVE_CONTROLLER_HPP
 
 #include <stdint.h>
-#include "../motor/motor.hpp"
-#include "../encoder/encoder.hpp"
-#include "../pid/pid.hpp"
-#include "../constants/constants.hpp"
+#include "motor.hpp"
+#include "encoder.hpp"
+#include "pid.hpp"
+#include "constants.hpp"
 
 /**
  * @class DifferentialDriveController
@@ -101,13 +101,17 @@ public:
 
     /**
      * @brief Returns current left encoder count.
+     *
+     * Not const: the underlying EncoderDriver::read() mutates driver state.
      */
-    int64_t getLeftEncoderCount() const;
+    int64_t getLeftEncoderCount();
 
     /**
      * @brief Returns current right encoder count.
+     *
+     * Not const: the underlying EncoderDriver::read() mutates driver state.
      */
-    int64_t getRightEncoderCount() const;
+    int64_t getRightEncoderCount();
 
     /**
      * @brief Called by ISR when left encoder edge detected.

@@ -5,6 +5,8 @@
 
 #include "differential_drive_controller.hpp"
 
+#include <Arduino.h>
+
 DifferentialDriveController::DifferentialDriveController(
     unsigned int ml_en, unsigned int ml_fwd, unsigned int ml_bwd,
     unsigned int mr_en, unsigned int mr_fwd, unsigned int mr_bwd,
@@ -88,11 +90,11 @@ void DifferentialDriveController::setTargetSpeed(int left_speed, int right_speed
     last_cmd_time = millis();
 }
 
-int64_t DifferentialDriveController::getLeftEncoderCount() const {
+int64_t DifferentialDriveController::getLeftEncoderCount() {
     return enc_left.read();
 }
 
-int64_t DifferentialDriveController::getRightEncoderCount() const {
+int64_t DifferentialDriveController::getRightEncoderCount() {
     return enc_right.read();
 }
 

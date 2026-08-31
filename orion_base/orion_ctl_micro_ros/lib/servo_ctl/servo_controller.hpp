@@ -9,7 +9,7 @@
 #ifndef SERVO_CONTROLLER_HPP
 #define SERVO_CONTROLLER_HPP
 
-#include "../servo/servo.hpp"
+#include "servo.hpp"
 
 /**
  * @class ServoController
@@ -63,12 +63,12 @@ public:
     /**
      * @brief Returns current left servo position (radians, offset from π/2).
      */
-    float getLeftPosition() const;
+    float getLeftPosition();
 
     /**
      * @brief Returns current right servo position (radians, offset from π/2).
      */
-    float getRightPosition() const;
+    float getRightPosition();
 };
 
 #endif

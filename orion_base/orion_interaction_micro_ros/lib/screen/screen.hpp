@@ -45,8 +45,8 @@ public:
     /*
      * Renders the emotion bitmap sprite for the given emotion index.
      *
-     * @param emotion Emotion index [0-6]: Angry, Disgust, Fear, Happy,
-     *                Neutral, Sad, Surprise
+     * @param emotion Emotion index [0-7]: Angry, Disgust, Fear, Happy,
+     *                Neutral, Sad, Surprise, Wink
      */
     void drawEmotion(int emotion);
 
@@ -67,7 +67,7 @@ public:
      * Renders a geometric (non-bitmap) emotion face as a fallback.
      * Useful for debugging without the full bitmap array flashed.
      *
-     * @param emotion Emotion index [0-6]
+     * @param emotion Emotion index [0-7]
      */
     void displayEmotion(int emotion);
 

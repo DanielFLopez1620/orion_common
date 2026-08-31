@@ -22,14 +22,15 @@
 #include <Arduino.h>
 
 // Control logic (NO micro-ROS dependencies)
-#include "control/differential_drive_controller.hpp"
-#include "control/servo_controller.hpp"
+#include "differential_drive_controller.hpp"
+#include "servo_controller.hpp"
 
 // Micro-ROS bridge (encapsulates all ROS infrastructure)
-#include "micro_ros_bridge/orion_ros.hpp"
+#include "orion_ros.hpp"
 
-// Hardware constants
-#include "constants/constants.hpp"
+// Hardware pin definitions and tuning constants
+#include "hardware.hpp"
+#include "constants.hpp"
 
 // ============================================================================
 // Global Control Objects
@@ -72,6 +73,13 @@ void on_servo_left_cmd(float radians) {
 void on_servo_right_cmd(float radians) {
     servo_ctrl.setRightPosition(radians);
 }
+
+// ============================================================================
+// ISR Forward Declarations (defined at the bottom of this file)
+// ============================================================================
+
+void IRAM_ATTR isr_left_encoder();
+void IRAM_ATTR isr_right_encoder();
 
 // ============================================================================
 // Arduino Lifecycle Hooks
