@@ -16,10 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libdc1394-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
-          /usr/lib/x86_64-linux-gnu/libdc1394.so.22
+RUN MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
+    && ln -s "/usr/lib/${MULTIARCH}/libdc1394.so.25" \
+             "/usr/lib/${MULTIARCH}/libdc1394.so.22"
 
-COPY robot/repos.yaml /tmp/robot_repos.yaml
+COPY repos.yaml /tmp/robot_repos.yaml
 
 RUN /bin/bash -c " \
     set -e && \
@@ -43,7 +44,7 @@ RUN /bin/bash -c " \
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws \
     "
 
-COPY robot/entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER $USERNAME

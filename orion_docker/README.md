@@ -17,13 +17,16 @@ osrf/ros:jazzy-ros-base
     ▼         ▼
 orion_dev   orion_robot
 (PC)        (Raspberry Pi — build natively on the RPi)
+    │
+    └─→ orion_gz (separate repo — Gazebo simulation layer)
 ```
 
 | Image | Purpose | Built on |
 | --- | --- | --- |
 | `orion_base` | Shared foundation: ROS 2 tools, ros2_control, micro-ROS agent, sensor driver deps | Developer PC |
-| `orion_dev` | Full development environment: Gazebo, RViz2, Nav2, SLAM, ORBBEC deps, OpenCV. Managed as a VS Code devcontainer. | Developer PC |
+| `orion_dev` | Development environment: RViz2, camera drivers, ORBBEC deps, OpenCV. **No simulation or Nav2.** Managed as a VS Code devcontainer. | Developer PC |
 | `orion_robot` | Minimal runtime for the robot hardware. No GUI, no simulation. | Raspberry Pi (native build) |
+| `orion_gz` | Simulation layer: Gazebo Harmonic + ROS 2 bridges + control. **Built separately in the [orion_gz repo](https://github.com/Tesis-ORION/orion_gz).** | `orion_dev:latest` |
 
 ---
 
@@ -83,7 +86,9 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 docker build -t orion_dev:latest orion_docker/dev/
 ```
 
-> First build takes ~10 minutes — installs Nav2, SLAM Toolbox, Cartographer, and the simulation stack.
+> First build takes ~5 minutes — installs development tools, camera drivers, and visualization (RViz2).
+>
+> **Note:** Gazebo simulation is **not** included here — it is built separately in the [orion_gz repo](https://github.com/Tesis-ORION/orion_gz) and inherits from `orion_dev:latest`. Similarly, Nav2/SLAM are managed in the [orion_tools repo](https://github.com/Tesis-ORION/orion_tools).
 
 ### Open in VS Code
 
@@ -121,6 +126,43 @@ colcon build --symlink-install --packages-ignore depth_ydlidar_os30a orbbec_came
 ### GPU support
 
 `--gpus all` is disabled by default in `devcontainer.json`. To enable it, install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) on the host and uncomment the flag in `orion_docker/dev/devcontainer.json`.
+
+---
+
+## 2.5 Simulation container (`orion_gz`) — Optional
+
+The simulation environment is managed in a **separate repository**: [orion_gz](https://github.com/Tesis-ORION/orion_gz). It builds on top of `orion_dev:latest` and adds Gazebo Harmonic + ROS 2 simulation bridges.
+
+### Build
+
+First ensure `orion_dev:latest` exists (built from this repository above). Then:
+
+```bash
+cd ~/dev_ws/src/orion_gz
+docker build -f orion_gz_docker/base/Dockerfile -t orion_gz:latest .
+docker build -f orion_gz_docker/dev/Dockerfile -t orion_gz:dev .
+```
+
+Or open the orion_gz repository in VS Code and use:
+
+```plaintext
+Ctrl + Shift + P → Dev Containers: Reopen in Container
+```
+
+This will build `orion_gz:dev` automatically and open the devcontainer.
+
+### What's included in `orion_gz`
+
+- **Gazebo Harmonic** (`ros-jazzy-ros-gz*`)
+- **ROS 2 + Gazebo integration** (`ros-jazzy-ros-gz-bridge`, `ros-jazzy-ros-gz-sim`)
+- **Gazebo + ros2_control** (`ros-jazzy-gz-ros2-control`)
+- **URDF/xacro tools** for simulation descriptions
+- Everything from `orion_dev` (RViz2, camera drivers, etc.)
+
+### What's **NOT** included
+
+- **Nav2, SLAM Toolbox** (managed in [orion_tools repo](https://github.com/Tesis-ORION/orion_tools))
+- **Trajectory planning, Cartographer** (managed in orion_tools)
 
 ---
 
@@ -283,11 +325,13 @@ orion_docker/
 
 ### depth_ydlidar_os30a (eYs3D / libdc1394)
 
-The os30a package ships a prebuilt `libeSPDI` library compiled against `libdc1394.so.22` (the Ubuntu 20/22.04 soname). Ubuntu 24.04 Noble ships `libdc1394.so.25` — same API, renamed soname. `orion_dev/Dockerfile` creates a compatibility symlink:
+The os30a package ships a prebuilt `libeSPDI` library compiled against `libdc1394.so.22` (the Ubuntu 20/22.04 soname). Ubuntu 24.04 Noble ships `libdc1394.so.25` — same API, renamed soname. The `orion_dev` and `orion_robot` Dockerfiles create a compatibility symlink:
 
 ```plaintext
-/usr/lib/x86_64-linux-gnu/libdc1394.so.22 → libdc1394.so.25
+/usr/lib/<multiarch>/libdc1394.so.22 → libdc1394.so.25
 ```
+
+The multiarch triplet is resolved at build time with `dpkg-architecture -qDEB_HOST_MULTIARCH`, so the same Dockerfile works on the x86_64 dev PC (`x86_64-linux-gnu`) and on the Raspberry Pi (`aarch64-linux-gnu`).
 
 No manual steps required — it is baked into the image.
 
@@ -326,8 +370,9 @@ The `--gpus all` flag requires NVIDIA Container Toolkit with CDI configured. Rem
 The ABI symlink is missing. This is normally baked into `orion_dev`. If building outside the devcontainer, run:
 
 ```bash
-sudo ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
-           /usr/lib/x86_64-linux-gnu/libdc1394.so.22
+MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+sudo ln -s "/usr/lib/${MULTIARCH}/libdc1394.so.25" \
+           "/usr/lib/${MULTIARCH}/libdc1394.so.22"
 ```
 
 ### **micro-ROS agent not found**

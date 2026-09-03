@@ -23,8 +23,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/lib/x86_64-linux-gnu/libdc1394.so.25 \
-          /usr/lib/x86_64-linux-gnu/libdc1394.so.22
+RUN MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
+    && ln -s "/usr/lib/${MULTIARCH}/libdc1394.so.25" \
+             "/usr/lib/${MULTIARCH}/libdc1394.so.22"
 
 RUN pip3 install --no-cache-dir --break-system-packages \
     --default-timeout=1000 --retries 5 \
