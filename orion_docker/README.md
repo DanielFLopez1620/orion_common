@@ -9,11 +9,11 @@ Containerized environments for developing and deploying ORION robot on ROS 2 Jaz
 The containers follow a parent–child hierarchy to avoid duplicating dependencies:
 
 ```plaintext
-osrf/ros:jazzy-ros-base
+ros:jazzy-ros-base
         │
         ▼
   orion_base          ← common deps: ros2_control, micro-ROS agent, CycloneDDS,
-     /      \            camera stack, peripheral libs, build tools
+     /      \            camera stack, peripheral libs
     ▼         ▼
 orion_dev   orion_robot
 (PC)        (Raspberry Pi — build natively on the RPi)
@@ -27,6 +27,11 @@ orion_dev   orion_robot
 | `orion_dev` | Development environment: RViz2, camera drivers, ORBBEC deps, OpenCV. **No simulation or Nav2.** Managed as a VS Code devcontainer. | Developer PC |
 | `orion_robot` | Minimal runtime for the robot hardware. No GUI, no simulation. | Raspberry Pi (native build) |
 | `orion_gz` | Simulation layer: Gazebo Harmonic + ROS 2 bridges + control. **Built separately in the [orion_gz repo](https://github.com/Tesis-ORION/orion_gz).** | `orion_dev:latest` |
+
+`orion_base` is a **multi-stage** build: a `builder` stage compiles the micro-ROS
+agent workspace and downloads the architecture-matching OrbbecSDK `.deb`, and the
+final stage copies only those artifacts in. The compilers and intermediate build
+trees never reach the shipped image.
 
 ---
 

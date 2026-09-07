@@ -15,6 +15,12 @@ echo "Importing repositories into ${WS_ROOT}/src ..."
 cd "${WS_ROOT}"
 vcs import src < "${REPOS_YAML}"
 
+# vcs import does not initialize submodules; ldrobot_lidar_ros2 needs libldlidar.
+if [ -d "${WS_ROOT}/src/ldrobot_lidar_ros2" ]; then
+    echo "Initializing ldrobot_lidar_ros2 submodules..."
+    git -C "${WS_ROOT}/src/ldrobot_lidar_ros2" submodule update --init --recursive
+fi
+
 echo "Running rosdep..."
 rosdep update
 sudo apt-get update

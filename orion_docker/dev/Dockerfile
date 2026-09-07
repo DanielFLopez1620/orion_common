@@ -21,17 +21,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     python3-soundfile \
     portaudio19-dev \
+    # ---- Python tooling (pip needed by post_create.sh for orion_chat)
+    python3-pip \
+    python3-requests \
+    python3-numpy \
+    python3-pytest \
     && rm -rf /var/lib/apt/lists/*
 
 RUN MULTIARCH="$(dpkg-architecture -qDEB_HOST_MULTIARCH)" \
     && ln -s "/usr/lib/${MULTIARCH}/libdc1394.so.25" \
              "/usr/lib/${MULTIARCH}/libdc1394.so.22"
-
-RUN pip3 install --no-cache-dir --break-system-packages \
-    --default-timeout=1000 --retries 5 \
-    requests \
-    numpy \
-    pytest
 
 RUN mkdir -p /home/${USERNAME}/ws/src \
     && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/ws

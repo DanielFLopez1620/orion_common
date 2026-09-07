@@ -25,3 +25,11 @@ repositories:
     type: git
     url: https://github.com/Tesis-ORION/Depth_ydlidar_os30a.git
     version: main
+
+  # LDRobot LD19 lidar driver (provides ldlidar_component, required by
+  # orion_bringup). Carries a libldlidar submodule — post_create.sh initializes
+  # it, since vcs import does not.
+  ldrobot_lidar_ros2:
+    type: git
+    url: https://github.com/Myzhar/ldrobot-lidar-ros2.git
+    version: main
